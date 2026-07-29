@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dontlie-openai"
+version = "0.1.0"
+description = "One-line drop-in for the OpenAI SDK that routes every call through a Don't-Lie signed proxy."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{ name = "Don't-Lie contributors" }]
+dependencies = [
+  "openai>=1.30",
+  "dontlie>=0.2.0",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["dontlie_openai*"]

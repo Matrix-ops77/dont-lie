@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local Don't-Lie state
+vault.db
+vault.db-*
+*.sqlite
+*.sqlite-*
+.dontlie/
+
+# Cryptographic material — NEVER commit
+keys/
+**/keys/
+*.key
+*.pub
+key_id
+dontlie.key
+dontlie.pub
+onboard/dontlie-passive
+**/dontlie-passive
+
+# Demo runtime artifacts (not source)
+demo/work/
+clients/demo/work/
+**/demo/work/
+
+# Receipt data and sample backlogs (may contain PII / real call data)
+*.jsonl
+*.jsonl.bak
+receipt-report.html.bak
+*.bak
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
+
+# Demo build pipeline (source) and runtime artifacts (scratch)
+demo/video/build_video.py
+demo/video/frames/
+demo/work_video/
+RECIPTS_DEMO.mp4
+
+# Re-include the build pipeline source even though the parent dir is
+# otherwise ignored (this lets `git add demo/video/build_video.py` work).
+!demo/video/
+!demo/video/build_video.py

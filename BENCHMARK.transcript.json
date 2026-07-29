@@ -1,0 +1,40 @@
+{
+  "machine": {
+    "python": "3.11.15",
+    "platform": "macOS-27.0-arm64-arm-64bit",
+    "machine": "arm64"
+  },
+  "configuration": {
+    "n_requests": 200,
+    "mock_port": 9870,
+    "proxy_port": 9871,
+    "note": "Mock provider is local stdlib HTTP. Both paths traverse the same provider; the dontlie path adds an extra proxy hop + sqlite write + ed25519 sign."
+  },
+  "default_sdk": {
+    "n": 200,
+    "elapsed_sec": 4.2184,
+    "throughput_per_sec": 47.41,
+    "latency_ms_p50": 8.491,
+    "latency_ms_p95": 18.03,
+    "latency_ms_max": 2229.639,
+    "mem_current_kb": 13965.0,
+    "mem_peak_kb": 14100.2
+  },
+  "dontlie_wrapped": {
+    "n": 200,
+    "elapsed_sec": 5.5779,
+    "throughput_per_sec": 35.86,
+    "latency_ms_p50": 25.38,
+    "latency_ms_p95": 44.13,
+    "latency_ms_max": 187.336,
+    "mem_current_kb": 259.7,
+    "mem_peak_kb": 345.8
+  },
+  "overhead": {
+    "latency_ms_p50_added": 16.889,
+    "latency_ms_p95_added": 26.1,
+    "throughput_pct": 75.6,
+    "mem_peak_kb_added": -13754.4
+  },
+  "receipts_written": 200
+}

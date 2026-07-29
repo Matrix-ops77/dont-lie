@@ -1,0 +1,28 @@
+=== STAGE 1: verify clean vault with production verifier ===
+clean: 3 ok, 0 bad
+
+=== STAGE 2: mutate receipt #2 directly in SQLite ===
+changed only the response column; hash and signature were not touched
+
+=== STAGE 3: verify tampered vault ===
+tampered: 2 ok, 1 bad
+  receipt 2: payload sha256 mismatch
+  receipt 2: signature verification failed
+  receipt 2: signature verification failed
+
+=== STAGE 4: show the exact hash mismatch ===
+  signed/stored sha256: ...
+  recomputed sha256:    ...
+  match: False
+
+=== STAGE 5: restore the original signed records ===
+restored 3 records from receipts.jsonl
+
+=== STAGE 6: verify restored vault ===
+restored: 3 ok, 0 bad
+
+=== CONCLUSION ===
+Don't-Lie proves that the local recorder signed this exact record and
+that its signed, hash-linked history has not been silently rewritten.
+It does not prove that a model answer was truthful or independently
+attest which remote provider generated it.

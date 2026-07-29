@@ -1,0 +1,33 @@
+{
+  "machine": {
+    "python": "3.11.15",
+    "platform": "macOS-27.0-arm64-arm-64bit",
+    "machine": "arm64",
+    "processor": "arm",
+    "dontlie_pkg": "0.2.0"
+  },
+  "workdir": "/Users/wayne_dellmyer/orca/projects/orca projects/dontlie/demo/work/bench",
+  "sign": {
+    "n": 1000,
+    "elapsed_sec": 1.9366,
+    "throughput_per_sec": 516.36,
+    "latency_ms_p50": 1.637,
+    "latency_ms_p95": 3.46,
+    "latency_ms_p99": 5.425,
+    "latency_ms_max": 13.026
+  },
+  "verify": {
+    "receipts": 1001,
+    "elapsed_sec": 0.3412,
+    "verify_per_sec": 2934.06,
+    "ok": 1001,
+    "bad": 0
+  },
+  "export": {
+    "n": 1001,
+    "elapsed_sec": 0.0258,
+    "export_per_sec": 38775.91,
+    "jsonl_bytes": 704256
+  },
+  "db_sha256": "7aa80539b0ea50bc429a7442a48103427ad822a289a602ae40c93b853e22499e"
+}

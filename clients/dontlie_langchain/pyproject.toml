@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dontlie-langchain"
+version = "0.1.0"
+description = "Don't-Lie instrumentation for LangChain / LangGraph calls."
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [{name = "Don't-Lie", email = "support@dontlie.app"}]
+dependencies = [
+    "dontlie>=0.2.0",
+]
+
+[project.optional-dependencies]
+langchain = ["langchain-core>=0.1.0"]
+extras = ["langchain-community>=0.0.34"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["dontlie_langchain*"]

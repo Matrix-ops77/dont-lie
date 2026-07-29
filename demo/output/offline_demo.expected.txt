@@ -1,0 +1,27 @@
+==> workdir isolated at .../demo/work
+==> mock provider up
+{"id": "mock-...", "choices": [{"message": {"content": "pong"}, ...}]}
+==> 'ping' request sent
+{"id": "mock-...", "choices": [{"message": {"content": "Paris"}, ...}]}
+==> 'knowledge' request sent
+{"id": "mock-...", "choices": [{"message": {"content": "Don't-Lie is a local-first..."}, ...}]}
+==> 'product-pitch' request sent
+#3  ...  [mock-1]  parent=2  key=...
+  response:  Don't-Lie is a local-first, signed-receipt vault for LLM prompts and responses.
+#2  ...  [mock-1]  parent=1  key=...
+  response:  Paris
+#1  ...  [mock-1]  parent=None  key=...
+  response:  pong
+verified 3 receipts: 3 ok, 0 bad (.../demo/work/vault.db)
+exported 3 receipts as JSONL export -> .../demo/work/receipts.jsonl
+exported 3 receipts as portable verification bundle -> .../demo/work/receipts.bundle.json
+wrote .../demo/work/receipt-report.html
+
+================================================
+Demo complete.
+  - vault:  .../demo/work/vault.db
+  - sha256: ...
+  - exports: .../demo/work/receipts.jsonl and receipts.bundle.json
+  - report:  .../demo/work/receipt-report.html
+  - logs:   .../demo/work/{mock,proxy}.log
+================================================

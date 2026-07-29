@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dontlie-agent"
+version = "0.1.0"
+description = "Wrap any agent runtime (claude-code, hermes, codex, aider, etc.) in a Don't-Lie signed proxy using one command."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{ name = "Don't-Lie contributors" }]
+dependencies = [
+  "dontlie>=0.2.0",
+]
+
+[project.scripts]
+dontlie-agent = "dontlie_agent.cli:main"
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["dontlie_agent*"]

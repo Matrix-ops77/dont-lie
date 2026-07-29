@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Don't-Lie receipt report</title>
+<style>
+:root { color-scheme: light dark; font-family: ui-sans-serif,system-ui,sans-serif; }
+body { max-width: 1100px; margin: 0 auto; padding: 2rem; line-height: 1.45; }
+h1 { margin-bottom: .25rem; }
+h2 { margin-top: 2.4rem; border-bottom: 1px solid #8885; padding-bottom: .35rem; }
+.subtle { opacity: .72; }
+.badge { display:inline-block; padding:.45rem .8rem; border-radius:999px; font-weight:700; letter-spacing:.04em; }
+.good { color:#075e2b; background:#b9f6cf; }
+.bad  { color:#8b1020; background:#ffc2c9; }
+.cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:.8rem; margin:1.5rem 0; }
+.card { border:1px solid #8885; border-radius:.7rem; padding:1rem; }
+.card strong { display:block; font-size:1.5rem; }
+table { width:100%; border-collapse:collapse; font-size:.9rem; }
+th,td { text-align:left; border-bottom:1px solid #8885; padding:.65rem .4rem; vertical-align: top; }
+code { font-family:ui-monospace,SFMono-Regular,monospace; font-size:.85em; }
+.fourup { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:.65rem; margin: 1rem 0 1.5rem; }
+.fourup > div { border:1px solid #8885; border-radius:.55rem; padding:.8rem .9rem; }
+.fourup h3 { margin: 0 0 .35rem; font-size: 1rem; letter-spacing:.02em; }
+.fourup p  { margin: 0; font-size: .9rem; opacity:.85; }
+.legend-integrity { background: #eef6ff; }
+.legend-signer    { background: #f4ecff; }
+.legend-provider  { background: #effaf1; }
+.legend-truth     { background: #fff2f2; }
+</style>
+</head>
+<body>
+<h1>Don't-Lie receipt report</h1>
+<p class="subtle">Portable verification artifact · no network required · self-contained HTML</p>
+<p><span class="badge good">VERIFIED</span></p>
+
+<div class="cards">
+  <div class="card"><strong>3</strong>valid receipts</div>
+  <div class="card"><strong>0</strong>invalid receipts</div>
+  <div class="card"><strong>3</strong>total records</div>
+  <div class="card"><strong>Ed25519</strong>signature scheme</div>
+</div>
+
+<section>
+<h2>Executive summary</h2>
+<p class="subtle">One-line verdict:
+All receipts are intact and were signed by the documented key.</p>
+</section>
+
+<section>
+<h2>What this report proves (and what it does not)</h2>
+<div class="fourup">
+  <div class="legend-integrity">
+    <h3>Integrity</h3>
+    <p>Canonical payload hashes, signatures, parent links, and key-history rows
+    are internally consistent. Receipts cannot be silently altered after the
+    fact without breaking verification.</p>
+  </div>
+  <div class="legend-signer">
+    <h3>Signer</h3>
+    <p>The receipt was signed by whichever key produced the public-key PEM
+    embedded in this bundle. The report does <em>not</em> assert that a
+    particular person or organization operated that key.</p>
+  </div>
+  <div class="legend-provider">
+    <h3>Provider</h3>
+    <p>The receipt records the model name and the local proxy endpoint that
+    forwarded the request. It does <em>not</em> independently attest the
+    remote provider's identity or behavior.</p>
+  </div>
+  <div class="legend-truth">
+    <h3>Truth</h3>
+    <p>The receipt does <em>not</em> claim the model answer is correct.
+    Hallucinations are recorded faithfully; that is the whole point. Use the
+    receipts as evidence of <em>what</em>, not as a fact-checker of
+    <em>whether</em>.</p>
+  </div>
+</div>
+</section>
+
+<section>
+<h2>Tamper demo (one screen)</h2>
+<ol>
+  <li>Run <code>bash demo/scripts/run_offline_demo.sh</code> to capture 3 receipts.</li>
+  <li>Run <code>python3 demo/scripts/tamper_walkthrough.py demo/work</code>.</li>
+  <li>Stage 3 shows the receipt hash no longer matches; Stage 5 restores it
+  from the signed JSONL export. Stage 6 verifies the restored chain again.</li>
+</ol>
+</section>
+
+<section>
+<h2>Verifier findings</h2>
+<ul><li>none</li></ul>
+</section>
+
+<section>
+<h2>Signer — public keys embedded in this bundle</h2>
+<table>
+<thead><tr><th>Key ID</th><th>SHA-256 fingerprint</th><th>Public key (PEM, first 80 chars)</th></tr></thead>
+<tbody><tr><td><code>f5e91b4dd9621a87</code></td><td><code>64e982eeafefd46c…</code></td><td><code>-----BEGIN PUBLIC KEY-----
+MCowBQYDK2VwAyEA9ekbTdliGocHqJDUwMKz/Q3Z8Ydo4j0Jzyp9w…</code></td></tr></tbody>
+</table>
+<p class="subtle">Re-pin these keys with
+<code>dontlie verify --public-key KEY_ID=path/to/pub.pem</code> to prove the
+bundle was authored by a key you trust.</p>
+</section>
+
+<section>
+<h2>Provider — distinct models and endpoints</h2>
+<h3 style="margin-bottom:.2rem">Models</h3>
+<table><thead><tr><th>Model</th><th>Receipts</th></tr></thead><tbody><tr><td><code>mock-1</code></td><td>3</td></tr></tbody></table>
+<h3 style="margin-bottom:.2rem; margin-top:1rem">Endpoints</h3>
+<table><thead><tr><th>Endpoint</th><th>Receipts</th></tr></thead><tbody><tr><td><code>/v1/chat/completions</code></td><td>3</td></tr></tbody></table>
+</section>
+
+<section>
+<h2>Integrity — receipt chain</h2>
+<table>
+<thead><tr><th>ID</th><th>Timestamp</th><th>Model</th><th>Parent</th><th>SHA-256</th><th>Signature</th></tr></thead>
+<tbody><tr><td>#1</td><td>2026-07-24T19:00:43.511695+00:00</td><td><code>mock-1</code></td><td>None</td><td><code>338c18779a4372cf…</code></td><td><code>B6LGPrYxZGT6sjcy…</code></td></tr><tr><td>#2</td><td>2026-07-24T19:00:43.595286+00:00</td><td><code>mock-1</code></td><td>1</td><td><code>8d5c10350ae841ca…</code></td><td><code>xLfiUb9Pigp0kFcX…</code></td></tr><tr><td>#3</td><td>2026-07-24T19:00:43.654881+00:00</td><td><code>mock-1</code></td><td>2</td><td><code>f8b235d990d435eb…</code></td><td><code>vWGp4/hQgMgN2b3a…</code></td></tr></tbody>
+</table>
+</section>
+
+<section>
+<h2>How to reproduce this report</h2>
+<ol>
+  <li>Run the offline demo: <code>bash demo/scripts/run_offline_demo.sh</code></li>
+  <li>Export the bundle: <code>dontlie export demo/work/receipts.bundle.json --bundle</code></li>
+  <li>Verify the bundle: <code>dontlie verify --export demo/work/receipts.bundle.json --verbose</code></li>
+  <li>Render this report: <code>python3 demo/scripts/render_report.py demo/work/receipts.bundle.json report.html</code></li>
+</ol>
+</section>
+</body>
+</html>

@@ -1,0 +1,6 @@
+data: {"id":"chatcmpl_fixture","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"Hello"}}]}
+
+data: {"id":"chatcmpl_fixture","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":" world"}}]}
+
+data: [DONE]
+

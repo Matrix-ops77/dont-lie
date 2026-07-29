@@ -1,0 +1,7 @@
+{
+  "publishes": {
+    "queued-inlet-pmqa": {
+      "siteUrl": "https://queued-inlet-pmqa.here.now/"
+    }
+  }
+}

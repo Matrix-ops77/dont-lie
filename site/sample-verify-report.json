@@ -1,0 +1,68 @@
+{
+  "tool": "dontlie",
+  "tool_version": "0.3.0",
+  "report_kind": "verify",
+  "issued_at": "2026-07-22T14:31:04Z",
+  "bundle": {
+    "receipt_count": 8,
+    "first_id": 1,
+    "last_id": 8,
+    "operator_key_id": "8X38g9C0L1BoX+/s"
+  },
+  "summary": {
+    "ok": 8,
+    "bad": 0,
+    "valid": true,
+    "duration_ms": 0.6
+  },
+  "results": [
+    {
+      "id": 1,
+      "signature_ok": true,
+      "parent_ok": true,
+      "verdict": "ok"
+    },
+    {
+      "id": 2,
+      "signature_ok": true,
+      "parent_ok": true,
+      "verdict": "ok"
+    },
+    {
+      "id": 3,
+      "signature_ok": true,
+      "parent_ok": true,
+      "verdict": "ok"
+    },
+    {
+      "id": 4,
+      "signature_ok": true,
+      "parent_ok": true,
+      "verdict": "ok"
+    },
+    {
+      "id": 5,
+      "signature_ok": true,
+      "parent_ok": true,
+      "verdict": "ok"
+    },
+    {
+      "id": 6,
+      "signature_ok": true,
+      "parent_ok": true,
+      "verdict": "ok"
+    },
+    {
+      "id": 7,
+      "signature_ok": true,
+      "parent_ok": true,
+      "verdict": "ok"
+    },
+    {
+      "id": 8,
+      "signature_ok": true,
+      "parent_ok": true,
+      "verdict": "ok"
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+{"max_tokens":128,"messages":[{"content":"Hello","role":"user"}],"model":"claude-fixture","stop_sequences":["END"],"system":"Be concise.","temperature":0.2,"tools":[{"description":"Look up weather","input_schema":{"properties":{"city":{"type":"string"}},"required":["city"],"type":"object"},"name":"weather"}]}

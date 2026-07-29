@@ -1,0 +1,58 @@
+# Release checklist
+
+This is the internal checklist to clear before shipping a release of
+Don't-Lie. Not customer-facing.
+
+## Before tagging
+
+- [ ] `python -m unittest discover` — full suite passes (target: 50/50)
+- [ ] `ruff check dontlie test_*.py demo/scripts` — clean
+- [ ] `mypy --strict dontlie/storage.py dontlie/sign.py` — clean
+- [ ] `python -m compileall -q dontlie` — bytecode builds
+- [ ] `bash demo/scripts/run_offline_demo.sh` — exit 0
+- [ ] `python3 demo/scripts/tamper_walkthrough.py demo/work` — exit 0
+- [ ] `python3 demo/scripts/render_report.py demo/work/receipts.bundle.json /tmp/r.html` — written
+- [ ] `python3 demo/scripts/benchmark.py 1000 demo/output/benchmark.transcript.json` — written
+- [ ] `python3 demo/scripts/cleanup.py` — no orphans on demo ports
+- [ ] No `print()` debug remnants in `demo/scripts/` (lint catches them)
+- [ ] Git status: working tree clean of stray artifacts
+- [ ] Git status: no tracked changes to `dontlie/storage.py`, `sign.py`,
+      `proxy.py`, `cli.py`, `test_dontlie.py`, `test_integrity.py`,
+      `test_proxy_security.py` outside the explicit core change
+
+## Version bump
+
+- [ ] Bump version in `pyproject.toml` (`[project] version`)
+- [ ] Add a `## X.Y.Z — YYYY-MM-DD` entry in `CHANGELOG.md` with the
+      user-visible changes since the last tag
+- [ ] Confirm `from dontlie import __version__` matches the new version
+
+## Documentation sweep
+
+- [ ] `README.md` "Quickstart" works on a fresh install
+- [ ] `demo/README.md` quickstart works on a fresh checkout
+- [ ] `demo/runbooks/OFFLINE.md` and `demo/runbooks/MINIMAX_LIVE.md`
+      commands actually work as written
+- [ ] `RELEASE.md` (customer-facing) notes match the changelog
+- [ ] `LAUNCH.md` (this repo) "What it proves / does not prove" list
+      matches the current capability surface
+- [ ] No references to deleted files (e.g. a removed runbook, an old
+      CLI subcommand name)
+
+## Security & privacy
+
+- [ ] No secrets, API keys, or tokens in any committed file
+- [ ] `demo/samples/` contains only deterministic mock data
+- [ ] `demo/work/` is in `.gitignore` (run `git check-ignore demo/work`)
+
+## Tag
+
+- [ ] `git tag -s vX.Y.Z -m "Release X.Y.Z"`
+- [ ] Push tag: `git push origin vX.Y.Z`
+- [ ] Trigger PyPI publish via GitHub Actions (manual step if not auto)
+
+## Post-release
+
+- [ ] Confirm PyPI release is visible
+- [ ] Smoke-test `pip install dontlie` in a clean venv
+- [ ] Update any external docs (e.g. product wiki) if the public API changed

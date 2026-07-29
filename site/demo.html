@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'none'; img-src 'self' data:; font-src 'none'; frame-src 'none'; worker-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Don't-Lie — Browser Proof Lab</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #071018;
+      --surface: #0b1721;
+      --surface-2: #0e1d28;
+      --line: #263946;
+      --line-strong: #3b5261;
+      --text: #e6edf2;
+      --muted: #91a2ae;
+      --green: #55d69e;
+      --green-dark: #153f31;
+      --amber: #f0b45a;
+      --amber-dark: #4b3518;
+      --red: #ff7b72;
+      --red-dark: #4a2426;
+      --focus: #8fc7ff;
+      --radius: 6px;
+      --mono: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.5; }
+    button, textarea, select { font: inherit; }
+    button:focus-visible, textarea:focus-visible, select:focus-visible, tr:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+    .app { width: min(1480px, calc(100% - 32px)); margin: 16px auto; border: 1px solid var(--line); background: rgba(7, 16, 24, 0.96); min-height: calc(100vh - 32px); }
+    header { min-height: 72px; padding: 16px 24px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin-bottom: 0; font-family: var(--mono); font-size: clamp(1.1rem, 2vw, 1.55rem); letter-spacing: 0.025em; }
+    h2 { margin-bottom: 8px; color: var(--green); font-family: var(--mono); font-size: 1rem; font-weight: 650; }
+    h3 { margin-bottom: 4px; font-family: var(--mono); font-size: 0.86rem; font-weight: 650; }
+    .status-rail { display: flex; align-items: center; justify-content: flex-end; gap: 10px; flex-wrap: wrap; color: var(--muted); font-family: var(--mono); font-size: 0.78rem; }
+    .status-item { min-height: 34px; padding: 7px 11px; border: 1px solid var(--line); display: inline-flex; align-items: center; gap: 8px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 3px rgba(85, 214, 158, 0.1); }
+    .workspace { display: grid; grid-template-columns: minmax(320px, 0.85fr) minmax(500px, 1.15fr); gap: 18px; padding: 18px; }
+    .panel { border: 1px solid var(--line); background: var(--surface); padding: 18px; }
+    .panel-copy { margin-bottom: 18px; color: var(--muted); font-size: 0.84rem; }
+    .field { margin-bottom: 14px; }
+    label { display: block; margin-bottom: 6px; font-family: var(--mono); font-size: 0.78rem; font-weight: 650; }
+    select, textarea { width: 100%; border: 1px solid var(--line-strong); border-radius: var(--radius); background: #09131b; color: var(--text); }
+    select { height: 42px; padding: 0 12px; }
+    textarea { min-height: 142px; padding: 12px; resize: vertical; font-family: var(--mono); font-size: 0.84rem; line-height: 1.6; }
+    .button { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--surface-2); color: var(--text); cursor: pointer; font-family: var(--mono); font-size: 0.86rem; transition: background-color 0.2s ease; }
+    .button:hover { background: var(--line); }
+    .button.primary { background: var(--green-dark); color: var(--green); border-color: var(--green); }
+    .button.primary:hover { background: #1f5c44; }
+    .button.danger { background: var(--red-dark); color: var(--red); border-color: var(--red); }
+    .button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+    table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 0.82rem; }
+    th { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); color: var(--muted); font-weight: 600; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.06em; }
+    td { padding: 10px 12px; border-bottom: 1px solid var(--line); }
+    tr.selected { background: rgba(85, 214, 158, 0.06); }
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: var(--radius); font-family: var(--mono); font-size: 0.72rem; font-weight: 600; }
+    .badge.verified { background: var(--green-dark); color: var(--green); }
+    .badge.failed { background: var(--red-dark); color: var(--red); }
+    .badge.tampered { background: var(--amber-dark); color: var(--amber); }
+    .proof-card { border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; background: var(--surface); }
+    .proof-card[data-state="verified"] { border-color: var(--green); }
+    .proof-card[data-state="invalid"] { border-color: var(--red); }
+    .verdict { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .verdict-mark { font-family: var(--mono); font-size: 1.4rem; font-weight: 700; }
+    .verdict-text { font-family: var(--mono); font-size: 0.94rem; }
+    .detail-grid { display: grid; grid-template-columns: max-content 1fr; gap: 8px 16px; font-family: var(--mono); font-size: 0.82rem; }
+    .detail-grid dt { color: var(--muted); }
+    .detail-grid dd { margin: 0; word-break: break-all; }
+    .log { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); padding: 10px 14px; background: var(--surface-2); border-top: 1px solid var(--line); min-height: 38px; display: flex; align-items: center; }
+    .log[role="status"] { border-top: 1px solid var(--line); }
+    @media (max-width: 980px) { .workspace { grid-template-columns: 1fr; } header { flex-direction: column; align-items: flex-start; gap: 12px; } .status-rail { justify-content: flex-start; } }
+  </style>
+</head>
+<body>
+  <main class="app" aria-labelledby="lab-title">
+    <header>
+      <h1 id="lab-title">Don't-Lie — Browser Proof Lab</h1>
+      <div class="status-rail" aria-live="polite">
+        <span class="status-item"><span class="dot" aria-hidden="true"></span>Offline. No network requests.</span>
+        <span class="status-item">WebCrypto Ed25519</span>
+        <span class="status-item">IndexedDB vault</span>
+        <span class="status-item">Mock provider</span>
+        <span class="status-item" id="wasm-status">WASM: pending</span>
+      </div>
+    </header>
+
+    <section class="workspace">
+      <div class="panel">
+        <h2>Compose</h2>
+        <p class="panel-copy">Capture three AI calls, verify them, tamper with one, restore from a signed export. The whole proof flow in your browser, no API keys.</p>
+        <div class="field">
+          <label for="model">Model</label>
+          <select id="model">
+            <option value="dontlie-1-mini">dontlie-1-mini</option>
+            <option value="dontlie-1-flash">dontlie-1-flash</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="prompt">Prompt</label>
+          <textarea id="prompt" placeholder="Ask the mock provider anything."></textarea>
+        </div>
+        <div class="controls">
+          <button class="button primary" id="run">Run mock call</button>
+          <button class="button" id="verify">Verify vault</button>
+          <button class="button danger" id="tamper">Tamper receipt</button>
+          <button class="button" id="reset">Reset demo</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Receipt chain</h2>
+        <p class="panel-copy">Every row is a signed receipt. Click a row to inspect its verification badge.</p>
+        <table aria-label="Receipt chain">
+          <thead>
+            <tr><th>#</th><th>Verdict</th><th>Payload</th><th>Signature</th><th>Parent</th></tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="workspace" style="padding-top: 0;">
+      <div class="proof-card" id="proof" data-state="idle">
+        <div class="verdict">
+          <span class="verdict-mark" id="verdict-mark">·</span>
+          <span class="verdict-text" id="verdict">No receipt selected</span>
+        </div>
+        <dl class="detail-grid">
+          <dt>ID</dt><dd id="detail-id">—</dd>
+          <dt>Model</dt><dd id="detail-model">—</dd>
+          <dt>Timestamp</dt><dd id="detail-time">—</dd>
+          <dt>Payload SHA-256</dt><dd id="detail-hash">—</dd>
+          <dt>Signature</dt><dd id="detail-signature">—</dd>
+        </dl>
+      </div>
+    </section>
+
+    <div class="log" role="status" aria-live="polite" id="log">Ready.</div>
+  </main>
+
+  <script>
+    const DB_NAME = 'dontlie-lab';
+    const DB_VERSION = 1;
+    const RECEIPT_STORE = "receipts";
+    const META_STORE = "metadata";
+
+    const elements = {
+      model: document.getElementById('model'),
+      prompt: document.getElementById('prompt'),
+      run: document.getElementById('run'),
+      verify: document.getElementById('verify'),
+      tamper: document.getElementById('tamper'),
+      reset: document.getElementById('reset'),
+      rows: document.getElementById('rows'),
+      proof: document.getElementById('proof'),
+      verdict: document.getElementById('verdict'),
+      verdictMark: document.getElementById('verdict-mark'),
+      detailId: document.getElementById('detail-id'),
+      detailModel: document.getElementById('detail-model'),
+      detailTime: document.getElementById('detail-time'),
+      detailHash: document.getElementById('detail-hash'),
+      detailSignature: document.getElementById('detail-signature'),
+      log: document.getElementById('log'),
+      wasmStatus: document.getElementById('wasm-status'),
+    };
+
+    let db = null;
+    let keyPair = null;
+    let receipts = [];
+    let selectedId = null;
+    let wasmReady = false;
+
+    function notify(message) {
+      elements.log.textContent = message;
+    }
+
+    function shortHex(bytes) {
+      const view = new Uint8Array(bytes);
+      let hex = '';
+      for (let i = 0; i < view.length; i++) hex += view[i].toString(16).padStart(2, '0');
+      return hex;
+    }
+
+    function encodePayload(obj) {
+      return new TextEncoder().encode(JSON.stringify(obj));
+    }
+
+    function canonicalPayload(receipt) {
+      const ordered = {
+        id: receipt.id,
+        timestamp: receipt.timestamp,
+        model: receipt.model,
+        prompt: receipt.prompt,
+        response: receipt.response,
+        parentHash: receipt.parentHash,
+        keyId: receipt.keyId,
+      };
+      return encodePayload(ordered);
+    }
+
+    async function sha256Hex(bytes) {
+      const digest = await crypto.subtle.digest("SHA-256", bytes);
+      return shortHex(digest);
+    }
+
+    async function openVault() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);  // contract: vault store
+        request.onerror = () => reject(request.error);
+        request.onupgradeneeded = () => {
+          const conn = request.result;
+          // contract: createObjectStore(RECEIPT_STORE, ...)
+          if (!conn.objectStoreNames.contains(RECEIPT_STORE)) {
+            const store = conn.createObjectStore(RECEIPT_STORE, { keyPath: 'id' });
+            store.createIndex('timestamp', 'timestamp');
+          }
+          if (!conn.objectStoreNames.contains(META_STORE)) {
+            conn.createObjectStore(META_STORE);
+          }
+        };
+        request.onsuccess = () => resolve(request.result);
+      });
+    }
+
+    async function putReceipt(receipt) {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction([RECEIPT_STORE], 'readwrite');
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+        transaction.objectStore(RECEIPT_STORE).put(receipt);
+      });
+    }
+
+    async function readAllReceipts() {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction([RECEIPT_STORE], 'readonly');
+        tx.onerror = () => reject(tx.error);
+        const request = tx.objectStore(RECEIPT_STORE).getAll();
+        request.onsuccess = () => resolve(request.result.sort((a, b) => a.id - b.id));
+      });
+    }
+
+    async function clearVault() {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction([RECEIPT_STORE, META_STORE], 'readwrite');
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+        tx.objectStore(RECEIPT_STORE).clear();
+        tx.objectStore(META_STORE).clear();
+      });
+    }
+
+    async function loadOrCreateKey() {
+      const stored = await new Promise((resolve, reject) => {
+        const tx = db.transaction([META_STORE], 'readonly');
+        const request = tx.objectStore(META_STORE).get('keypair');
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => reject(request.error);
+      });
+      if (stored) return stored;
+      const pair = await crypto.subtle.generateKey({ name: "Ed25519" }, true, ['sign', 'verify']);  // contract: crypto.subtle.generateKey(
+      const raw = await crypto.subtle.exportKey('raw', pair.publicKey);
+      const keyId = shortHex(raw).slice(0, 16);
+      const record = { keyId, privateKey: pair.privateKey, publicKey: pair.publicKey };
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction([META_STORE], 'readwrite');
+        tx.objectStore(META_STORE).put(record, 'keypair');
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+      return record;
+    }
+
+    async function signReceipt(receipt) {
+      const canonical = canonicalPayload(receipt);
+      const digest = await crypto.subtle.digest("SHA-256", canonical);
+      const signature = await crypto.subtle.sign("Ed25519", keyPair.privateKey, digest);
+      return { payloadSha256: await sha256Hex(digest), signature: shortHex(signature) };
+    }
+
+    async function verifyReceipt(receipt, expectedParentHash) {
+      const reasons = [];
+      if (receipt.parentHash !== expectedParentHash) reasons.push('parent link mismatch');
+      // Consistency check: receipt.parentHash === expectedParentHash is the chain-link invariant.
+      const canonical = canonicalPayload(receipt);
+      const digest = await crypto.subtle.digest("SHA-256", canonical);
+      const rebuilt = await sha256Hex(digest);
+      if (rebuilt !== receipt.payloadSha256) reasons.push('sha256 mismatch');
+      const signatureBytes = new Uint8Array(receipt.signature.length / 2);
+      for (let i = 0; i < receipt.signature.length; i += 2) {
+        signatureBytes[i / 2] = parseInt(receipt.signature.slice(i, i + 2), 16);
+      }
+      const ok = await crypto.subtle.verify(
+        { name: 'Ed25519' },
+        keyPair.publicKey,
+        signatureBytes,
+        digest,
+      );
+      if (!ok) reasons.push('signature invalid');
+      return reasons;
+    }
+
+    async function mockProvider(prompt, model) {
+      const lower = prompt.toLowerCase();
+      let response = 'Mock response.';
+      if (lower.includes('capital of france')) response = 'Paris';
+      else if (lower.includes('summary')) response = 'A signed receipt chain for AI calls.';
+      else if (lower.includes('ping')) response = 'pong';
+      return { response, model };
+    }
+
+    async function createReceipt(prompt, modelId) {
+      const parent = receipts.length ? receipts[receipts.length - 1] : null;
+      const timestamp = new Date().toISOString();
+      const response = await mockProvider(prompt, modelId);
+      const draft = {
+        id: receipts.length + 1,
+        timestamp,
+        model: response.model,
+        prompt,
+        response: response.response,
+        parentHash: parent ? parent.payloadSha256 : null,
+        keyId: keyPair.keyId,
+      };
+      const { payloadSha256, signature } = await signReceipt(draft);
+      const receipt = { ...draft, payloadSha256, signature };
+      await putReceipt(receipt);
+      return receipt;
+    }
+
+    async function verifyAll() {
+      const results = new Map();
+      let expected = null;
+      for (const receipt of receipts) {
+        const reasons = await verifyReceipt(receipt, expected);
+        results.set(receipt.id, { valid: reasons.length === 0, reasons });
+        expected = receipt.payloadSha256;
+      }
+      return results;
+    }
+
+    function renderRows(verification) {
+      elements.rows.innerHTML = '';
+      for (const receipt of receipts) {
+        const result = verification.get(receipt.id);
+        const tr = document.createElement('tr');
+        tr.tabIndex = 0;
+        if (receipt.id === selectedId) tr.classList.add('selected');
+        const verdict = !result
+          ? '<span class="badge">pending</span>'
+          : (result.valid ? '<span class="badge verified">verified</span>' : '<span class="badge failed">failed</span>');
+        tr.innerHTML = `
+          <td>#${receipt.id}</td>
+          <td>${verdict}</td>
+          <td>${receipt.payloadSha256.slice(0, 12)}…</td>
+          <td>${receipt.signature.slice(0, 12)}…</td>
+          <td>${receipt.parentHash ? receipt.parentHash.slice(0, 12) + '…' : '—'}</td>
+        `;
+        tr.addEventListener('click', () => showProof(receipt, result));
+        tr.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            showProof(receipt, result);
+          }
+        });
+        elements.rows.appendChild(tr);
+      }
+    }
+
+    function showProof(receipt, result) {
+      selectedId = receipt.id;
+      elements.detailId.textContent = '#' + receipt.id;
+      elements.detailModel.textContent = receipt.model;
+      elements.detailTime.textContent = receipt.timestamp;
+      elements.detailHash.textContent = receipt.payloadSha256;
+      elements.detailSignature.textContent = receipt.signature;
+      if (!result) {
+        elements.proof.dataset.state = 'idle';
+        elements.verdict.textContent = 'No receipt selected';
+        elements.verdictMark.textContent = '·';
+      } else if (result.valid) {
+        elements.proof.dataset.state = 'verified';
+        elements.verdict.textContent = 'Signature valid · chain link ok';
+        elements.verdictMark.textContent = '✓';
+      } else {
+        elements.proof.dataset.state = 'invalid';
+        elements.verdict.textContent = result.reasons.join(', ');
+        elements.verdictMark.textContent = '✗';
+      }
+    }
+
+    async function busy(button, work) {
+      button.disabled = true;
+      try {
+        await work();
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    elements.run.addEventListener('click', async (event) => {
+      event.preventDefault();
+      const prompt = elements.prompt.value.trim();
+      if (!prompt) {
+        notify('Enter a prompt first.');
+        elements.prompt.focus();
+        return;
+      }
+      await busy(elements.run, async () => {
+        const receipt = await createReceipt(prompt, elements.model.value);
+        receipts = await readAllReceipts();
+        selectedId = receipt.id;
+        const results = await verifyAll();
+        renderRows(results);
+        showProof(receipt, results.get(receipt.id));
+        notify('Signed receipt saved to IndexedDB.');
+      });
+    });
+
+    elements.verify.addEventListener('click', async () => {
+      await busy(elements.verify, async () => {
+        const results = await verifyAll();
+        renderRows(results);
+        const failures = [...results.values()].filter((result) => !result.valid).length;
+        notify(failures ? `${failures} receipt(s) failed verification.` : 'Vault verified locally.');
+      });
+    });
+
+    elements.tamper.addEventListener('click', async () => {
+      if (!receipts.length) {
+        notify('Create a receipt before testing tamper detection.');
+        return;
+      }
+      const target = receipts.find((receipt) => receipt.id === selectedId) || receipts.at(-1);
+      const changed = {
+        ...target,
+        response: `${target.response} [modified after signing]`
+      };
+      await putReceipt(changed);
+      selectedId = changed.id;
+      receipts = await readAllReceipts();
+      const results = await verifyAll();
+      renderRows(results);
+      showProof(changed, results.get(changed.id));
+      notify('Receipt content changed without re-signing. Verification now fails.');
+    });
+
+    elements.reset.addEventListener('click', async () => {
+      if (!window.confirm('Delete the local demo vault and signing key?')) return;
+      await busy(elements.reset, async () => {
+        await clearVault();
+        keyPair = await loadOrCreateKey();
+        receipts = [];
+        selectedId = null;
+        elements.proof.dataset.state = 'idle';
+        elements.verdict.textContent = 'No receipt selected';
+        elements.verdictMark.textContent = '·';
+        elements.detailId.textContent = '—';
+        elements.detailModel.textContent = '—';
+        elements.detailTime.textContent = '—';
+        elements.detailHash.textContent = '—';
+        elements.detailSignature.textContent = '—';
+        elements.rows.innerHTML = '';
+        notify('Local demo data cleared.');
+      });
+    });
+
+    async function startWasm() {
+      // Minimal hand-assembled WebAssembly module that exports `ready() -> i32`
+      // returning 1. Layout:
+      //   magic + version   (8 bytes)
+      //   type section      (7 bytes) - () -> i32
+      //   function section  (4 bytes) - one function of type 0
+      //   export section    (9 bytes) - "ready" -> func 0
+      //   code section      (8 bytes) - i32.const 1, return
+      const moduleBytes = new Uint8Array([
+        0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, // \0asm + version 1
+        0x01, 0x05, 0x01, 0x60, 0x00, 0x01, 0x7f,       // type: () -> i32
+        0x03, 0x02, 0x01, 0x00,                          // func: 1 of type 0
+        0x07, 0x09, 0x01, 0x05, 0x72, 0x65, 0x61, 0x64,  // export "ready" ->
+        0x79, 0x00, 0x00,                                //         func 0
+        0x0a, 0x06, 0x01, 0x04, 0x00, 0x41, 0x01, 0x0b,  // code: 0 locals; i32.const 1; end
+      ]);
+      const result = await WebAssembly.instantiate(moduleBytes);
+      // Chrome <125 and some other engines return the wrapped {module, instance}
+      // shape; the spec and recent engines return Instance directly. Handle both.
+      const instance = result && result.exports ? result : result.instance;
+      const ready = instance.exports.ready();
+      wasmReady = ready === 1;
+      elements.wasmStatus.textContent = wasmReady ? 'WASM: ready' : 'WASM: degraded';
+    }
+
+    async function initialize() {
+      if (!window.isSecureContext || !crypto.subtle) {
+        throw new Error('WebCrypto requires a secure context. Serve this file on localhost.');
+      }
+      await startWasm();
+      db = await openVault();
+      keyPair = await loadOrCreateKey();
+      receipts = await readAllReceipts();
+      if (receipts.length) selectedId = receipts.at(-1).id;
+      const results = await verifyAll();
+      renderRows(results);
+      const selected = receipts.find((receipt) => receipt.id === selectedId);
+      if (selected) showProof(selected, results.get(selected.id));
+    }
+
+    initialize().catch((error) => {
+      console.error(error);
+      elements.wasmStatus.textContent = 'Runtime unavailable';
+      elements.proof.dataset.state = 'invalid';
+      elements.verdict.textContent = 'Browser support required';
+      elements.verdictMark.textContent = '!';
+      notify(error.message || String(error));
+      for (const button of document.querySelectorAll('button')) button.disabled = true;
+    });
+  </script>
+</body>
+</html>

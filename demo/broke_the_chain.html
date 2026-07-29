@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>I broke the chain. Don't-Lie caught it.</title>
+<meta name="description" content="A 90-second self-contained demo: an attacker edits a receipt in the SQLite vault. The verifier catches it. The chain is restored from a signed export. No narration, no music, just the screen.">
+<style>
+  :root { color-scheme: light dark; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", ui-sans-serif, system-ui, sans-serif; }
+  * { box-sizing: border-box; }
+  body { max-width: 920px; margin: 0 auto; padding: 2rem 1.5rem; line-height: 1.5; }
+  h1 { font-size: 1.8rem; margin: 0 0 0.5rem; }
+  .sub { opacity: .65; font-size: 0.9rem; margin-bottom: 2rem; }
+  .stage { background: #050505; color: #e5e5e5; border: 1px solid #2a2a2a; border-radius: 8px; padding: 1.2rem 1.4rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.95rem; min-height: 360px; line-height: 1.6; }
+  .stage pre { margin: 0; white-space: pre-wrap; }
+  .row { display: block; }
+  .prompt { color: #22d3ee; }
+  .ok { color: #22c55e; }
+  .bad { color: #ef4444; font-weight: 600; }
+  .muted { opacity: .55; }
+  .controls { display: flex; gap: 0.7rem; align-items: center; margin: 1rem 0; flex-wrap: wrap; }
+  .controls button { padding: 0.6rem 1.1rem; border: 1px solid #8885; border-radius: 6px; background: #1a1a1a; color: inherit; font: inherit; cursor: pointer; }
+  .controls button.primary { background: #16a34a; border-color: #16a34a; color: #fff; }
+  .controls button.primary:hover { background: #15803d; }
+  .controls button:hover { background: #2a2a2a; }
+  .status { margin-left: auto; font-family: ui-monospace, monospace; opacity: .8; }
+  .legend { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem; font-size: 0.9rem; }
+  .legend h3 { margin: 0 0 0.3rem; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: .7; }
+  .legend p { margin: 0; opacity: .85; }
+  .postscript { margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid #8885; font-size: 0.92rem; opacity: .85; }
+  .postscript code { background: #8882; padding: 0.1rem 0.4rem; border-radius: 0.3rem; }
+  .postscript a { color: #2563eb; }
+  @media (prefers-color-scheme: dark) {
+    body { background: #0a0a0a; color: #e5e5e5; }
+    .controls button { background: #1a1a1a; border-color: #333; }
+    .controls button:hover { background: #252525; }
+    .postscript a { color: #60a5fa; }
+  }
+</style>
+</head>
+<body>
+  <h1>I broke the chain. Don't-Lie caught it.</h1>
+  <p class="sub">A 90-second self-contained demo. Press <b>▶ Play</b> below. No narration, no music — just the screen.</p>
+
+  <div class="controls">
+    <button id="play" class="primary">▶ Play</button>
+    <button id="reset">↺ Reset</button>
+    <button id="step">Step ▸</button>
+    <span class="status" id="status">ready · press Play</span>
+  </div>
+
+  <div class="stage" id="stage">
+    <pre id="screen"><span class="muted">// don't-lie vault: 3 signed receipts
+// key: 1923055d6da006b5  ·  chain: v2  ·  ready</span>
+
+<span class="prompt">$ </span>dontlie list --limit 3
+  #1  2026-07-28T17:11:18  [mock-1]  parent=None  key=1923055d
+       prompt:    ping
+       response:  pong
+       sha256:    5d6f9a32…2a0086  sig: ob5XGDNF…nCDg==
+
+  #2  2026-07-28T17:11:18  [mock-1]  parent=1     key=1923055d
+       prompt:    what is the capital of france?
+       response:  Paris
+       sha256:    79fec19f…cea1dd7  sig: YqsGuhEU…gGu==
+
+  #3  2026-07-28T17:11:18  [mock-1]  parent=2     key=1923055d
+       prompt:    summarize what don't-lie does
+       response:  Don't-Lie is a local-first signed-receipt vault…
+       sha256:    a0549843…3b261049  sig: iPX/89NR…Vo3A==
+
+<span class="muted">// 3 receipts · 3 ok · 0 bad</span>
+<span class="prompt">$ </span>dontlie verify --verbose
+  <span class="ok">✓ payload_hash  ok     3/3</span>
+  <span class="ok">✓ signature    ok     3/3</span>
+  <span class="ok">✓ parent_link  ok     3/3</span>
+  <span class="ok">✓ key_history  ok     1 of 1 active</span>
+  <span class="ok">✓ chain_walk   ok     3/3 intact</span>
+  → <span class="ok">chain is clean</span>
+</pre>
+  </div>
+
+  <div class="legend">
+    <div>
+      <h3>What just happened</h3>
+      <p>The vault has 3 receipts. The verifier confirms every hash, every signature, every parent link. The chain is clean.</p>
+    </div>
+    <div>
+      <h3>What's about to happen</h3>
+      <p>An attacker opens the SQLite file directly and edits one row's response column. The hash and signature are not touched. The chain is now silent-broken.</p>
+    </div>
+  </div>
+
+  <div class="postscript">
+    <b>The "I broke the chain" demo.</b> The same SQLite <code>UPDATE</code> an attacker would run, and the same verifier a compliance officer would run. The receipt is the only line of defense between "we trust our logs" and "we have evidence."
+    <br><br>
+    <b>Try it on your machine:</b>
+    <pre style="background:#8882; padding:0.7rem; border-radius:0.4rem; margin-top:0.5rem;"><code>$ git clone https://github.com/Matrix-ops77/dontlie
+$ cd dontlie
+$ bash demo/scripts/run_offline_demo.sh
+$ open demo/work/receipt-report.html</code></pre>
+    <b>Learn more:</b> <a href="../MANIFESTO.md">the manifesto</a> · <a href="../DIFFERENTIATORS.md">40 differentiators</a> · <a href="../LAUNCH_POST.md">the launch post</a>
+  </div>
+
+<script>
+(function() {
+  // 90 seconds, ~12 steps. Each step is a fragment of terminal output.
+  const steps = [
+    { duration: 5000, body: `<span class="muted">// ATTACKER: open the vault directly in sqlite3</span>
+
+<span class="prompt">$ </span>sqlite3 ~/.local/share/dontlie/vault.db
+sqlite> <span class="bad">UPDATE receipts SET response = 'Paris, France (tampered)'
+        WHERE id = 2;</span>
+sqlite> .quit
+
+<span class="muted">// the response for receipt #2 was rewritten
+// the hash and signature are now inconsistent with the new bytes
+// the chain is silent-broken</span>` },
+
+    { duration: 5000, body: `<span class="prompt">$ </span>dontlie list --limit 3
+  #1  2026-07-28T17:11:18  [mock-1]  parent=None  key=1923055d
+       prompt:    ping
+       response:  pong
+       sha256:    5d6f9a32…2a0086  sig: ob5XGDNF…nCDg==
+
+  #2  2026-07-28T17:11:18  [mock-1]  parent=1     key=1923055d
+       prompt:    what is the capital of france?
+       response:  <span class="bad">Paris, France (tampered)</span>          <span class="muted">// ← tampered</span>
+       sha256:    79fec19f…cea1dd7  sig: YqsGuhEU…gGu==        <span class="muted">// ← unchanged</span>
+
+  #3  2026-07-28T17:11:18  [mock-1]  parent=2     key=1923055d
+       prompt:    summarize what don't-lie does
+       response:  Don't-Lie is a local-first signed-receipt vault…
+       sha256:    a0549843…3b261049  sig: iPX/89NR…Vo3A==` },
+
+    { duration: 8000, body: `<span class="prompt">$ </span>dontlie verify --verbose
+  <span class="ok">✓ payload_hash  ok     1/3</span>
+  <span class="ok">✓ signature    ok     1/3</span>
+  <span class="bad">✗ payload_hash  FAIL   receipt 2: SHA-256 mismatch</span>
+        <span class="muted">stored:    79fec19f5cea1dd7…</span>
+        <span class="muted">recomputed: 85485ae3f9efda9f…</span>
+  <span class="bad">✗ signature    FAIL   receipt 2: signature does not verify</span>
+  <span class="ok">✓ parent_link  ok     3/3</span>
+  <span class="ok">✓ key_history  ok     1 of 1 active</span>
+  <span class="bad">✗ chain_walk   FAIL   1 of 3 receipts broken</span>
+
+  → <span class="bad">TAMPER DETECTED</span>` },
+
+    { duration: 4000, body: `<span class="muted">// receipt 2's bytes were changed. the signature was not.
+// the verifier caught it on the first run. no human in the loop.</span>
+
+<span class="prompt">$ </span>dontlie export receipts.bundle.json --bundle
+  <span class="muted">// bundle written — the signed records are also exported as JSON</span>
+
+<span class="prompt">$ </span>sqlite3 ~/.local/share/dontlie/vault.db
+sqlite> <span class="bad">DELETE FROM receipts;</span>
+sqlite> .quit
+
+<span class="muted">// attacker goes further — deletes the local vault entirely</span>` },
+
+    { duration: 6000, body: `<span class="prompt">$ </span>dontlie import receipts.bundle.json
+  <span class="muted">// re-importing the signed bundle</span>
+  <span class="ok">✓</span> 3 receipts restored
+  <span class="ok">✓</span> chain re-linked to first receipt (parent=None)
+
+<span class="prompt">$ </span>dontlie verify --verbose
+  <span class="ok">✓ payload_hash  ok     3/3</span>
+  <span class="ok">✓ signature    ok     3/3</span>
+  <span class="ok">✓ parent_link  ok     3/3</span>
+  <span class="ok">✓ key_history  ok     1 of 1 active</span>
+  <span class="ok">✓ chain_walk   ok     3/3 intact</span>
+  → <span class="ok">chain is clean</span>
+
+<span class="muted">// the original signed bundle is the source of truth, not the local DB.
+// the receipts can be re-derived, the chain can be re-walked, the audit holds.</span>` },
+
+    { duration: 5000, body: `<span class="muted">// THE END.
+
+// don't-lie is MIT-licensed and local-first.
+// pip install dontlie
+// bash demo/scripts/run_offline_demo.sh
+// dontlie verify --verbose
+
+// the receipt is the only line of defense between "we trust our logs" and "we have evidence."</span>
+
+<span class="ok">→ chain restored · audit holds · run the demo on your machine</span>` },
+  ];
+
+  const screen = document.getElementById('screen');
+  const playBtn = document.getElementById('play');
+  const resetBtn = document.getElementById('reset');
+  const stepBtn = document.getElementById('step');
+  const status = document.getElementById('status');
+
+  let idx = 0;
+  let timer = null;
+  let playing = false;
+
+  function show(n) {
+    idx = Math.max(0, Math.min(steps.length, n));
+    const initialBlock = `<span class="muted">// don't-lie vault: 3 signed receipts
+// key: 1923055d6da006b5  ·  chain: v2  ·  ready</span>
+
+<span class="prompt">$ </span>dontlie list --limit 3
+  #1  2026-07-28T17:11:18  [mock-1]  parent=None  key=1923055d
+       prompt:    ping
+       response:  pong
+       sha256:    5d6f9a32…2a0086  sig: ob5XGDNF…nCDg==
+
+  #2  2026-07-28T17:11:18  [mock-1]  parent=1     key=1923055d
+       prompt:    what is the capital of france?
+       response:  Paris
+       sha256:    79fec19f…cea1dd7  sig: YqsGuhEU…gGu==
+
+  #3  2026-07-28T17:11:18  [mock-1]  parent=2     key=1923055d
+       prompt:    summarize what don't-lie does
+       response:  Don't-Lie is a local-first signed-receipt vault…
+       sha256:    a0549843…3b261049  sig: iPX/89NR…Vo3A==
+
+<span class="muted">// 3 receipts · 3 ok · 0 bad</span>
+<span class="prompt">$ </span>dontlie verify --verbose
+  <span class="ok">✓ payload_hash  ok     3/3</span>
+  <span class="ok">✓ signature    ok     3/3</span>
+  <span class="ok">✓ parent_link  ok     3/3</span>
+  <span class="ok">✓ key_history  ok     1 of 1 active</span>
+  <span class="ok">✓ chain_walk   ok     3/3 intact</span>
+  → <span class="ok">chain is clean</span>
+`;
+    const accumulated = (idx === 0) ? initialBlock : initialBlock + '\n\n' +
+      steps.slice(0, idx).map(s => s.body).join('\n\n');
+    screen.innerHTML = accumulated;
+    status.textContent = `step ${idx}/${steps.length}  ·  ${idx === steps.length ? 'done' : 'ready'}`;
+  }
+
+  function tick() {
+    if (idx >= steps.length) {
+      playing = false;
+      playBtn.textContent = '▶ Replay';
+      status.textContent = `done · ${steps.length}/${steps.length}`;
+      return;
+    }
+    show(idx + 1);
+    if (playing) {
+      timer = setTimeout(tick, steps[idx].duration);
+    }
+  }
+
+  function play() {
+    if (idx >= steps.length) {
+      idx = 0;
+      show(0);
+    }
+    playing = true;
+    playBtn.textContent = '⏸ Pause';
+    tick();
+  }
+
+  function pause() {
+    playing = false;
+    if (timer) clearTimeout(timer);
+    playBtn.textContent = '▶ Play';
+  }
+
+  playBtn.addEventListener('click', () => playing ? pause() : play());
+  resetBtn.addEventListener('click', () => { pause(); idx = 0; show(0); });
+  stepBtn.addEventListener('click', () => { pause(); if (idx < steps.length) { idx++; show(idx); } });
+
+  show(0);
+})();
+</script>
+</body>
+</html>
