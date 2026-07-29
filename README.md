@@ -16,7 +16,7 @@
 
 ```bash
 pip install dontlie
-bash demo/scripts/run_offline_demo.sh
+dontlie demo
 ```
 
 That's it. 30 seconds. No API keys. A signed receipt chain you can tamper with to verify it actually catches tampering.
@@ -81,7 +81,7 @@ The wedge is honesty. We don't claim AI is truthful. We claim the record is tamp
 3. Each receipt is SHA-256 hashed, Ed25519 signed, and linked to the previous
 4. Verify offline with `dontlie verify`
 5. Export a portable bundle with `dontlie export --bundle`
-6. Render an HTML proof report with `python3 demo/scripts/render_report.py`
+6. Render an HTML proof report (the demo script does this automatically; the helper is also exposed as `python3 -m dontlie.demo.render_report`)
 
 ### Verify anywhere
 
@@ -113,13 +113,14 @@ Verify the install:
 
 ```bash
 dontlie --version
-dontlie demo
+dontlie demo                  # offline proof: 3 signed receipts, tamper + restore
+dontlie demo --port 9879     # same demo on a non-default proxy port
 ```
 
 30-second offline demo:
 
 ```bash
-bash demo/scripts/run_offline_demo.sh
+dontlie demo
 ```
 
 This runs a local mock provider, captures 3 receipts, verifies them, tampers with one, and shows you exactly what fails.

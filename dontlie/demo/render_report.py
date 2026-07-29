@@ -1,7 +1,7 @@
 """Render a self-contained customer-facing HTML evidence report.
 
 Usage:
-    python3 demo/scripts/render_report.py demo/work/receipts.bundle.json \
+    python3 -m dontlie.demo.render_report demo/work/receipts.bundle.json \
         demo/work/receipt-report.html
 
 The report contains no external assets, scripts, keys, or network calls.
@@ -241,8 +241,8 @@ custody, authorization, or truth questions. Here is the honest short list.
 <section>
 <h2>Tamper demo (one screen)</h2>
 <ol>
-  <li>Run <code>bash demo/scripts/run_offline_demo.sh</code> to capture 3 receipts.</li>
-  <li>Run <code>python3 demo/scripts/tamper_walkthrough.py demo/work</code>.</li>
+  <li>Run <code>dontlie demo</code> to capture 3 receipts.</li>
+  <li>Run <code>python3 -m dontlie.demo.tamper_walkthrough /tmp/dontlie-demo-work</code>.</li>
   <li>Stage 3 shows the receipt hash no longer matches; Stage 5 restores it
   from the signed JSONL export. Stage 6 verifies the restored chain again.</li>
 </ol>
@@ -283,10 +283,10 @@ bundle was authored by a key you trust.</p>
 <section>
 <h2>How to reproduce this report</h2>
 <ol>
-  <li>Run the offline demo: <code>bash demo/scripts/run_offline_demo.sh</code></li>
-  <li>Export the bundle: <code>dontlie export demo/work/receipts.bundle.json --bundle</code></li>
-  <li>Verify the bundle: <code>dontlie verify --export demo/work/receipts.bundle.json --verbose</code></li>
-  <li>Render this report: <code>python3 demo/scripts/render_report.py demo/work/receipts.bundle.json report.html</code></li>
+  <li>Run the offline demo: <code>dontlie demo</code></li>
+  <li>Export the bundle: <code>dontlie export /tmp/dontlie-demo-work/receipts.bundle.json --bundle</code></li>
+  <li>Verify the bundle: <code>dontlie verify --export /tmp/dontlie-demo-work/receipts.bundle.json --verbose</code></li>
+  <li>Render this report: <code>python3 -m dontlie.demo.render_report /tmp/dontlie-demo-work/receipts.bundle.json report.html</code></li>
 </ol>
 </section>
 </body>

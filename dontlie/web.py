@@ -246,7 +246,7 @@ def _render_dashboard(limit: int = 50) -> str:
         + "</tbody></table>"
     )
     if not receipts:
-        table = '<p class="muted">No receipts yet. Start the proxy and make a call, or run <code>bash demo/scripts/run_offline_demo.sh</code>.</p>'
+        table = '<p class="muted">No receipts yet. Start the proxy and make a call, or run <code>dontlie demo</code>.</p>'
     return _wrap("Dashboard", cards + legend + search + table)
 
 

@@ -10,7 +10,7 @@ local signed proxy. This file measures the cost of that wrapper.
 |---|---|
 | `default_sdk` | Official `openai` Python SDK pointed directly at the mock provider. |
 | `dontlie_wrapped` | `dontlie-openai` Client (a subclass of the OpenAI SDK) pointed at the local `dontlie proxy`, which forwards to the same mock provider. |
-| Mock provider | `demo/scripts/mock_provider.py` — stdlib HTTP, deterministic, no model call. |
+| Mock provider | `python3 -m dontlie.demo.mock_provider` — stdlib HTTP, deterministic, no model call. |
 | Proxy | `dontlie proxy --port 9871` with isolated key/db/workdir. |
 
 Both paths traverse the **same provider**. The dontlie path adds:
@@ -97,7 +97,7 @@ signed, tamper-evident audit trail.
 
 ## Related
 
-- `demo/scripts/benchmark.py` — measures Dont-Lie itself (sign + verify
+- `python3 -m dontlie.demo.benchmark` — measures Dont-Lie itself (sign + verify
   + export throughput) without the proxy hop.
 - `demo/output/BENCHMARK.md` — sign/verify/export throughput reference.
 - `BENCHMARK.transcript.json` — raw numbers from this run.

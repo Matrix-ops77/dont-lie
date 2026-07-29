@@ -15,13 +15,14 @@ os.environ["DONTLIE_KEY_DIR"] = str(Path(_TMP) / "keys")
 os.environ["DONTLIE_DB"] = str(Path(_TMP) / "vault.db")
 os.environ["DONTLIE_NO_WAL"] = "1"
 
-# This test file lives at <repo>/dontlie/test_*.py; the demo sources
-# are siblings under <repo>/dontlie/demo/.
+# This test file lives at <repo>/test_*.py; the demo sources are
+# inside the dontlie package at <repo>/dontlie/demo/ (shipped as a
+# sub-package so `pip install dontlie` makes `dontlie demo` work).
 REPO_ROOT = Path(__file__).resolve().parent
-DEMO_SCRIPTS = REPO_ROOT / "demo" / "scripts"
-RUN_DEMO = DEMO_SCRIPTS / "run_offline_demo.sh"
-TAMPER_WALK = DEMO_SCRIPTS / "tamper_walkthrough.py"
-CLEANUP = DEMO_SCRIPTS / "cleanup.py"
+DEMO_PKG = REPO_ROOT / "dontlie" / "demo"
+RUN_DEMO = DEMO_PKG / "run_offline_demo.sh"
+TAMPER_WALK = DEMO_PKG / "tamper_walkthrough.py"
+CLEANUP = DEMO_PKG / "cleanup.py"
 
 DEMO_LOCK = Path(tempfile.gettempdir()) / "dontlie-demo-test.lock"
 

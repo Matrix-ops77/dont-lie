@@ -42,10 +42,10 @@ and render a self-contained HTML proof report.
 git clone https://github.com/your-org/dontlie.git
 cd dontlie
 python -m pip install -e .
-bash demo/scripts/run_offline_demo.sh
-python3 demo/scripts/tamper_walkthrough.py demo/work
-python3 demo/scripts/render_report.py demo/work/receipts.bundle.json report.html
-python3 demo/scripts/cleanup.py
+dontlie demo
+python3 -m dontlie.demo.tamper_walkthrough demo/work
+python3 -m dontlie.demo.render_report demo/work/receipts.bundle.json report.html
+python3 -m dontlie.demo.cleanup
 ```
 
 The offline demo uses a local mock provider. No network, no API keys,

@@ -6,15 +6,15 @@ Don't-Lie. Not customer-facing.
 ## Before tagging
 
 - [ ] `python -m unittest discover` — full suite passes (target: 50/50)
-- [ ] `ruff check dontlie test_*.py demo/scripts` — clean
+- [ ] `ruff check dontlie test_*.py` — clean
 - [ ] `mypy --strict dontlie/storage.py dontlie/sign.py` — clean
 - [ ] `python -m compileall -q dontlie` — bytecode builds
-- [ ] `bash demo/scripts/run_offline_demo.sh` — exit 0
-- [ ] `python3 demo/scripts/tamper_walkthrough.py demo/work` — exit 0
-- [ ] `python3 demo/scripts/render_report.py demo/work/receipts.bundle.json /tmp/r.html` — written
-- [ ] `python3 demo/scripts/benchmark.py 1000 demo/output/benchmark.transcript.json` — written
-- [ ] `python3 demo/scripts/cleanup.py` — no orphans on demo ports
-- [ ] No `print()` debug remnants in `demo/scripts/` (lint catches them)
+- [ ] `dontlie demo` — exit 0
+- [ ] `python3 -m dontlie.demo.tamper_walkthrough /tmp/dontlie-demo-work` — exit 0
+- [ ] `python3 -m dontlie.demo.render_report /tmp/dontlie-demo-work/receipts.bundle.json /tmp/r.html` — written
+- [ ] `python3 -m dontlie.demo.benchmark 1000 demo/output/benchmark.transcript.json` — written
+- [ ] `python3 -m dontlie.demo.cleanup` — no orphans on demo ports
+- [ ] No `print()` debug remnants in `dontlie/demo/` (lint catches them)
 - [ ] Git status: working tree clean of stray artifacts
 - [ ] Git status: no tracked changes to `dontlie/storage.py`, `sign.py`,
       `proxy.py`, `cli.py`, `test_dontlie.py`, `test_integrity.py`,

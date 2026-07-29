@@ -95,10 +95,9 @@
     <b>The "I broke the chain" demo.</b> The same SQLite <code>UPDATE</code> an attacker would run, and the same verifier a compliance officer would run. The receipt is the only line of defense between "we trust our logs" and "we have evidence."
     <br><br>
     <b>Try it on your machine:</b>
-    <pre style="background:#8882; padding:0.7rem; border-radius:0.4rem; margin-top:0.5rem;"><code>$ git clone https://github.com/Matrix-ops77/dontlie
-$ cd dontlie
-$ bash demo/scripts/run_offline_demo.sh
-$ open demo/work/receipt-report.html</code></pre>
+    <pre style="background:#8882; padding:0.7rem; border-radius:0.4rem; margin-top:0.5rem;"><code>$ pip install dontlie
+$ dontlie demo
+$ open /tmp/dontlie-demo-work/receipt-report.html</code></pre>
     <b>Learn more:</b> <a href="../MANIFESTO.md">the manifesto</a> · <a href="../competitive.md">competitive position</a> · <a href="../LAUNCH_POST.md">the launch post</a>
   </div>
 
@@ -178,7 +177,7 @@ sqlite> .quit
 
 // don't-lie is MIT-licensed and local-first.
 // pip install dontlie
-// bash demo/scripts/run_offline_demo.sh
+// dontlie demo
 // dontlie verify --verbose
 
 // the receipt is the only line of defense between "we trust our logs" and "we have evidence."</span>

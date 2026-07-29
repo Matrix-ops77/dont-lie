@@ -4,7 +4,7 @@ Runs against an isolated workdir so it never touches the real vault.
 Outputs a transcript file with timings, throughput, and machine info.
 
 Usage:
-    python3 demo/scripts/benchmark.py [N=1000] [transcript_path]
+    python3 -m dontlie.demo.benchmark [N=1000] [transcript_path]
 
 Designed to be deterministic given the same Python/runtime/build.
 """

@@ -35,24 +35,18 @@ os.environ["DONTLIE_KEY_DIR"] = str(Path(_TMP) / "keys")
 os.environ["DONTLIE_DB"] = str(Path(_TMP) / "vault.db")
 os.environ["DONTLIE_NO_WAL"] = "1"
 
-# Project layout: this test file lives at <repo>/dontlie/test_*.py, so the
-# repo root is one parent up, and demo sources live at <repo>/dontlie/demo/.
+# Project layout: this test file lives at <repo>/test_*.py, so REPO_ROOT
+# is the repo root, and demo sources live at <repo>/dontlie/demo/ (shipped
+# as a sub-package so `pip install dontlie` makes `dontlie demo` work
+# without a source checkout).
 REPO_ROOT = Path(__file__).resolve().parent
-DEMO_SCRIPTS = REPO_ROOT / "demo" / "scripts"
-RUN_DEMO = DEMO_SCRIPTS / "run_offline_demo.sh"
-TAMPER_WALK = DEMO_SCRIPTS / "tamper_walkthrough.py"
+DEMO_PKG = REPO_ROOT / "dontlie" / "demo"
+RUN_DEMO = DEMO_PKG / "run_offline_demo.sh"
+TAMPER_WALK = DEMO_PKG / "tamper_walkthrough.py"
 
-import importlib.util
-
-_TAMPER_SPEC = importlib.util.spec_from_file_location(
-    "demo_tamper_walkthrough", str(TAMPER_WALK)
-)
-if _TAMPER_SPEC is None or _TAMPER_SPEC.loader is None:  # pragma: no cover
-    raise RuntimeError(f"could not load {TAMPER_WALK} as a module")
-_TAMPER_MOD = importlib.util.module_from_spec(_TAMPER_SPEC)
-_TAMPER_SPEC.loader.exec_module(_TAMPER_MOD)
-
+# tamper_walkthrough is now a proper sub-module — import it that way.
 from dontlie import storage
+from dontlie.demo import tamper_walkthrough as _TAMPER_MOD
 
 
 def _port_pair(seed: int) -> tuple[str, str]:

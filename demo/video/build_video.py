@@ -113,10 +113,10 @@ def run_demo(events):
     # Step 2: Start mock provider
     mock_log = open(WORK / "mock.log", "w")
     mock = subprocess.Popen(
-        ["python3", "demo/scripts/mock_provider.py", "--port", "9876"],
+        ["python3", "-m", "dontlie.demo.mock_provider", "--port", "9876"],
         cwd=REPO, stdout=mock_log, stderr=subprocess.STDOUT, env=env,
     )
-    events.append("$ python3 demo/scripts/mock_provider.py --port 9876 &")
+    events.append("$ python3 -m dontlie.demo.mock_provider --port 9876 &")
     time.sleep(1.2)
     events.append("  [mock] listening on 127.0.0.1:9876")
     events.append("")
@@ -214,10 +214,10 @@ def run_demo(events):
         events.append("")
 
         # Tamper (real)
-        events.append("$ python3 demo/scripts/tamper_walkthrough.py demo/work_video")
+        events.append("$ python3 -m dontlie.demo.tamper_walkthrough demo/work_video")
         events.append("")
         r = subprocess.run(
-            ["python3", "demo/scripts/tamper_walkthrough.py", "demo/work_video"],
+            ["python3", "-m", "dontlie.demo.tamper_walkthrough", "demo/work_video"],
             cwd=REPO, capture_output=True, text=True, env=env, timeout=30,
         )
         for ln in r.stdout.splitlines():
@@ -225,7 +225,7 @@ def run_demo(events):
         events.append("")
 
         # Render report
-        events.append("$ python3 demo/scripts/render_report.py \\")
+        events.append("$ python3 -m dontlie.demo.render_report \\")
         events.append("    demo/work_video/receipts.bundle.json report.html")
         events.append("  ✓ wrote report.html (portable, signed, independently verifiable)")
         events.append("")

@@ -591,15 +591,47 @@ def cmd_version(args) -> int:
 
 
 def cmd_demo(args) -> int:
-    """Run the deterministic offline demo from a source checkout."""
-    _ = args
-    script = Path(__file__).resolve().parents[1] / "demo" / "scripts" / "run_offline_demo.sh"
-    if not script.exists():
-        print("Offline demo is available from the Don't-Lie source checkout:", file=sys.stderr)
-        print("  bash demo/scripts/run_offline_demo.sh", file=sys.stderr)
-        return 2
+    """Run the deterministic offline demo (no API key, no network).
+
+    The demo shell script is shipped inside the installed package at
+    ``dontlie/demo/run_offline_demo.sh`` and its sibling Python helpers
+    run as ``python -m dontlie.demo.<name>`` so this works after
+    ``pip install dontlie``, not just from a source checkout.
+
+    --port and --mock-port propagate to the script via MOCK_PORT and
+    PROXY_PORT environment variables.
+    """
     import subprocess
-    return subprocess.run(["bash", str(script)], cwd=str(script.parents[2])).returncode
+
+    try:
+        import dontlie.demo as _demo_pkg
+    except ImportError as exc:  # pragma: no cover - the sub-package is shipped
+        print(f"demo sub-package is not available: {exc}", file=sys.stderr)
+        return 2
+
+    script = Path(_demo_pkg.__file__).resolve().parent / "run_offline_demo.sh"
+    if not script.exists():
+        print(f"demo script not found at {script}", file=sys.stderr)
+        return 2
+
+    env = os.environ.copy()
+    # Always pin PYTHON to the interpreter running this CLI so the demo's
+    # helper scripts (`python -m dontlie ...`, `python -m dontlie.demo.X`)
+    # resolve to a Python that actually has `dontlie` installed. Without
+    # this, a stray `PYTHON` in the parent env (e.g. a system Python or
+    # another venv) would silently route the demo to the wrong
+    # interpreter and the helpers would fail with "No module named
+    # 'dontlie'".
+    env["PYTHON"] = sys.executable
+    if getattr(args, "port", None):
+        env["PROXY_PORT"] = str(args.port)
+    if getattr(args, "mock_port", None):
+        env["MOCK_PORT"] = str(args.mock_port)
+    return subprocess.run(
+        ["bash", str(script)],
+        cwd=str(script.parent),
+        env=env,
+    ).returncode
 
 
 def _read_passphrase(prompt: str, confirm: bool = False) -> bytearray:
@@ -706,12 +738,33 @@ def cmd_unlock(args) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="dontlie", description="Verifiable local-first LLM receipt vault.")
+    # Top-level --version flag so `dontlie --version` works without a subcommand.
+    # This is what most CLI users try first; the `version` subcommand is still
+    # available for parity.
+    p.add_argument(
+        "--version",
+        action="version",
+        version=f"dontlie {__version__}",
+    )
     sub = p.add_subparsers(dest="cmd", required=True)
 
     sub.add_parser("gen-key", help="generate Ed25519 keypair").set_defaults(func=cmd_gen_key)
     sub.add_parser("version", help="print version").set_defaults(func=cmd_version)
     sub.add_parser("doctor", help="show environment diagnostics").set_defaults(func=cmd_doctor)
-    sub.add_parser("demo", help="run the offline proof experience (no API key required)").set_defaults(func=cmd_demo)
+    p_demo = sub.add_parser("demo", help="run the offline proof experience (no API key required)")
+    p_demo.add_argument(
+        "--port",
+        type=int,
+        default=None,
+        help="proxy port (default: 9877)",
+    )
+    p_demo.add_argument(
+        "--mock-port",
+        type=int,
+        default=None,
+        help="mock provider port (default: 9876)",
+    )
+    p_demo.set_defaults(func=cmd_demo)
 
     p_encrypt = sub.add_parser("encrypt", help="encrypt the local vault with a passphrase")
     p_encrypt.add_argument("vault", nargs="?",

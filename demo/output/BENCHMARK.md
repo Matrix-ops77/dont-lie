@@ -1,6 +1,6 @@
 # Benchmark transcript — reference fixture
 
-Captured by `python3 demo/scripts/benchmark.py 5000` on:
+Captured by `python3 -m dontlie.demo.benchmark 5000` on:
 
 | Item | Value |
 |---|---|
@@ -24,7 +24,7 @@ Captured by `python3 demo/scripts/benchmark.py 5000` on:
 ## Reproduce
 
 ```sh
-python3 demo/scripts/benchmark.py 5000 demo/output/benchmark.transcript.json
+python3 -m dontlie.demo.benchmark 5000 demo/output/benchmark.transcript.json
 ```
 
 The benchmark is single-threaded, single-process. Numbers are wall-clock

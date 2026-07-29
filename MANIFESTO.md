@@ -59,7 +59,7 @@ Every bundle ships with a Reasonable Doubt panel — five challenges an auditor 
 pip install dontlie
 
 # 2. The 30-second offline demo (no API key)
-bash demo/scripts/run_offline_demo.sh
+dontlie demo
 
 # 3. The receipt report (open in browser)
 open demo/work/receipt-report.html
@@ -117,7 +117,7 @@ A small team. MIT-licensed. No VC. No board. No exit timeline. We sell to the bu
 ## Where to go next
 
 - Install: `pip install dontlie`
-- Demo: `bash demo/scripts/run_offline_demo.sh`
+- Demo: `dontlie demo`
 - Docs: `README.md`
 - Compliance: `docs/compliance/`
 - Pricing: `site/pricing.html`

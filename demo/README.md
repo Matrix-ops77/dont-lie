@@ -49,12 +49,12 @@ demo/
 
 ```sh
 # offline, deterministic, no network
-bash demo/scripts/run_offline_demo.sh
-python3 demo/scripts/tamper_walkthrough.py demo/work
-open demo/work/receipt-report.html  # optional visual proof artifact
-python3 demo/scripts/render_report.py demo/work/receipts.bundle.json /tmp/report.html
-DONTLIE_DB=demo/work/vault.db DONTLIE_KEY_DIR=demo/work/keys \
-  python3 -m dontlie verify --export demo/work/receipts.bundle.json --verbose
-python3 demo/scripts/benchmark.py 1000 demo/output/benchmark.transcript.json
-python3 demo/scripts/cleanup.py
+dontlie demo
+python3 -m dontlie.demo.tamper_walkthrough /tmp/dontlie-demo-work
+open /tmp/dontlie-demo-work/receipt-report.html  # optional visual proof artifact
+python3 -m dontlie.demo.render_report /tmp/dontlie-demo-work/receipts.bundle.json /tmp/report.html
+DONTLIE_DB=/tmp/dontlie-demo-work/vault.db DONTLIE_KEY_DIR=/tmp/dontlie-demo-work/keys \
+  python3 -m dontlie verify --export /tmp/dontlie-demo-work/receipts.bundle.json --verbose
+python3 -m dontlie.demo.benchmark 1000 demo/output/benchmark.transcript.json
+python3 -m dontlie.demo.cleanup
 ```

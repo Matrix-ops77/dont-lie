@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import importlib.util
 import json
 import tempfile
 import unittest
@@ -10,17 +9,15 @@ from contextlib import redirect_stderr, redirect_stdout
 from io import StringIO
 from pathlib import Path
 
-# This test file lives at <repo>/dontlie/test_*.py, so the demo sources
-# are siblings under <repo>/dontlie/demo/.
+# This test file lives at <repo>/test_*.py, so the demo sources are
+# inside the dontlie package at <repo>/dontlie/demo/ (shipped as a
+# sub-package so `pip install dontlie` makes `dontlie demo` work).
 PROJECT_ROOT = Path(__file__).resolve().parent
-RENDER_SCRIPT = PROJECT_ROOT / "demo" / "scripts" / "render_report.py"
+RENDER_SCRIPT = PROJECT_ROOT / "dontlie" / "demo" / "render_report.py"
 SAMPLE_BUNDLE = PROJECT_ROOT / "demo" / "samples" / "receipts.bundle.json"
 
-_SPEC = importlib.util.spec_from_file_location("dontlie_demo_render", RENDER_SCRIPT)
-if _SPEC is None or _SPEC.loader is None:  # pragma: no cover
-    raise RuntimeError(f"could not load {RENDER_SCRIPT}")
-render_report = importlib.util.module_from_spec(_SPEC)
-_SPEC.loader.exec_module(render_report)
+# render_report is now a proper sub-module — import it that way.
+from dontlie.demo import render_report
 
 
 class DemoRenderTest(unittest.TestCase):

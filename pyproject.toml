@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dontlie"
-version = "0.3.3"
+version = "0.3.4"
 description = "Local-first, verifiable signed receipts for OpenAI-compatible AI calls."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -42,6 +42,14 @@ Issues = "https://github.com/Matrix-ops77/dont-lie/issues"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["dontlie*"]
+
+[tool.setuptools.package-data]
+# Ship the demo shell script inside the wheel so `dontlie demo` works
+# after `pip install dontlie`, not just from a source checkout. The
+# Python helpers (mock_provider, issue_request, render_report,
+# tamper_walkthrough, cleanup, benchmark) are normal sub-modules and
+# don't need a package-data directive — they ship automatically.
+"dontlie.demo" = ["*.sh"]
 
 [tool.ruff]
 # Scope lint to the core product. Clients and demos have their own rules.

@@ -4,10 +4,9 @@ I'm shipping a v0.3 today and I'd like to show you what changed. The TL;DR: a dr
 
 **Demo (30 seconds, no API key):**
 ```bash
-git clone https://github.com/Matrix-ops77/dontlie
-cd dontlie
-bash demo/scripts/run_offline_demo.sh
-open demo/work/receipt-report.html
+pip install dontlie
+dontlie demo
+open /tmp/dontlie-demo-work/receipt-report.html
 ```
 
 You will see: 3 receipts signed, a SQLite row edited directly with the sqlite3 CLI, the verifier catching it ("1 ok / 1 bad"), the chain restored from a signed export, and the chain back to clean. The whole loop runs in 30 seconds and proves the wedge: **the receipt is tamper-evident, and you can prove it without trusting us**.

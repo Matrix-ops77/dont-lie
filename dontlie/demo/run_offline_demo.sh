@@ -1,13 +1,29 @@
 #!/usr/bin/env bash
 # Offline demo: zero network, deterministic, no API keys.
-# Starts mock provider + dontlie proxy, issues 3 requests, verifies chain.
+# Starts mock provider + dontlie proxy, issues 3 requests, verifies chain,
+# tampers with one record, detects, and restores.
+#
+# Invoked by `dontlie demo` (cli.cmd_demo). The script's location is
+# `dontlie/demo/run_offline_demo.sh` inside the installed package; it
+# calls the sibling Python helpers as `python -m dontlie.demo.<name>`.
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-DEMO="$ROOT/demo"
+# Resolve the package directory (the .sh file's parent) so we can derive
+# every other path from a single source of truth. Works whether the
+# package is editable-installed or installed from a wheel.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MOCK_PORT="${MOCK_PORT:-9876}"
 PROXY_PORT="${PROXY_PORT:-9877}"  # deliberately separate from common dev ports
-WORK="${DONTLIE_DEMO_WORK:-$DEMO/work}"
+WORK="${DONTLIE_DEMO_WORK:-/tmp/dontlie-demo-work}"
+
+# Default workdir lives OUTSIDE the package so a wheel install has somewhere
+# to write. Override with DONTLIE_DEMO_WORK if you want it somewhere specific.
+case "$WORK" in
+    ""|"/"|"$HOME"|"$HOME/.config")
+        echo "FAIL: refusing to use unsafe demo workdir: $WORK" >&2
+        exit 1
+        ;;
+esac
 
 # isolate demo state from real user vault
 export DONTLIE_KEY_DIR="$WORK/keys"
@@ -16,13 +32,10 @@ export DONTLIE_NO_WAL=1
 export DONTLIE_UPSTREAM_BASE_URL="http://127.0.0.1:$MOCK_PORT"
 export DONTLIE_UPSTREAM_API_KEY="mock-no-key-required"
 export OPENAI_API_KEY="dontlie-local"
+# Critical: pin the client to the proxy's actual port, not the default.
+# (Previously this was hardcoded to 9877, so changing --port broke the demo.)
+export OPENAI_BASE_URL="http://127.0.0.1:$PROXY_PORT/v1"
 
-case "$WORK" in
-    ""|"/"|"$ROOT"|"$HOME"|"$HOME/.config")
-        echo "FAIL: refusing to use unsafe demo workdir: $WORK" >&2
-        exit 1
-        ;;
-esac
 rm -rf "$WORK"
 mkdir -p "$WORK"
 echo "==> workdir isolated at $WORK"
@@ -51,7 +64,7 @@ fi
 if ! port_available "$PROXY_PORT"; then
     echo "FAIL: port $PROXY_PORT already in use"; exit 1
 fi
-"$PY" "$DEMO/scripts/mock_provider.py" --port "$MOCK_PORT" >"$WORK/mock.log" 2>&1 &
+"$PY" -m dontlie.demo.mock_provider --port "$MOCK_PORT" >"$WORK/mock.log" 2>&1 &
 MOCK_PID=$!
 printf '%s\n' "$MOCK_PID" > "$WORK/mock.pid"
 sleep 0.5
@@ -77,7 +90,7 @@ echo "==> mock provider up"
 # --- three deterministic requests ---
 issue() {
     local label="$1" content="$2"
-    echo "$content" | "$PY" "$DEMO/scripts/issue_request.py" | tee "$WORK/last_response.json"
+    echo "$content" | "$PY" -m dontlie.demo.issue_request | tee "$WORK/last_response.json"
     echo "==> '$label' request sent"
 }
 
@@ -87,20 +100,19 @@ issue "product-pitch"  "Summarize what Don't-Lie does in one sentence."
 
 # --- verify chain ---
 echo "==> verifying receipt chain"
-cd "$ROOT"
 "$PY" -m dontlie list --limit 5 | tee "$WORK/list.out"
 "$PY" -m dontlie verify --verbose | tee "$WORK/verify.out"
 
 # --- export both human-friendly JSONL and a self-contained verification bundle ---
 "$PY" -m dontlie export "$WORK/receipts.jsonl"
 "$PY" -m dontlie export "$WORK/receipts.bundle.json" --bundle
-"$PY" "$DEMO/scripts/render_report.py" \
+"$PY" -m dontlie.demo.render_report \
     "$WORK/receipts.bundle.json" "$WORK/receipt-report.html"
 
 # Show the central product moment: mutate a signed record, detect it, restore it.
 echo ""
 echo "=== TAMPER-PROOF CHECK ==="
-"$PY" "$DEMO/scripts/tamper_walkthrough.py" "$WORK"
+"$PY" -m dontlie.demo.tamper_walkthrough "$WORK"
 "$PY" -m dontlie list --limit 100 > "$WORK/all_receipts.txt"
 "$PY" - "$WORK/vault.db" > "$WORK/vault.db.sha256" <<'PY'
 import hashlib
@@ -113,9 +125,11 @@ PY
 echo ""
 echo "================================================"
 echo "Demo complete."
-echo "  - vault:  $WORK/vault.db"
-echo "  - sha256: $(<"$WORK/vault.db.sha256")"
-echo "  - exports: $WORK/receipts.jsonl and receipts.bundle.json"
-echo "  - report:  $WORK/receipt-report.html"
-echo "  - logs:   $WORK/{mock,proxy}.log"
+echo "  - mock port:    $MOCK_PORT"
+echo "  - proxy port:   $PROXY_PORT"
+echo "  - vault:        $WORK/vault.db"
+echo "  - sha256:       $(<"$WORK/vault.db.sha256")"
+echo "  - exports:      $WORK/receipts.jsonl and receipts.bundle.json"
+echo "  - report:       $WORK/receipt-report.html"
+echo "  - logs:         $WORK/{mock,proxy}.log"
 echo "================================================"
