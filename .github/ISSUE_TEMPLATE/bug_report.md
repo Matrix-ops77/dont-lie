@@ -13,8 +13,8 @@ A clear, concise description.
 ## Steps to reproduce
 
 ```
-$ git clone https://github.com/waynedellmyer/dontlie
-$ cd dontlie
+$ git clone https://github.com/Matrix-ops77/dont-lie
+$ cd dont-lie
 $ pip install -e .
 $ dontlie ...
 ```
