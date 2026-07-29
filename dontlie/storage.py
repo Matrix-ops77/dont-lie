@@ -240,6 +240,14 @@ def init() -> None:
 
 def _row_to_receipt(row: sqlite3.Row) -> Receipt:
     # v3 columns: present in the SELECT *, may be None for v2 receipts.
+    # sqlite3.Row has no .get(); we use a small helper that mimics dict.get
+    # against a fixed column list, so older v2 rows don't KeyError.
+    def _opt(name: str):
+        try:
+            return row[name]
+        except IndexError:  # pragma: no cover — column not in SELECT
+            return None
+
     return Receipt(
         id=row["id"],
         timestamp=row["timestamp"],
@@ -252,9 +260,9 @@ def _row_to_receipt(row: sqlite3.Row) -> Receipt:
         signature=row["signature"],
         tags=json.loads(row["tags"]),
         extra=json.loads(row["extra"]),
-        operator_id=row.get("operator_id", None),
-        deployer_id=row.get("deployer_id", None),
-        system_id=row.get("system_id", None),
+        operator_id=_opt("operator_id"),
+        deployer_id=_opt("deployer_id"),
+        system_id=_opt("system_id"),
     )
 
 

@@ -93,6 +93,9 @@ class TamperWalkthroughEndToEndTest(unittest.TestCase):
         self.work = _isolated_work(f"tamper-{id(self)}")
         self.mock_port, self.proxy_port = _port_pair(id(self) % 4000)
         self.env = os.environ.copy()
+        # Subprocess-launched scripts need PYTHONPATH to find the local
+        # `dontlie` package when the test isn't run from an editable install.
+        self.env["PYTHONPATH"] = str(REPO_ROOT) + os.pathsep + self.env.get("PYTHONPATH", "")
         self.env["DONTLIE_DEMO_WORK"] = str(self.work)
         self.env["MOCK_PORT"] = self.mock_port
         self.env["PROXY_PORT"] = self.proxy_port
@@ -144,11 +147,13 @@ class TamperWalkthroughMissingInputsTest(unittest.TestCase):
         if work.exists():
             shutil.rmtree(work, ignore_errors=True)
         work.mkdir(parents=True, exist_ok=True)
+        env = os.environ.copy()
+        env["PYTHONPATH"] = str(REPO_ROOT) + os.pathsep + env.get("PYTHONPATH", "")
         try:
             result = subprocess.run(
                 [sys.executable, str(TAMPER_WALK), str(work)],
                 cwd=str(REPO_ROOT),
-                env=os.environ.copy(),
+                env=env,
                 capture_output=True,
                 text=True,
                 timeout=30,
@@ -166,6 +171,9 @@ class TamperWalkthroughInProcessTest(unittest.TestCase):
         self.work = _isolated_work(f"tamper-inproc-{id(self)}")
         self.mock_port, self.proxy_port = _port_pair((id(self) + 1000) % 4000)
         self.env = os.environ.copy()
+        # Subprocess-launched scripts need PYTHONPATH to find the local
+        # `dontlie` package when the test isn't run from an editable install.
+        self.env["PYTHONPATH"] = str(REPO_ROOT) + os.pathsep + self.env.get("PYTHONPATH", "")
         self.env["DONTLIE_DEMO_WORK"] = str(self.work)
         self.env["MOCK_PORT"] = self.mock_port
         self.env["PROXY_PORT"] = self.proxy_port
@@ -248,6 +256,9 @@ class TamperWalkthroughJsonlShapeTest(unittest.TestCase):
         self.work = _isolated_work(f"tamper-jsonl-{id(self)}")
         self.mock_port, self.proxy_port = _port_pair((id(self) + 2000) % 4000)
         self.env = os.environ.copy()
+        # Subprocess-launched scripts need PYTHONPATH to find the local
+        # `dontlie` package when the test isn't run from an editable install.
+        self.env["PYTHONPATH"] = str(REPO_ROOT) + os.pathsep + self.env.get("PYTHONPATH", "")
         self.env["DONTLIE_DEMO_WORK"] = str(self.work)
         self.env["MOCK_PORT"] = self.mock_port
         self.env["PROXY_PORT"] = self.proxy_port
