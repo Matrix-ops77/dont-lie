@@ -30,8 +30,6 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Iterable
-
 
 STATUSES = ("new", "qualified", "piloting", "won", "lost")
 
@@ -175,10 +173,10 @@ def load(path: Path | None = None) -> CRMPipeline:
 
 
 __all__ = [
+    "STATUSES",
     "CRMPipeline",
     "CRMPipelineError",
     "Lead",
-    "STATUSES",
     "load",
     "persistence_path",
     "save",

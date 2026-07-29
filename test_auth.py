@@ -10,10 +10,9 @@ from pathlib import Path
 _TMP = tempfile.mkdtemp(prefix="dontlie-auth-test-")
 os.environ["DONTLIE_TEAM_VAULT_PATH"] = str(Path(_TMP) / "team-vault.json")
 
-from dontlie.auth import (  # noqa: E402
-    AuthError,
+from dontlie.auth import (
     ROLE_GRANTS,
-    ROLES,
+    AuthError,
     TeamVault,
     UnknownRoleError,
     UnknownUserError,
@@ -32,7 +31,7 @@ def _seed() -> tuple[TeamVault, dict[str, str]]:
         ("op@example.com", "operator"),
         ("view@example.com", "viewer"),
     ]:
-        user, api_key = team.add_user(email, role)
+        _user, api_key = team.add_user(email, role)
         keys[email] = api_key
     return team, keys
 
@@ -108,7 +107,7 @@ class AuthorizationTest(unittest.TestCase):
 class AuditLogTest(unittest.TestCase):
     def test_log_records_success_and_denials(self) -> None:
         team = TeamVault()
-        user, key = team.add_user("a@example.com", "viewer")
+        user, _key = team.add_user("a@example.com", "viewer")
         with self.assertRaises(AuthError):
             team.authorize(user, "receipt:append")
         team.authorize(user, "receipt:read", target="42")

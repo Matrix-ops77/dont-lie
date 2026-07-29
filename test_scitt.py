@@ -14,7 +14,6 @@ Don't-Lie-specific labels (kid, operator_key_id, chain_version).
 from __future__ import annotations
 
 import copy
-import json
 import os
 import tempfile
 import unittest
@@ -55,7 +54,7 @@ def _isolated_workspace(prefix: str = "dontlie-scitt-") -> tuple[Path, tempfile.
         signing.KEY_ID_FILE = saved["KEY_ID_FILE"]
 
     # Attach restore() to the tempdir handle so tearDown finds it.
-    setattr(temp, "restore", restore)
+    temp.restore = restore
     temp._dontlie_restore = restore  # belt + braces
 
     signing.KEY_DIR = root / "keys"
@@ -281,7 +280,7 @@ class ScittV2AndV3ReceiptTest(unittest.TestCase):
         self.root, self._temp = _isolated_workspace()
         conn = storage._connect()
         try:
-            keys, _ = storage._key_material(conn)
+            _keys, _ = storage._key_material(conn)
         finally:
             conn.close()
         # We need the public key for the current key, which was generated

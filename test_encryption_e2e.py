@@ -18,7 +18,6 @@ Run with::
 from __future__ import annotations
 
 import importlib
-import json
 import os
 import sqlite3
 import subprocess
@@ -31,8 +30,7 @@ from pathlib import Path
 # because they read ``DONTLIE_DB`` / ``DONTLIE_KEY_DIR`` at *module load* time.
 # An import at the top of this file would bind ``DB_PATH`` against the
 # developer's real env and the per-test env swap would silently have no effect.
-import dontlie.encryption as encryption
-
+from dontlie import encryption
 
 # ---------------------------------------------------------------------------
 # Helpers

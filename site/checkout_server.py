@@ -30,7 +30,6 @@ import sys
 import urllib.error
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from pathlib import Path
 
 STRIPE_API = "https://api.stripe.com/v1/checkout/sessions"
 
@@ -149,10 +148,10 @@ def _create_session(tier: str, email: str | None) -> dict:
 
 
 class CheckoutHandler(BaseHTTPRequestHandler):
-    def log_message(self, fmt: str, *args: object) -> None:  # noqa: D401
+    def log_message(self, fmt: str, *args: object) -> None:
         pass
 
-    def do_POST(self) -> None:  # noqa: N802
+    def do_POST(self) -> None:
         if self.path != "/api/create-checkout-session":
             self.send_error(404, "not found")
             return
@@ -171,7 +170,7 @@ class CheckoutHandler(BaseHTTPRequestHandler):
         )
         self._send_json(status, result)
 
-    def do_GET(self) -> None:  # noqa: N802
+    def do_GET(self) -> None:
         if self.path == "/health":
             self._send_json(200, {
                 "ok": True,
@@ -203,8 +202,8 @@ def main(argv: list[str] | None = None) -> int:
 
     httpd = ThreadingHTTPServer((args.host, args.port), CheckoutHandler)
     print(f"checkout backend listening on http://{args.host}:{args.port}", file=sys.stderr)
-    print(f"  POST /api/create-checkout-session", file=sys.stderr)
-    print(f"  GET  /health", file=sys.stderr)
+    print("  POST /api/create-checkout-session", file=sys.stderr)
+    print("  GET  /health", file=sys.stderr)
     print(f"  stripe_configured: {bool(os.environ.get('STRIPE_SECRET_KEY'))}", file=sys.stderr)
     httpd.serve_forever()
     return 0

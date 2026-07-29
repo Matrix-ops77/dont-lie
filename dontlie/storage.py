@@ -252,15 +252,16 @@ def _row_to_receipt(row: sqlite3.Row) -> Receipt:
         signature=row["signature"],
         tags=json.loads(row["tags"]),
         extra=json.loads(row["extra"]),
-        operator_id=row["operator_id"] if "operator_id" in row.keys() else None,
-        deployer_id=row["deployer_id"] if "deployer_id" in row.keys() else None,
-        system_id=row["system_id"] if "system_id" in row.keys() else None,
+        operator_id=row.get("operator_id", None),
+        deployer_id=row.get("deployer_id", None),
+        system_id=row.get("system_id", None),
     )
 
 
 def _redaction_policy():
     """Resolve the active policy from env, or None when redaction is off."""
     import os
+
     from .redaction import RedactionPolicy
 
     config = os.environ.get("DONTLIE_REDACTION_POLICY", "default").strip()

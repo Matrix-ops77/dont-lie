@@ -57,7 +57,7 @@ import base64
 import binascii
 import json
 from typing import Any
-from urllib.parse import quote, unquote, urlparse, urlunparse
+from urllib.parse import urlparse, urlunparse
 
 from . import sign as signing
 from . import storage
@@ -171,7 +171,7 @@ def decode_fragment(fragment: str) -> dict[str, Any]:
         raise ValueError(f"verify URL payload is not valid JSON: {exc}") from exc
 
     if not isinstance(payload, dict):
-        raise ValueError("verify URL payload must be a JSON object")
+        raise TypeError("verify URL payload must be a JSON object")
     fmt_version = payload.get("v")
     if fmt_version != FORMAT_VERSION:
         raise ValueError(
@@ -212,9 +212,8 @@ def verify_payload_locally(payload: dict[str, Any]) -> tuple[bool, str]:
     derived_canon = json.dumps(obj, sort_keys=True, separators=(",", ":")).encode("utf-8")
 
     # Compare to the included body_canon
-    if rec.get("body_canon"):
-        if rec["body_canon"].encode("utf-8") != derived_canon:
-            return False, "body_canon does not match the canonical form derived from the receipt fields"
+    if rec.get("body_canon") and rec["body_canon"].encode("utf-8") != derived_canon:
+        return False, "body_canon does not match the canonical form derived from the receipt fields"
 
     # Verify the signature
     try:

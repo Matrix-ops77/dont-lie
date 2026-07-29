@@ -33,8 +33,9 @@ class BillingPlanTest(unittest.TestCase):
             quick_checkout_url("not-a-real-plan", "user@example.com")
 
     def test_checkout_session_requires_stripe_key(self) -> None:
-        from dontlie.billing import create_checkout_session
         import os
+
+        from dontlie.billing import create_checkout_session
 
         os.environ.pop("DONTLIE_STRIPE_SECRET_KEY", None)
         with self.assertRaises(StripeError):

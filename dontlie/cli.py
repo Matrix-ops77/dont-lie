@@ -33,9 +33,8 @@ from urllib.parse import urlparse
 
 import httpx
 
-from . import __version__, protocols, proxy, storage
+from . import __version__, encryption, protocols, proxy, storage
 from . import sign as signing
-from . import encryption
 
 
 def _print_receipt(r) -> None:
@@ -1085,8 +1084,9 @@ def build_parser() -> argparse.ArgumentParser:
 
 def cmd_ui(args) -> int:
     """Launch the interactive TUI."""
-    from . import ui
     import os
+
+    from . import ui
     if args.vault is not None:
         storage.DB_PATH = args.vault
     elif "DONTLIE_DB" in os.environ:
@@ -1099,8 +1099,9 @@ def cmd_ui(args) -> int:
 
 def cmd_web(args) -> int:
     """Launch the stdlib web UI."""
-    from . import web as _web
     import os
+
+    from . import web as _web
     if args.vault is not None:
         storage.DB_PATH = args.vault
     elif "DONTLIE_DB" in os.environ:
@@ -1110,8 +1111,8 @@ def cmd_web(args) -> int:
 
 def cmd_trust_score(args) -> int:
     """Compute and print a 0-100 trust score for the local vault."""
+
     from . import trust as _trust
-    import os
     if getattr(args, "receipt_id", None) is not None:
         # per-receipt score
         r = storage.get_receipt(args.receipt_id)
@@ -1153,8 +1154,9 @@ def cmd_tail(args) -> int:
 
 def cmd_decision(args) -> int:
     """Wrap multiple receipts into a signed decision."""
-    from . import decision as _decision
     import os
+
+    from . import decision as _decision
     if os.environ.get("DONTLIE_DB"):
         storage.DB_PATH = Path(os.environ["DONTLIE_DB"])
     if os.environ.get("DONTLIE_KEY_DIR"):
@@ -1217,9 +1219,7 @@ def cmd_policy(args) -> int:
     sub_argv = [args.policy_action]
     if args.policy_action == "test":
         sub_argv += ["--model", args.model or "", "--prompt", args.prompt or ""]
-    elif args.policy_action in ("deny-model", "deny-prompt", "allow-only"):
-        sub_argv += list(args.policy_args)
-    elif args.policy_action == "redact-pii":
+    elif args.policy_action in ("deny-model", "deny-prompt", "allow-only") or args.policy_action == "redact-pii":
         sub_argv += list(args.policy_args)
     return _policy.main(sub_argv)
 

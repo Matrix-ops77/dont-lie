@@ -31,9 +31,9 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
-from . import __version__, sign as signing, storage
+from . import __version__, storage
+from . import sign as signing
 from .offline import require_network
-
 
 ATT_DIR = Path(
     os.environ.get(

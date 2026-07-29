@@ -8,7 +8,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from dontlie import storage, sign as signing
+from dontlie import sign as signing
+from dontlie import storage
 
 
 class CapabilitiesTest(unittest.TestCase):
@@ -31,7 +32,8 @@ class CapabilitiesTest(unittest.TestCase):
         importlib.reload(storage)
         storage.init()
         # Initialize the decision/annotation schemas
-        from dontlie import decision as _decision, annotate as _annotate
+        from dontlie import annotate as _annotate
+        from dontlie import decision as _decision
         _decision.init()
         _annotate.init()
 

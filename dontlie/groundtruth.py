@@ -19,7 +19,7 @@ Design notes (full threat model and privacy story in
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field, replace
-from typing import Any, Optional
+from typing import Any
 
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import (
@@ -49,7 +49,6 @@ from .groundtruth import (
     verify_request_signature,
 )
 
-
 # --- exceptions --------------------------------------------------------------
 
 
@@ -77,7 +76,7 @@ class BlindProbeResult:
         return asdict(self)
 
 
-_RUNNER: Optional[Any] = None
+_RUNNER: Any | None = None
 
 
 def attach_runner(runner: Any) -> None:

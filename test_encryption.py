@@ -15,11 +15,9 @@ os.environ["DONTLIE_NO_WAL"] = "1"
 # argon2-cffi is not always available; we skip encryption tests that
 # require it if it's missing.
 try:
-    from dontlie.encryption import (  # noqa: E402
+    from dontlie.encryption import (
         DecryptionError,
-        KDFParams,
         decrypt_column,
-        decrypt_with_passphrase,
         encrypt_column,
         encrypt_with_passphrase,
         unwrap_dek,
@@ -48,9 +46,9 @@ class EncryptionRoundTripTest(unittest.TestCase):
         plaintext = b"the customer conversation payload"
         state = encrypt_with_passphrase("passphrase", plaintext)
         # ciphertext format: nonce(12) + aes-gcm ciphertext+tag
-        ciphertext = b"\x00" * 12 + b"some-ciphertext"
+        b"\x00" * 12 + b"some-ciphertext"
         # We need a valid ciphertext; use the helper directly.
-        from dontlie.encryption import _aes_gcm_encrypt, _aes_gcm_decrypt
+        from dontlie.encryption import _aes_gcm_decrypt, _aes_gcm_encrypt
         nonce, ct = _aes_gcm_encrypt(_unwrap(state), b"hello world")
         out = _aes_gcm_decrypt(_unwrap(state), nonce, ct)
         self.assertEqual(out, b"hello world")

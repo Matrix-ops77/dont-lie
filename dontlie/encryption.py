@@ -18,13 +18,10 @@ Don't-Lie. Argon2id uses the ``argon2-cffi`` library; if absent, an
 from __future__ import annotations
 
 import base64
-import os
 import secrets
 import sqlite3
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
-
 
 try:  # pragma: no cover - optional dependency
     from argon2.low_level import Type as Argon2Type
@@ -101,7 +98,7 @@ def _aes_gcm_decrypt(key: bytes, nonce: bytes, ciphertext: bytes, *, aad: bytes 
         raise DecryptionError(str(exc)) from exc
 
 
-def encrypt_with_passphrase(passphrase: str, plaintext: bytes, *, params: Optional[KDFParams] = None) -> VaultState:
+def encrypt_with_passphrase(passphrase: str, plaintext: bytes, *, params: KDFParams | None = None) -> VaultState:
     """Encrypt arbitrary plaintext using a passphrase.
 
     Returns a :class:`VaultState` containing the salt, the wrapped DEK,
@@ -125,7 +122,7 @@ def decrypt_with_passphrase(passphrase: str, state: VaultState, ciphertext: byte
     return _aes_gcm_decrypt(dek, ciphertext[:12], ciphertext[12:], aad=aad)
 
 
-def wrap_dek(passphrase: str, *, params: Optional[KDFParams] = None) -> tuple[VaultState, bytes]:
+def wrap_dek(passphrase: str, *, params: KDFParams | None = None) -> tuple[VaultState, bytes]:
     """Create a fresh DEK and wrap it with the passphrase. Returns (state, dek)."""
     p = params or KDFParams()
     salt = secrets.token_bytes(p.salt_len)
@@ -164,7 +161,7 @@ _ENCRYPTED_FILE_MAGIC = b"DLVL1\n"  # "Don't-Lie Vault Layer 1\n"
 _ENCRYPTED_FILE_VERSION = 1
 
 
-def encrypt_file(source: "Path | str", target: "Path | str", passphrase: bytes) -> None:
+def encrypt_file(source: Path | str, target: Path | str, passphrase: bytes) -> None:
     """Encrypt a whole file (e.g. ``vault.db``) to a sidecar ``.enc`` file.
 
     The output format is::
@@ -197,7 +194,7 @@ def encrypt_file(source: "Path | str", target: "Path | str", passphrase: bytes) 
         f.write(payload_ct)
 
 
-def decrypt_file(source: "Path | str", target: "Path | str", passphrase: bytes) -> None:
+def decrypt_file(source: Path | str, target: Path | str, passphrase: bytes) -> None:
     """Reverse of :func:`encrypt_file`. Raises :class:`EncryptionError`
     on bad magic, unsupported version, or wrong passphrase."""
     from pathlib import Path
@@ -281,20 +278,20 @@ def persist_state(conn: sqlite3.Connection, state: VaultState) -> None:
 
 
 __all__ = [
+    "DecryptionError",
     "EncryptionError",
     "EncryptionUnavailable",
-    "DecryptionError",
     "KDFParams",
     "VaultState",
-    "encrypt_with_passphrase",
-    "decrypt_with_passphrase",
-    "wrap_dek",
-    "unwrap_dek",
-    "encrypt_column",
-    "decrypt_column",
     "b64",
     "b64d",
-    "is_unlocked",
+    "decrypt_column",
+    "decrypt_with_passphrase",
+    "encrypt_column",
+    "encrypt_with_passphrase",
     "ensure_state_table",
+    "is_unlocked",
     "persist_state",
+    "unwrap_dek",
+    "wrap_dek",
 ]

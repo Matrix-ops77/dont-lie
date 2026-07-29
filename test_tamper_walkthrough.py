@@ -42,7 +42,7 @@ DEMO_SCRIPTS = REPO_ROOT / "demo" / "scripts"
 RUN_DEMO = DEMO_SCRIPTS / "run_offline_demo.sh"
 TAMPER_WALK = DEMO_SCRIPTS / "tamper_walkthrough.py"
 
-import importlib.util  # noqa: E402
+import importlib.util
 
 _TAMPER_SPEC = importlib.util.spec_from_file_location(
     "demo_tamper_walkthrough", str(TAMPER_WALK)
@@ -52,7 +52,7 @@ if _TAMPER_SPEC is None or _TAMPER_SPEC.loader is None:  # pragma: no cover
 _TAMPER_MOD = importlib.util.module_from_spec(_TAMPER_SPEC)
 _TAMPER_SPEC.loader.exec_module(_TAMPER_MOD)
 
-import dontlie.storage as storage  # noqa: E402
+from dontlie import storage
 
 
 def _port_pair(seed: int) -> tuple[str, str]:

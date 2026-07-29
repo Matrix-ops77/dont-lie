@@ -22,13 +22,11 @@ from __future__ import annotations
 import json
 import os
 import re
-import socket
 import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest import mock
 
 REPO_ROOT = Path(__file__).resolve().parent
 SITE_INDEX = REPO_ROOT / "site" / "index.html"

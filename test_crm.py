@@ -10,7 +10,7 @@ from pathlib import Path
 _TMP = tempfile.mkdtemp(prefix="dontlie-crm-test-")
 os.environ["DONTLIE_CRM_PATH"] = str(Path(_TMP) / "leads.jsonl")
 
-from dontlie.crm import CRMPipeline, CRMPipelineError, load, save  # noqa: E402
+from dontlie.crm import CRMPipeline, CRMPipelineError, load, save
 
 
 class CRMPipelineTest(unittest.TestCase):

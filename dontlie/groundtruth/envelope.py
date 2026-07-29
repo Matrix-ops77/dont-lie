@@ -28,7 +28,6 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import (
 
 from .helpers import short_nonce
 
-
 # --- request -----------------------------------------------------------------
 
 
@@ -194,13 +193,13 @@ def verify_attestation_signature(
 
 
 __all__ = [
-    "PeerWitnessRequest",
     "PeerWitnessAttestation",
+    "PeerWitnessRequest",
     "build_signed_request",
-    "serialize_request",
-    "serialize_attestation",
-    "deserialize_request",
     "deserialize_attestation",
-    "verify_request_signature",
+    "deserialize_request",
+    "serialize_attestation",
+    "serialize_request",
     "verify_attestation_signature",
+    "verify_request_signature",
 ]

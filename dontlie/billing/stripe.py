@@ -18,15 +18,10 @@ webhook signing secret via ``DONTLIE_STRIPE_WEBHOOK_SECRET``.
 from __future__ import annotations
 
 import hashlib
-import hmac
-import json
 import os
 import time
 from dataclasses import dataclass
-from typing import Any, TYPE_CHECKING
-
-if TYPE_CHECKING:  # pragma: no cover
-    import stripe  # type: ignore
+from typing import Any
 
 
 class StripeUnavailable(ImportError):
@@ -159,7 +154,7 @@ def quick_checkout_url(
     """
     if plan not in PLANS:
         raise StripeError(f"unknown plan: {plan!r}")
-    digest = hashlib.sha256(f"{plan}|{email}|{time.time_ns()}".encode("utf-8")).hexdigest()[:16]
+    digest = hashlib.sha256(f"{plan}|{email}|{time.time_ns()}".encode()).hexdigest()[:16]
     return f"{origin}/billing/checkout?session={digest}"
 
 
@@ -168,12 +163,12 @@ def plans() -> dict[str, Plan]:
 
 
 __all__ = [
-    "Plan",
     "PLANS",
+    "Plan",
     "StripeError",
     "StripeUnavailable",
     "create_checkout_session",
-    "verify_webhook_signature",
-    "quick_checkout_url",
     "plans",
+    "quick_checkout_url",
+    "verify_webhook_signature",
 ]

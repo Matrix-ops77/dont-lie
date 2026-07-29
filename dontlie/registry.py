@@ -34,14 +34,11 @@ from __future__ import annotations
 import fnmatch
 import json
 import os
-import sqlite3
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterable
 
 from . import storage
-
 
 DEFAULT_REGISTRY_PATH = Path.home() / ".config" / "dontlie" / "registry.json"
 
@@ -281,7 +278,7 @@ def main(argv: list[str] | None = None) -> int:
 def _cmd_list(args) -> int:
     reg = load()
     if not reg:
-        print(f"no providers registered. run `dontlie registry install-default` to seed.")
+        print("no providers registered. run `dontlie registry install-default` to seed.")
         return 0
     for name, p in reg.items():
         marker = "✓" if p.attestable else " "

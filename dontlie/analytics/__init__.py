@@ -30,8 +30,9 @@ import os
 import time
 import urllib.error
 import urllib.request
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Any, Iterable
+from typing import Any
 
 
 class AnalyticsError(RuntimeError):

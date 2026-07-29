@@ -21,20 +21,14 @@ out of the box.
 from __future__ import annotations
 
 import base64
-import hashlib
-import json
-import os
 import re
-import subprocess
 import sys
 import urllib.error
 import urllib.request
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
 
 from . import storage
-
 
 # Free public TSAs known to be reliable
 DEFAULT_TSAS = [
@@ -210,7 +204,7 @@ def _cmd_anchor(args) -> int:
     print(f"  timestamp:  {a.timestamp}")
     print(f"  sha256:     {a.sha256}")
     print(f"  token:      {a.tsr_path}")
-    print(f"  (closes Reasonable Doubt #5)")
+    print("  (closes Reasonable Doubt #5)")
     return 0
 
 

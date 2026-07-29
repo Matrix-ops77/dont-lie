@@ -32,8 +32,8 @@ from . import cli
 from .auto import InstallHandle, install, installed, sign
 
 __all__ = [
-    "cli",
     "InstallHandle",
+    "cli",
     "install",
     "installed",
     "sign",

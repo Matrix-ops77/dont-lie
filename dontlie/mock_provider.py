@@ -21,11 +21,11 @@ import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 __all__ = [
+    "DEFAULT_PORT",
     "MockHandler",
     "MockServer",
     "start_mock_server",
     "stop_mock_server",
-    "DEFAULT_PORT",
 ]
 
 DEFAULT_PORT = 9876
@@ -81,10 +81,10 @@ def _completion(prompt: str, model: str) -> dict:
 class MockHandler(BaseHTTPRequestHandler):
     """Stdlib HTTP handler that mimics the OpenAI chat-completions endpoint."""
 
-    def log_message(self, fmt, *args):  # noqa: A003
+    def log_message(self, fmt, *args):
         sys.stderr.write(f"[mock_provider] {fmt % args}\n")
 
-    def do_POST(self):  # noqa: N802
+    def do_POST(self):
         if not self.path.endswith("/chat/completions"):
             self.send_response(404)
             self.end_headers()
@@ -113,7 +113,7 @@ class MockHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(payload)
 
-    def do_GET(self):  # noqa: N802
+    def do_GET(self):
         if self.path == "/health":
             self.send_response(200)
             self.end_headers()

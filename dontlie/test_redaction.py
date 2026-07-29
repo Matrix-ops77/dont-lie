@@ -9,8 +9,8 @@ os.environ["DONTLIE_KEY_DIR"] = str(Path(_TMP) / "keys")
 os.environ["DONTLIE_DB"] = str(Path(_TMP) / "vault.db")
 os.environ["DONTLIE_NO_WAL"] = "1"
 
-from dontlie import redaction, sign as signing, storage
-
+from dontlie import redaction, storage
+from dontlie import sign as signing
 
 SUPPORTED_RULES = (
     "ANTHROPIC_API_KEY",

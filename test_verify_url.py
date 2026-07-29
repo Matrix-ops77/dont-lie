@@ -56,10 +56,10 @@ def _make_receipt(env: dict) -> None:
     subprocess.run(
         [
             sys.executable, "-c",
-            "import sys; sys.path.insert(0, '.'); "
+            ("import sys; sys.path.insert(0, '.'); "
             "from dontlie import storage; "
             "storage.append(model='test-model-v3', prompt='verify-url test prompt', "
-            "response='verify-url test response')"
+            "response='verify-url test response')")
         ],
         env=v3_env, check=True, capture_output=True, cwd=str(REPO_ROOT),
     )
@@ -79,7 +79,8 @@ class TestVerifyURL(unittest.TestCase):
         for k, v in cls.env.items():
             os.environ[k] = v
         # Force the storage module to re-read its env-derived paths
-        from dontlie import storage, sign as signing
+        from dontlie import sign as signing
+        from dontlie import storage
         storage.DB_PATH = Path(cls.env["DONTLIE_DB"])
         signing.KEY_DIR = Path(cls.env["DONTLIE_KEY_DIR"])
         signing.PRIVATE_FILE = signing.KEY_DIR / "dontlie.key"
@@ -88,8 +89,7 @@ class TestVerifyURL(unittest.TestCase):
 
     def test_verify_url_generates_valid_url(self) -> None:
         """dontlie verify-url 1 produces a URL whose fragment is a valid payload."""
-        from dontlie import verify_url
-        from dontlie import storage
+        from dontlie import storage, verify_url
 
         receipt = storage.get_receipt(1)
         self.assertIsNotNone(receipt, "fixture: receipt #1 should exist")
@@ -112,8 +112,7 @@ class TestVerifyURL(unittest.TestCase):
 
     def test_verify_url_local_verify_succeeds(self) -> None:
         """decode + verify_payload_locally returns ok=True for a real receipt."""
-        from dontlie import verify_url
-        from dontlie import storage
+        from dontlie import storage, verify_url
 
         receipt = storage.get_receipt(1)
         url = verify_url.encode_url(receipt)
@@ -138,8 +137,7 @@ class TestVerifyURL(unittest.TestCase):
 
     def test_tampering_with_prompt_breaks_signature(self) -> None:
         """Modifying the prompt field in the payload should break verification."""
-        from dontlie import verify_url
-        from dontlie import storage
+        from dontlie import storage, verify_url
 
         receipt = storage.get_receipt(1)
         url = verify_url.encode_url(receipt)
@@ -159,9 +157,9 @@ class TestVerifyURL(unittest.TestCase):
 
     def test_tampering_with_signature_breaks_verification(self) -> None:
         """Replacing the signature with random bytes must fail."""
-        from dontlie import verify_url
-        from dontlie import storage
         import secrets
+
+        from dontlie import storage, verify_url
 
         receipt = storage.get_receipt(1)
         url = verify_url.encode_url(receipt)
@@ -172,13 +170,12 @@ class TestVerifyURL(unittest.TestCase):
         random_bytes = secrets.token_bytes(64)
         payload["receipt"]["signature"] = base64.b64encode(random_bytes).decode("ascii")
 
-        ok, reason = verify_url.verify_payload_locally(payload)
+        ok, _reason = verify_url.verify_payload_locally(payload)
         self.assertFalse(ok, "tampered signature must fail verification")
 
     def test_tampering_with_response_breaks_verification(self) -> None:
         """Modifying the response field in the payload should break verification."""
-        from dontlie import verify_url
-        from dontlie import storage
+        from dontlie import storage, verify_url
 
         receipt = storage.get_receipt(1)
         url = verify_url.encode_url(receipt)
@@ -186,7 +183,7 @@ class TestVerifyURL(unittest.TestCase):
         payload = verify_url.decode_fragment(fragment)
 
         payload["receipt"]["response"] = "TAMPERED response"
-        ok, reason = verify_url.verify_payload_locally(payload)
+        ok, _reason = verify_url.verify_payload_locally(payload)
         self.assertFalse(ok, "tampered response must fail verification")
 
     def test_format_version_mismatch_is_rejected(self) -> None:

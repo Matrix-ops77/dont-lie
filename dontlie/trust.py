@@ -22,11 +22,8 @@ import json
 import sqlite3
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from pathlib import Path
-from typing import Iterable
 
 from . import storage
-
 
 # Optional witness module — present in v0.2+ but treat absence as 0 coverage
 try:
@@ -311,13 +308,13 @@ def score_receipt(receipt) -> dict:
                                               "note": f"parent link to #{receipt.parent_id} verified"}
             else:
                 components["chain_linked"] = {"value": 8, "max": 15,
-                                              "note": f"parent link present but unverified"}
+                                              "note": "parent link present but unverified"}
     # 4. key known — the signing key is in the active key set
     try:
         from . import sign as signing
         pub_path = signing.PUBLIC_FILE
         if pub_path.exists():
-            pub_pem = pub_path.read_text()
+            pub_path.read_text()
             # simple check: is this key_id the active one?
             active_id = (signing.KEY_ID_FILE.read_text().strip()
                          if signing.KEY_ID_FILE.exists() else None)

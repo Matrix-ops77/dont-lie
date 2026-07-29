@@ -24,21 +24,15 @@ version.
 from __future__ import annotations
 
 import argparse
-import base64
-import hashlib
 import json
-import os
 import secrets
 import sys
-import time
 from datetime import datetime, timezone
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 from . import sign as signing
-from . import storage
-
 
 SERVICE_NAME = "dontlie-witness-service"
 SERVICE_VERSION = "0.1.0"
@@ -128,7 +122,7 @@ class WitnessHandler(BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.end_headers()
 
-    def do_GET(self) -> None:  # noqa: N802
+    def do_GET(self) -> None:
         if self.path in ("/", "/healthz", "/health"):
             return self._send_json({
                 "service": SERVICE_NAME,
@@ -161,7 +155,7 @@ class WitnessHandler(BaseHTTPRequestHandler):
             return self._send_json({"attestations": recent})
         return self._send_json({"error": "not found"}, status=HTTPStatus.NOT_FOUND)
 
-    def do_POST(self) -> None:  # noqa: N802
+    def do_POST(self) -> None:
         if self.path != "/attest":
             return self._send_json({"error": "unknown endpoint"}, status=HTTPStatus.NOT_FOUND)
         try:
@@ -181,7 +175,7 @@ class WitnessHandler(BaseHTTPRequestHandler):
             )
         if not _is_valid_sha256(receipt_sha):
             return self._send_json(
-                {"error": f"receipt_sha256 is not a valid SHA-256 hex digest"},
+                {"error": "receipt_sha256 is not a valid SHA-256 hex digest"},
                 status=400,
             )
         attestation = self.server.state.attest(

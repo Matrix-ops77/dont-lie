@@ -27,12 +27,12 @@ import http.client
 import json
 import logging
 import secrets
-import socket
 import ssl
 import urllib.parse
 import urllib.request
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Mapping
+from typing import Any
 
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes
@@ -222,7 +222,7 @@ class _Reader:
         content = self.read(length)
         return tag, content, header + content
 
-    def subset(self, length: int) -> "_Reader":
+    def subset(self, length: int) -> _Reader:
         start = self.pos
         end = start + length
         if end > len(self.data):
@@ -276,8 +276,7 @@ def _decode_boolean(content: bytes) -> bool:
 
 def _decode_generalizedtime(content: bytes) -> datetime.datetime:
     text = content.decode("ascii")
-    if text.endswith("Z"):
-        text = text[:-1]
+    text = text.removesuffix("Z")
     return datetime.datetime.strptime(text, "%Y%m%d%H%M%S").replace(
         tzinfo=datetime.timezone.utc
     )
@@ -285,8 +284,7 @@ def _decode_generalizedtime(content: bytes) -> datetime.datetime:
 
 def _decode_utctime(content: bytes) -> datetime.datetime:
     text = content.decode("ascii")
-    if text.endswith("Z"):
-        text = text[:-1]
+    text = text.removesuffix("Z")
     return datetime.datetime.strptime(text, "%y%m%d%H%M%SZ").replace(
         tzinfo=datetime.timezone.utc
     )
@@ -429,7 +427,7 @@ def _post_tsr(tsa_url: str, req_der: bytes, *, timeout: float) -> bytes:
                 return bytes(data)
             finally:
                 conn.close()
-        except (socket.timeout, http.client.HTTPException, OSError) as exc:
+        except (TimeoutError, http.client.HTTPException, OSError) as exc:
             last_exc = exc
             if attempt == 2:
                 raise TimestampError(
@@ -500,9 +498,10 @@ def parse_response(
     tst_info, cert_der = _extract_tst_info_and_cert(ts_token)
 
     # Verify imprint match.
-    if expected_imprint is not None:
-        if tst_info.message_imprint is None or tst_info.message_imprint != expected_imprint:
-            raise TimestampError("message imprint mismatch")
+    if expected_imprint is not None and (
+        tst_info.message_imprint is None or tst_info.message_imprint != expected_imprint
+    ):
+        raise TimestampError("message imprint mismatch")
 
     # Verify nonce match.
     if nonce is not None:
@@ -806,16 +805,16 @@ def _pin_for_url(tsa_url: str) -> str:
     entry = pins.find_by_url(tsa_url)
     if entry is None or not entry.cert_sha256:
         return ""
-    return sorted(entry.cert_sha256)[0]
+    return min(entry.cert_sha256)
 
 
 __all__ = [
+    "ASN1Error",
+    "TimestampError",
     "anchor_bundle",
     "build_timestamp_request",
     "canonical_bundle_bytes",
     "parse_response",
     "request_attestation",
-    "TimestampError",
     "verify_attestation",
-    "ASN1Error",
 ]

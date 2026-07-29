@@ -18,13 +18,8 @@ from __future__ import annotations
 import base64
 import datetime
 import hashlib
-import http.client
-import json
 import os
-import socket
-import tempfile
 import unittest
-from pathlib import Path
 from unittest.mock import patch
 
 from cryptography import x509
@@ -32,7 +27,6 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import NameOID
 
-import dontlie.anchor as anchor
 from dontlie.anchor import (
     TimestampError,
     anchor_bundle,
@@ -45,7 +39,6 @@ from dontlie.anchor import (
 )
 from dontlie.anchor import pins as anchor_pins
 from dontlie.anchor import rfc3161 as anchor_rfc3161
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -290,11 +283,9 @@ class AnchorRoundTripTest(unittest.TestCase):
         resp = _build_minimal_tsresp(self.cert_der, imprint, nonce)
 
         posted = {}
-        real_request = request_attestation
 
         def fake_request(tsa_url, digest, *, hash_name="sha256", nonce=None, timeout=10.0):
             posted["nonce"] = nonce
-            from dataclasses import replace
             parsed = parse_response(resp, expected_imprint=digest, nonce=nonce)
             return parsed
 
@@ -345,7 +336,7 @@ class FailurePathTest(unittest.TestCase):
         bad_imprint = hashlib.sha256(b"tampered").digest()
         nonce = b"\x01\x02\x03\x04\x05\x06\x07\x08"
         resp = _build_minimal_tsresp(self.cert_der, bad_imprint, nonce)
-        parsed = parse_response(resp)
+        parse_response(resp)
         att = {
             "type": "rfc3161",
             "tsa_url": "https://freetsa.org/tsr",

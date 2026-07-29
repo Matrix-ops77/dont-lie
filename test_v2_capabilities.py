@@ -2,14 +2,13 @@
 
 Run: python3 -m unittest test_v2_capabilities
 """
-import json
 import os
-import sys
 import tempfile
 import unittest
 from pathlib import Path
 
-from dontlie import storage, sign as signing
+from dontlie import sign as signing
+from dontlie import storage
 
 
 class V2CapabilitiesTest(unittest.TestCase):

@@ -14,7 +14,6 @@ These tests use stdlib only and don't depend on pytest. Run via:
 """
 from __future__ import annotations
 
-import importlib
 import json
 import os
 import socket
@@ -28,7 +27,6 @@ import urllib.request
 from pathlib import Path
 
 from test_helpers import dontlie_cmd
-
 
 REPO = Path(__file__).resolve().parent
 sys.path.insert(0, str(REPO))
@@ -94,7 +92,7 @@ class StorageMigrationTest(unittest.TestCase):
         # it directly so the test doesn't disturb other tests' module
         # cache (popping ``dontlie.storage`` here breaks test_web,
         # which reloads ``dontlie.signing`` later).
-        from dontlie import storage  # noqa: F401
+        from dontlie import storage
         storage.DB_PATH = self.db_path
         # Mimic db(): _migrate FIRST, then SCHEMA. This is the
         # canonical sequence used in production.

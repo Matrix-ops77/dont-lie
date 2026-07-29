@@ -6,14 +6,15 @@ This produces a JSONL file with 8 receipt entries that an outside-counsel
 type person can download to see what an actual audit deliverable looks like.
 Each receipt is signed with a real Ed25519 key, hash-linked to the one before.
 """
-import json
-import hashlib
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.backends import default_backend
 import base64
 import datetime
+import hashlib
+import json
 import sys
+
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
 
 def canon(obj):
     if obj is None: return "null"

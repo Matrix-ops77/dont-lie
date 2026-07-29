@@ -16,7 +16,6 @@ PII redaction / evidence modes. Different concept, same word.
 from __future__ import annotations
 
 import os
-from typing import NoReturn
 
 
 class OfflineRefused(RuntimeError):

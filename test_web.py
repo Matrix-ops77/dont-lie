@@ -11,7 +11,8 @@ import unittest
 import urllib.request
 from pathlib import Path
 
-from dontlie import storage, sign as signing
+from dontlie import sign as signing
+from dontlie import storage
 from dontlie.web import _Handler  # type: ignore[import-not-found]
 
 
@@ -77,7 +78,7 @@ class WebServerTest(unittest.TestCase):
         self.assertIn(b"trust", body.lower())  # trust card is in the dashboard
 
     def test_receipt_detail(self) -> None:
-        status, ct, body = self._get("/receipt/1")
+        status, _ct, body = self._get("/receipt/1")
         self.assertEqual(status, 200)
         self.assertIn(b"Receipt #1", body)
         self.assertIn(b"gpt-4o-mini", body)
@@ -88,12 +89,12 @@ class WebServerTest(unittest.TestCase):
         self.assertIn(b"not found", body.lower())
 
     def test_search_page(self) -> None:
-        status, ct, body = self._get("/search?q=ping")
+        status, _ct, body = self._get("/search?q=ping")
         self.assertEqual(status, 200)
         self.assertIn(b"ping", body)
 
     def test_verify_page(self) -> None:
-        status, ct, body = self._get("/verify")
+        status, _ct, body = self._get("/verify")
         self.assertEqual(status, 200)
         self.assertIn(b"VERIFIED", body.upper())
 
@@ -107,7 +108,7 @@ class WebServerTest(unittest.TestCase):
         self.assertIn("ok", d)
 
     def test_api_verify(self) -> None:
-        status, ct, body = self._get("/api/verify")
+        status, _ct, body = self._get("/api/verify")
         self.assertEqual(status, 200)
         d = json.loads(body)
         self.assertEqual(d["ok_count"], 2)
@@ -115,7 +116,7 @@ class WebServerTest(unittest.TestCase):
         self.assertEqual(d["total"], 2)
 
     def test_api_receipts_list(self) -> None:
-        status, ct, body = self._get("/api/receipts")
+        status, _ct, body = self._get("/api/receipts")
         self.assertEqual(status, 200)
         d = json.loads(body)
         self.assertEqual(d["total"], 2)
@@ -123,7 +124,7 @@ class WebServerTest(unittest.TestCase):
         self.assertIn("payload_sha256", d["receipts"][0])
 
     def test_api_receipts_detail(self) -> None:
-        status, ct, body = self._get("/api/receipts/1")
+        status, _ct, body = self._get("/api/receipts/1")
         self.assertEqual(status, 200)
         d = json.loads(body)
         self.assertEqual(d["id"], 1)

@@ -14,7 +14,6 @@ import os
 import threading
 from typing import Any
 
-
 _LANGCHAIN_AVAILABLE = False
 _BaseCallbackHandler: type | None = None
 
@@ -150,4 +149,4 @@ def _model_name(response: Any) -> str:
     return str(llm_output.get("model_name") or llm_output.get("model") or "langchain")
 
 
-__all__ = ["DontlieCallback", "_LANGCHAIN_AVAILABLE"]
+__all__ = ["_LANGCHAIN_AVAILABLE", "DontlieCallback"]

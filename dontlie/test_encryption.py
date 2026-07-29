@@ -21,7 +21,6 @@ import tempfile
 import unittest
 from pathlib import Path
 
-import dontlie.encryption as encryption
 from dontlie.encryption import (
     DecryptionError,
     EncryptionError,

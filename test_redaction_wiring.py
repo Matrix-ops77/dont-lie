@@ -13,7 +13,7 @@ os.environ["DONTLIE_DB"] = str(Path(_TMP) / "vault.db")
 os.environ["DONTLIE_NO_WAL"] = "1"
 os.environ["DONTLIE_REDACTION_POLICY"] = "default"
 
-from dontlie import storage  # noqa: E402
+from dontlie import storage
 
 
 class RedactionWiringTest(unittest.TestCase):

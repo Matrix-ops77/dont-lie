@@ -31,7 +31,7 @@ DEFAULT_DUMP = Path(os.environ.get("DONTLIE_WAITLIST_DUMP", ROOT / "waitlist.jso
 class WaitlistHandler(BaseHTTPRequestHandler):
     dump_path: Path = DEFAULT_DUMP
 
-    def do_POST(self) -> None:  # noqa: N802
+    def do_POST(self) -> None:
         if self.path != "/api/waitlist":
             self.send_error(404, "not found")
             return
@@ -54,7 +54,7 @@ class WaitlistHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(json.dumps({"ok": True}).encode("utf-8"))
 
-    def do_GET(self) -> None:  # noqa: N802
+    def do_GET(self) -> None:
         if self.path == "/api/health":
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
@@ -63,7 +63,7 @@ class WaitlistHandler(BaseHTTPRequestHandler):
             return
         self.send_error(404, "not found")
 
-    def log_message(self, fmt: str, *args: object) -> None:  # noqa: D401
+    def log_message(self, fmt: str, *args: object) -> None:
         # Keep stderr tidy; toggle off if you want logs.
         pass
 

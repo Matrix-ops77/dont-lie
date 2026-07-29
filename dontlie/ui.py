@@ -19,22 +19,19 @@ Keybindings:
 from __future__ import annotations
 
 import argparse
-import sqlite3
 import sys
 import threading
-import time
 from datetime import datetime
 from pathlib import Path
-from typing import Iterable
 
-from rich.console import Console, Group
+from rich.console import Group
 from rich.panel import Panel
 from rich.syntax import Syntax
-from rich.text import Text
 from rich.table import Table
+from rich.text import Text
 from textual.app import App, ComposeResult
 from textual.binding import Binding
-from textual.containers import Container, Horizontal, Vertical
+from textual.containers import Horizontal, Vertical
 from textual.reactive import reactive
 from textual.widgets import (
     DataTable,
@@ -186,7 +183,7 @@ class StatusBar(Static):
                 f"{report.ok_count} ok / {report.bad_count} bad / {total} total"
             )
         else:
-            text = f"[yellow]? empty vault[/]"
+            text = "[yellow]? empty vault[/]"
         self._message = text
         self.refresh()
 
@@ -198,23 +195,7 @@ class HelpScreen(Static):
     def compose(self) -> ComposeResult:
         yield Static(
             Panel(
-                "\n".join(
-                    [
-                        "[bold]dontlie ui — interactive receipt explorer[/]",
-                        "",
-                        "  r         refresh from disk",
-                        "  v         run verify on the whole chain",
-                        "  /         focus the search box",
-                        "  t         toggle live tail (poll every 2s)",
-                        "  enter     show full receipt",
-                        "  j / k     next / previous receipt",
-                        "  g / G     jump to top / bottom",
-                        "  ?         toggle this help",
-                        "  q         quit",
-                        "",
-                        "[dim]Press any key to close.[/]",
-                    ]
-                ),
+                "[bold]dontlie ui — interactive receipt explorer[/]\n\n  r         refresh from disk\n  v         run verify on the whole chain\n  /         focus the search box\n  t         toggle live tail (poll every 2s)\n  enter     show full receipt\n  j / k     next / previous receipt\n  g / G     jump to top / bottom\n  ?         toggle this help\n  q         quit\n\n[dim]Press any key to close.[/]",
                 title="Help",
                 border_style="yellow",
             )
@@ -400,5 +381,5 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    import os  # noqa: E402
+    import os
     sys.exit(main())

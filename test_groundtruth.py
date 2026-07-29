@@ -15,6 +15,9 @@ from pathlib import Path
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
+# Type alias matching the cryptography library's Ed25519 key types.
+_Key = Ed25519PrivateKey
+
 import dontlie.groundtruth as gt
 from dontlie import sign as signing
 from dontlie import storage
@@ -240,7 +243,7 @@ def _witness_keypair() -> gt.WitnessKey:
     )
 
 
-def _operator_keypair() -> "_Key":
+def _operator_keypair() -> _Key:
     """Local helper to match the style of _key_pair() in this file."""
     return _key_pair()
 

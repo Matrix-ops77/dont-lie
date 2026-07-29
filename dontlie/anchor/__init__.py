@@ -54,6 +54,8 @@ else:  # pragma: no cover
 
 __all__ = [
     "Anchor",
+    "TSAEntry",
+    "TimestampError",
     "anchor",
     "anchor_bundle",
     "build_timestamp_request",
@@ -66,7 +68,5 @@ __all__ = [
     "request_attestation",
     "rfc3161",
     "set_pin",
-    "TimestampError",
-    "TSAEntry",
     "verify_attestation",
 ]

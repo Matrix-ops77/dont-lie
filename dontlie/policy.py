@@ -32,7 +32,6 @@ import sys
 from dataclasses import dataclass, field
 from fnmatch import fnmatch
 from pathlib import Path
-from typing import Iterable
 
 DEFAULT_POLICY_PATH = Path.home() / ".config" / "dontlie" / "policy.json"
 
@@ -65,7 +64,7 @@ class Policy:
         }
 
     @classmethod
-    def from_dict(cls, d: dict) -> "Policy":
+    def from_dict(cls, d: dict) -> Policy:
         return cls(
             deny_models=list(d.get("deny_models", []) or []),
             deny_prompts=list(d.get("deny_prompts", []) or []),
@@ -81,7 +80,7 @@ class Policy:
         return path
 
     @classmethod
-    def load(cls, path: Path | None = None) -> "Policy":
+    def load(cls, path: Path | None = None) -> Policy:
         path = Path(path) if path is not None else _policy_path()
         if not path.exists():
             return cls()
@@ -115,9 +114,8 @@ def evaluate(policy: Policy, *, model: str, prompt: str) -> PolicyDecision:
         if fnmatch(model, pattern):
             return PolicyDecision(allowed=False, reason=f"model {model!r} denied by policy (matches {pattern!r})")
     # 2. allow_only
-    if policy.allow_only:
-        if not any(fnmatch(model, p) for p in policy.allow_only):
-            return PolicyDecision(allowed=False, reason=f"model {model!r} not in allow_only list {policy.allow_only}")
+    if policy.allow_only and not any(fnmatch(model, p) for p in policy.allow_only):
+        return PolicyDecision(allowed=False, reason=f"model {model!r} not in allow_only list {policy.allow_only}")
     # 3. deny_prompts
     for needle in policy.deny_prompts:
         if needle in prompt:

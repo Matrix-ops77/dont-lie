@@ -33,7 +33,8 @@ class ChainV3Test(unittest.TestCase):
         os.environ["DONTLIE_OPERATOR_ID"] = "ops-team-acme"
         os.environ["DONTLIE_DEPLOYER_ID"] = "deployer-prod-east"
         os.environ["DONTLIE_SYSTEM_ID"] = "agent-billing-2026-q3"
-        from dontlie import sign as signing, storage
+        from dontlie import sign as signing
+        from dontlie import storage
         self.signing = signing
         self.storage = storage
         signing.KEY_DIR.mkdir(parents=True, exist_ok=True)

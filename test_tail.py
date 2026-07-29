@@ -10,7 +10,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from dontlie import storage, sign as signing
+from dontlie import sign as signing
+from dontlie import storage
 
 
 class TailTest(unittest.TestCase):

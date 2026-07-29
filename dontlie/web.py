@@ -24,7 +24,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import sqlite3
 import sys
 from dataclasses import asdict
 from datetime import datetime
@@ -35,7 +34,6 @@ from urllib.parse import parse_qs, urlparse
 
 from . import storage
 from .storage import Receipt
-
 
 # ---- helpers ----------------------------------------------------------------
 
@@ -277,7 +275,7 @@ def _render_receipt(rid: int) -> str:
         + f'<h3>Prompt</h3><pre>{_esc(r.prompt or "(empty)")}</pre>'
         + f'<h3>Response</h3><pre>{_esc(r.response or "(empty)")}</pre>'
         + f'<p><a class="btn" href="/api/receipts/{r.id}">view as JSON</a> '
-        + f'<a class="btn" href="/">← dashboard</a></p>'
+        + '<a class="btn" href="/">← dashboard</a></p>'
     )
     return _wrap(f"Receipt #{r.id}", body)
 
@@ -401,7 +399,7 @@ class _Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-    def do_GET(self) -> None:  # noqa: N802
+    def do_GET(self) -> None:
         url = urlparse(self.path)
         path = url.path
         qs = parse_qs(url.query)

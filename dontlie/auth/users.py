@@ -43,8 +43,6 @@ import secrets
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
-
 
 ROLES = ("admin", "auditor", "operator", "viewer")
 ACTIONS = (
@@ -174,7 +172,7 @@ class TeamVault:
             )
         )
 
-    def audit_log(self, *, for_user: Optional[User] = None) -> list[dict]:
+    def audit_log(self, *, for_user: User | None = None) -> list[dict]:
         if for_user is not None:
             self.authorize(for_user, "audit:read")
         return [entry.to_dict() for entry in self.audit]
@@ -224,10 +222,10 @@ def load(path: Path | None = None) -> TeamVault:
 
 __all__ = [
     "ACTIONS",
-    "AuthError",
-    "AuditEntry",
-    "ROLE_GRANTS",
     "ROLES",
+    "ROLE_GRANTS",
+    "AuditEntry",
+    "AuthError",
     "TeamVault",
     "UnknownRoleError",
     "UnknownUserError",

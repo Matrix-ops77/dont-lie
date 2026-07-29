@@ -28,9 +28,47 @@ dontlie = "dontlie.cli:main"
 
 [project.urls]
 Homepage = "https://dontlie.pages.dev"
-Repository = "https://github.com/Matrix-ops77/dontlie"
-Issues = "https://github.com/Matrix-ops77/dontlie/issues"
+Repository = "https://github.com/Matrix-ops77/dont-lie"
+Issues = "https://github.com/Matrix-ops77/dont-lie/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["dontlie*"]
+
+[tool.ruff]
+# Scope lint to the core product. Clients and demos have their own rules.
+extend-exclude = [
+    "clients",
+    "demo",
+    "witness-worker",
+    "site",
+    "build",
+    "dist",
+]
+
+[tool.ruff.lint]
+# We allow the following noisy patterns in the core product. They are
+# documented exceptions to the rule, not laziness.
+#
+# - BLE001: bare `except Exception:` is fine for boundary code that
+#   re-raises with context, or wraps third-party SDKs.
+# - PLW1510: subprocess.run without explicit check= is fine when the
+#   caller checks the returncode.
+# - S110: try-except-pass is fine for fire-and-forget cleanup.
+# - RUF012: mutable class defaults — we use them for caches by intent.
+# - B017: assertRaises(Exception) — used in smoke tests to assert any
+#   failure is raised, not a specific class.
+# - DTZ011: date.today() is fine for wall-clock dates that don't need
+#   timezone info (e.g. log rotation filenames).
+extend-ignore = [
+    "BLE001",
+    "PLW1510",
+    "S110",
+    "RUF012",
+    "B017",
+    "DTZ011",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests can be a bit looser.
+"test_*.py" = ["E402", "E501"]

@@ -3,14 +3,15 @@
 time-stamped events, rendering frames as monospace animation, encoding
 with ffmpeg. Terminal-only path.
 """
+import json as _json
 import os
+import shutil
 import subprocess
 import sys
-import time
-import shutil
 import threading
-import json as _json
+import time
 from pathlib import Path
+
 from PIL import Image, ImageDraw, ImageFont
 
 REPO = Path("/Users/wayne_dellmyer/orca/projects/orca projects/dontlie")
@@ -69,13 +70,11 @@ def render_frame(events, frame_idx):
             text = text[:127] + "..."
         color = (200, 200, 210)
         stripped = text.lstrip()
-        if stripped.startswith("$") or stripped.startswith("#"):
-            color = (74, 222, 128)
-        elif "✓" in text or "verified" in text.lower():
+        if stripped.startswith(("$", "#")) or "✓" in text or "verified" in text.lower():
             color = (74, 222, 128)
         elif "✗" in text or "failed" in text.lower() or "tamper" in text.lower():
             color = (248, 113, 113)
-        elif text.startswith("[") or text.startswith("  ["):
+        elif text.startswith(("[", "  [")):
             color = (148, 163, 184)
         draw.text((28, y), text, font=FONT_MONO, fill=color)
         y += 24
@@ -163,8 +162,8 @@ def run_demo(events):
         # Issue 3 real requests
         for prompt in ["ping", "What is the capital of France?",
                        "Summarize what Don't-Lie does in one sentence."]:
-            events.append(f"$ curl -s -X POST http://127.0.0.1:8080/v1/chat/completions \\")
-            events.append(f"    -H 'Content-Type: application/json' \\")
+            events.append("$ curl -s -X POST http://127.0.0.1:8080/v1/chat/completions \\")
+            events.append("    -H 'Content-Type: application/json' \\")
             events.append(f"    -d '{{\"model\":\"mock-1\",\"messages\":[{{\"role\":\"user\",\"content\":\"{prompt}\"}}]}}'")
             try:
                 r = subprocess.run(

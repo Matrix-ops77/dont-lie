@@ -24,7 +24,6 @@ from __future__ import annotations
 
 import argparse
 import base64
-import hashlib
 import json
 import os
 import secrets
@@ -34,8 +33,9 @@ import urllib.request
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
-from . import __version__, batch as _batch, sign as signing, storage
-
+from . import __version__, storage
+from . import batch as _batch
+from . import sign as signing
 
 OTS_DIR = Path(
     os.environ.get(
@@ -179,7 +179,7 @@ def main(argv: list[str] | None = None) -> int:
     first_id = receipts[0].id
     last_id = receipts[-1].id
     print(f"  receipts: #{first_id} .. #{last_id}  ({leaf_count} leaves)")
-    print(f"  merkle root: (computed at create time)")
+    print("  merkle root: (computed at create time)")
 
     if args.dry_run:
         print()
@@ -209,14 +209,14 @@ def main(argv: list[str] | None = None) -> int:
     # 2. Create OTS pending attestation
     ots_path = _create_ots_for_root(b.merkle_root, today)
     print()
-    print(f"  2. OTS pending attestation written")
+    print("  2. OTS pending attestation written")
     print(f"     path:        {ots_path}")
     print(f"     upgrade:     ots upgrade {ots_path}")
     print(f"                  (then `ots verify {ots_path}` after Bitcoin confirmation)")
 
     # 3. POST to witness
     print()
-    print(f"  3. witness attestation")
+    print("  3. witness attestation")
     try:
         witness_pub = _witness_pubkey(args.url)
         att = _post_witness_attest(
@@ -253,10 +253,10 @@ def main(argv: list[str] | None = None) -> int:
             print(f"     witness key:  {att.get('service_key_id')}")
             print(f"     issued_at:    {att.get('issued_at')}")
             print(f"     signature:    {att.get('signature', '')[:48]}...")
-            print(f"     ✓ verified locally")
+            print("     ✓ verified locally")
             print(f"     stored:       {anchor_path}")
         else:
-            print(f"     ! witness signature did NOT verify", file=sys.stderr)
+            print("     ! witness signature did NOT verify", file=sys.stderr)
             print(f"     stored (unverified): {anchor_path}")
             return 2
     except Exception as e:
@@ -266,9 +266,9 @@ def main(argv: list[str] | None = None) -> int:
     print()
     print(f"daily anchor complete for {today}.")
     print(f"  the merkle root for this day's {leaf_count} receipts is now")
-    print(f"  co-signed by:")
-    print(f"    - your local Ed25519 key (in the batch row)")
-    print(f"    - the OTS aggregator (Bitcoin-anchorable later)")
+    print("  co-signed by:")
+    print("    - your local Ed25519 key (in the batch row)")
+    print("    - the OTS aggregator (Bitcoin-anchorable later)")
     print(f"    - the witness service at {args.url}")
     return 0
 

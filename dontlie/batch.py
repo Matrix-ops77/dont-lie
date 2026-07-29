@@ -39,15 +39,13 @@ from __future__ import annotations
 
 import hashlib
 import json
-import sqlite3
 import sys
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Iterable
 
 from . import sign as signing
 from . import storage
-
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS batches (
@@ -182,7 +180,7 @@ def create(
 ) -> Batch:
     """Create a batch that signs a Merkle root over the given receipts."""
     init()
-    receipt_ids = sorted(set(int(r) for r in receipt_ids))
+    receipt_ids = sorted({int(r) for r in receipt_ids})
     if not receipt_ids:
         raise ValueError("batch must reference at least one receipt")
     for rid in receipt_ids:

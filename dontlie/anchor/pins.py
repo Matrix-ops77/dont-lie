@@ -18,8 +18,8 @@ from __future__ import annotations
 
 import hashlib
 import os
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Iterable
 
 
 @dataclass(frozen=True)

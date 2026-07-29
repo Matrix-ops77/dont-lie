@@ -14,7 +14,6 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
-from types import SimpleNamespace
 
 _TMP = tempfile.mkdtemp(prefix="dontlie-langchain-test-")
 os.environ["DONTLIE_KEY_DIR"] = str(Path(_TMP) / "keys")

@@ -16,17 +16,14 @@ from __future__ import annotations
 
 import abc
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable, Optional
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
 from .envelope import (
     PeerWitnessAttestation,
     PeerWitnessRequest,
-    deserialize_attestation,
-    verify_attestation_signature,
-    verify_request_signature,
 )
 
 
@@ -40,7 +37,7 @@ class WitnessKey:
 
     key_id: str
     public_key: Ed25519PublicKey
-    private_key: Optional[object] = None  # Ed25519PrivateKey; opaque to avoid extra import
+    private_key: object | None = None  # Ed25519PrivateKey; opaque to avoid extra import
     label: str = ""
 
     def __post_init__(self) -> None:
@@ -107,8 +104,8 @@ class InProcessWitness(Witness):
             if request.is_expired():
                 raise WitnessError("request expired")
         # Compose attestation over the request's digest fields.
+
         from .envelope import serialize_attestation  # local to break cycles
-        from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
         att = PeerWitnessAttestation(
             request=request,
@@ -139,7 +136,7 @@ class RemoteHTTPWitness(Witness):
         endpoint: str,
         key: WitnessKey,
         *,
-        verify_request_payload: Optional[Callable[[PeerWitnessRequest], None]] = None,
+        verify_request_payload: Callable[[PeerWitnessRequest], None] | None = None,
     ) -> None:
         if not endpoint.startswith("https://"):
             raise ValueError("RemoteHTTPWitness endpoint must be https://")
@@ -162,10 +159,10 @@ class RemoteHTTPWitness(Witness):
 
 
 __all__ = [
-    "Witness",
-    "WitnessKey",
-    "WitnessError",
-    "OfflineWitness",
     "InProcessWitness",
+    "OfflineWitness",
     "RemoteHTTPWitness",
+    "Witness",
+    "WitnessError",
+    "WitnessKey",
 ]

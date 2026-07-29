@@ -45,7 +45,7 @@ class EventTest(unittest.TestCase):
 class _CollectingHandler(BaseHTTPRequestHandler):
     received: list[bytes] = []
 
-    def do_POST(self) -> None:  # noqa: N802
+    def do_POST(self) -> None:
         length = int(self.headers.get("Content-Length", "0"))
         self.received.append(self.rfile.read(length))
         self.send_response(200)

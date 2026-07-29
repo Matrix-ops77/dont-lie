@@ -20,11 +20,10 @@ from __future__ import annotations
 
 import json
 import sys
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterable, Iterator
 
-from . import sign as signing
 from . import storage
 
 
@@ -70,7 +69,7 @@ def _import_obsigna(path: Path) -> Iterator[dict]:
                 "prompt": prompt if isinstance(prompt, str) else json.dumps(prompt),
                 "response": response if isinstance(response, str) else json.dumps(response),
                 "timestamp": ts,
-                "tags": [f"imported_from:obsigna", f"obsigna_id:{r.get('id', '?')}"],
+                "tags": ["imported_from:obsigna", f"obsigna_id:{r.get('id', '?')}"],
                 "extra": {"_imported_from": "obsigna", "obsigna": r},
             }
         except Exception as exc:
@@ -93,7 +92,7 @@ def _import_halo(path: Path) -> Iterator[dict]:
                 "prompt": r.get("input") or r.get("prompt") or "",
                 "response": r.get("output") or r.get("response") or "",
                 "timestamp": r.get("timestamp") or r.get("time") or "",
-                "tags": [f"imported_from:halo-record", f"halo_id:{r.get('id', '?')}"],
+                "tags": ["imported_from:halo-record", f"halo_id:{r.get('id', '?')}"],
                 "extra": {"_imported_from": "halo-record", "halo": r},
             }
         except Exception as exc:
@@ -113,7 +112,7 @@ def _import_aulite(path: Path) -> Iterator[dict]:
                 "prompt": json.dumps(req.get("messages") or req.get("input") or ""),
                 "response": json.dumps(resp.get("content") or resp.get("output") or ""),
                 "timestamp": r.get("ts") or r.get("timestamp") or "",
-                "tags": [f"imported_from:aulite", f"aulite_id:{r.get('id', '?')}"],
+                "tags": ["imported_from:aulite", f"aulite_id:{r.get('id', '?')}"],
                 "extra": {"_imported_from": "aulite", "aulite": r},
             }
         except Exception as exc:

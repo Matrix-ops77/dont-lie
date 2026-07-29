@@ -5,10 +5,10 @@ See :mod:`dontlie.auth.users` for the full API.
 
 from .users import (
     ACTIONS,
-    ROLES,
     ROLE_GRANTS,
-    AuthError,
+    ROLES,
     AuditEntry,
+    AuthError,
     TeamVault,
     UnknownRoleError,
     UnknownUserError,
@@ -23,8 +23,8 @@ __all__ = [
     "ACTIONS",
     "ROLES",
     "ROLE_GRANTS",
-    "AuthError",
     "AuditEntry",
+    "AuthError",
     "TeamVault",
     "UnknownRoleError",
     "UnknownUserError",

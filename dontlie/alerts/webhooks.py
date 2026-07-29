@@ -20,8 +20,8 @@ import os
 import time
 import urllib.error
 import urllib.request
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Iterable
 
 
 class AlertError(RuntimeError):
@@ -90,7 +90,7 @@ def send(sinks: Iterable[AlertSink], alert: Alert) -> dict[str, int]:
     for sink in sinks:
         try:
             results[sink.name] = send_event(sink, alert)
-        except AlertError as exc:
+        except AlertError:
             results[sink.name] = 0
     return results
 

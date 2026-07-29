@@ -43,7 +43,7 @@ def dontlie_cmd(*args: str) -> list[str]:
     return [PYTHON, "-m", "dontlie", *args]
 
 
-def with_dontlie_env(base: "dict | None" = None) -> dict:
+def with_dontlie_env(base: dict | None = None) -> dict:
     """Return a copy of `base` (or os.environ) with PYTHON and PYTHONPATH
     set so that subprocess invocations of `dontlie` work, regardless of
     the parent's env or the subprocess's cwd.

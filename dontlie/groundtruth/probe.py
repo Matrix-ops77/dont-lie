@@ -10,7 +10,7 @@ actually contact an upstream.
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
-from typing import Any, Optional
+from typing import Any
 
 
 class BlindProbeUnavailable(RuntimeError):
@@ -30,7 +30,7 @@ class BlindProbeResult:
         return asdict(self)
 
 
-_RUNNER: Optional[Any] = None
+_RUNNER: Any | None = None
 
 
 def attach_runner(runner: Any) -> None:

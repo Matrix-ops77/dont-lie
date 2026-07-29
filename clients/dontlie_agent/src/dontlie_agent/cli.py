@@ -190,7 +190,7 @@ def cmd_auto(args) -> int:
         upstream_key=args.upstream_key,
         start_proxy=not args.no_proxy,
     )
-    print(f"dontlie_agent installed.")
+    print("dontlie_agent installed.")
     print(f"  proxy port: {handle.port}")
     print(f"  base url:   {handle.base_url}")
     print(f"  detected:   {', '.join(handle.detected_sdks) or '(none)'}")

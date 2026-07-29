@@ -40,10 +40,10 @@ import subprocess
 import sys
 import threading
 import time
+from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterator, Optional
 
 DEFAULT_UPSTREAM = "https://api.minimax.io/v1"
 DEFAULT_PORT_LOW, DEFAULT_PORT_HIGH = 8080, 8180  # scan a small window
@@ -90,7 +90,7 @@ def _python_can_import(name: str) -> bool:
     try:
         __import__(name)
         return True
-    except Exception:
+    except ImportError:
         return False
 
 
@@ -100,8 +100,8 @@ class InstallHandle:
 
     port: int
     base_url: str
-    proxy_proc: Optional[subprocess.Popen] = None
-    env_backup: dict[str, Optional[str]] = field(default_factory=dict)
+    proxy_proc: subprocess.Popen | None = None
+    env_backup: dict[str, str | None] = field(default_factory=dict)
     detected_sdks: list[str] = field(default_factory=list)
     _lock: threading.Lock = field(default_factory=threading.Lock)
     _uninstalled: bool = False
@@ -120,10 +120,11 @@ class InstallHandle:
                 try:
                     self.proxy_proc.send_signal(signal.SIGTERM)
                     self.proxy_proc.wait(timeout=5)
-                except Exception:
+                except (OSError, subprocess.TimeoutExpired):
                     try:
                         self.proxy_proc.kill()
-                    except Exception:
+                    except OSError:
+                        # Process already exited — nothing more to do.
                         pass
 
 
@@ -165,32 +166,34 @@ def _patch_env(handle: InstallHandle) -> list[str]:
     return detected
 
 
-def _start_proxy(port: int, *, upstream: str, upstream_key: Optional[str]) -> subprocess.Popen:
+def _start_proxy(port: int, *, upstream: str, upstream_key: str | None) -> subprocess.Popen:
     env = os.environ.copy()
     env["DONTLIE_UPSTREAM_BASE_URL"] = upstream
     if upstream_key:
         env["DONTLIE_UPSTREAM_API_KEY"] = upstream_key
-    log = open(Path.home() / ".dontlie" / "agent-proxy.log", "ab")
     Path.home().joinpath(".dontlie").mkdir(parents=True, exist_ok=True)
-    proc = subprocess.Popen(
-        ["dontlie", "proxy", "--port", str(port)],
-        env=env,
-        stdout=log,
-        stderr=subprocess.STDOUT,
-    )
+    log_path = Path.home() / ".dontlie" / "agent-proxy.log"
+    # The subprocess inherits the log fd; we close our end after Popen.
+    with open(log_path, "ab") as log:
+        proc = subprocess.Popen(
+            ["dontlie", "proxy", "--port", str(port)],
+            env=env,
+            stdout=log,
+            stderr=subprocess.STDOUT,
+        )
     # wait for the proxy to bind
     for _ in range(50):  # 5s
         if not _port_is_free(port):
             return proc
         time.sleep(0.1)
-    raise RuntimeError(f"dontlie proxy did not start on port {port} within 5s — see ~/.dontlie/agent-proxy.log")
+    raise RuntimeError(f"dontlie proxy did not start on port {port} within 5s — see {log_path}")
 
 
 def install(
     *,
     port: int | None = None,
     upstream: str = DEFAULT_UPSTREAM,
-    upstream_key: Optional[str] = None,
+    upstream_key: str | None = None,
     start_proxy: bool = True,
 ) -> InstallHandle:
     """One-line setup: start a proxy (if needed) and route every known SDK through it.
@@ -277,7 +280,7 @@ def main(argv: list[str] | None = None) -> int:
         upstream_key=args.upstream_key,
         start_proxy=not args.no_proxy,
     )
-    print(f"dontlie_agent installed.")
+    print("dontlie_agent installed.")
     print(f"  proxy port: {handle.port}")
     print(f"  base url:   {handle.base_url}")
     print(f"  detected:   {', '.join(handle.detected_sdks) or '(none)'}")

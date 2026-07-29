@@ -46,7 +46,13 @@ from .envelope import (
     verify_request_signature,
 )
 from .helpers import digest_payload, short_nonce
-from .probe import BlindProbe, BlindProbeResult, BlindProbeUnavailable, attach_runner, reset_runner
+from .probe import (
+    BlindProbe,
+    BlindProbeResult,
+    BlindProbeUnavailable,
+    attach_runner,
+    reset_runner,
+)
 from .verifier import WitnessVerification, WitnessVerifier
 
 __all__ = [

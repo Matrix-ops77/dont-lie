@@ -12,7 +12,7 @@ os.environ["DONTLIE_KEY_DIR"] = str(Path(_TMP) / "keys")
 os.environ["DONTLIE_DB"] = str(Path(_TMP) / "vault.db")
 os.environ["DONTLIE_NO_WAL"] = "1"
 
-from dontlie.redaction import RedactionPolicy  # noqa: E402
+from dontlie.redaction import RedactionPolicy
 
 
 class RedactionPolicyTest(unittest.TestCase):

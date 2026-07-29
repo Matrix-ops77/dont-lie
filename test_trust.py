@@ -7,10 +7,9 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
-from unittest import mock
 
 from dontlie import storage
-from dontlie.trust import compute, TrustScore, _label_for
+from dontlie.trust import _label_for, compute
 
 
 class TrustScoreLabelTest(unittest.TestCase):

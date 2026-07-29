@@ -31,14 +31,11 @@ import json
 import os
 import sqlite3
 import sys
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from pathlib import Path
-from typing import Iterable
 
-from . import sign as signing
 from . import storage
-
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS namespaces (
@@ -94,12 +91,11 @@ def create(name: str, *, description: str = "", tags: Iterable[str] = ()) -> Nam
     init()
     conn = storage._connect()
     try:
-        cur = conn.execute(
+        conn.execute(
             "INSERT INTO namespaces (name, created_at, description, tags, extra) VALUES (?, ?, ?, ?, ?)",
             (name, datetime.now(timezone.utc).isoformat(), description,
              json.dumps(list(tags)), "{}"),
         )
-        ns_id = cur.lastrowid
         conn.commit()
     except sqlite3.IntegrityError:
         conn.close()

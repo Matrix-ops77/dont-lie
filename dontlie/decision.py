@@ -16,15 +16,12 @@ from __future__ import annotations
 
 import json
 import sqlite3
-import time
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from pathlib import Path
-from typing import Iterable
 
 from . import sign as signing
 from . import storage
-
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS decisions (
@@ -103,7 +100,7 @@ def create(
 ) -> Decision:
     """Create a new decision that binds a set of receipts together."""
     init()
-    receipt_ids = sorted(set(int(r) for r in receipt_ids))
+    receipt_ids = sorted({int(r) for r in receipt_ids})
     if not receipt_ids:
         raise ValueError("decision must reference at least one receipt")
     # Confirm the receipts exist
@@ -214,7 +211,6 @@ def verify(d: Decision) -> bool:
 
 def _lookup_public_key(key_id: str):
     """Look up a public key by key_id in the active key or in key_history."""
-    import sqlite3
     from . import sign as signing_mod
     # First: the active key
     try:
@@ -241,7 +237,6 @@ def _lookup_public_key(key_id: str):
 
 def main(argv: list[str] | None = None) -> int:
     import argparse
-    import sys
     parser = argparse.ArgumentParser(prog="dontlie decision", description=__doc__)
     sub = parser.add_subparsers(dest="cmd", required=True)
 

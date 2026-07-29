@@ -38,19 +38,13 @@ OTS file format (simplified):
 """
 from __future__ import annotations
 
-import hashlib
-import json
-import os
-import struct
 import subprocess
 import sys
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Iterable
 
 from . import storage
-
 
 OTS_MAGIC = b"\x00\x4f\x50"  # "\x00OP" — OpenTimestamps
 OTS_VERSION = 1

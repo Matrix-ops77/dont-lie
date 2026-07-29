@@ -54,16 +54,15 @@ in the envelope itself; that is the role of a separate SCITT Receipt
 from __future__ import annotations
 
 import base64
-import hashlib
 import json
 import struct
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 from . import sign as signing
 from . import storage
-
 
 # ---- COSE / SCITT constants ------------------------------------------------
 
@@ -736,28 +735,28 @@ def write_scitt_bundle(
 
 
 __all__ = [
-    "COSE_ALG_ED25519",
     "CONTENT_TYPE_RECEIPT_HASH",
-    "ScittEnvelope",
-    "EnvelopeVerifyResult",
-    "LABEL_KID",
-    "LABEL_OPERATOR_KEY_ID",
+    "COSE_ALG_ED25519",
     "LABEL_CHAIN_VERSION",
-    "LABEL_RECEIPT_ID",
-    "LABEL_PAYLOAD_SHA256",
-    "LABEL_PARENT_ID",
+    "LABEL_KID",
     "LABEL_MODEL",
+    "LABEL_OPERATOR_KEY_ID",
+    "LABEL_PARENT_ID",
+    "LABEL_PAYLOAD_SHA256",
+    "LABEL_RECEIPT_ID",
     "LABEL_TIMESTAMP",
+    "EnvelopeVerifyResult",
+    "ScittEnvelope",
+    "build_scitt_bundle",
+    "build_sig_structure",
     "cbor_decode",
     "cbor_encode",
-    "build_sig_structure",
-    "envelope_for_receipt",
-    "envelope_to_json",
-    "envelope_from_json",
     "emit_envelope_cbor",
-    "verify_envelope_signature",
+    "envelope_for_receipt",
+    "envelope_from_json",
+    "envelope_to_json",
     "load_receipt_envelope",
-    "build_scitt_bundle",
-    "write_scitt_envelope",
+    "verify_envelope_signature",
     "write_scitt_bundle",
+    "write_scitt_envelope",
 ]

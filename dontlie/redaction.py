@@ -35,9 +35,8 @@ profile; add a detector rather than loosen an existing one.
 
 from __future__ import annotations
 
-import re
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Iterable
 
 
 @dataclass(frozen=True)

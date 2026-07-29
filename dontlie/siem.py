@@ -14,12 +14,9 @@ extraction rules in the SIEM.
 """
 from __future__ import annotations
 
-import base64
 import json
 import sys
-from dataclasses import asdict
 from datetime import datetime, timezone
-from typing import Iterable
 
 from . import storage
 
