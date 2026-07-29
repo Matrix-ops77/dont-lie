@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
+  <title id="title">Don't-Lie receipt flow</title>
+  <desc id="desc">An application sends an AI request through the Don't-Lie local proxy to a provider. The proxy writes signed, hash-linked receipts to a local vault.</desc>
+  <defs>
+    <linearGradient id="paper" x1="0" x2="1"><stop stop-color="#f7fbf8"/><stop offset="1" stop-color="#eef6f1"/></linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#102a24" flood-opacity=".12"/></filter>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0 0 12 6 0 12z" fill="#173d35"/></marker>
+  </defs>
+  <rect width="1200" height="520" rx="28" fill="url(#paper)"/>
+  <g fill="none" stroke="#b9d1c6" stroke-width="2" opacity=".8"><path d="M0 64h160M0 86h110M1040 434h160M1080 456h120"/><circle cx="84" cy="414" r="26"/><circle cx="1120" cy="96" r="34"/></g>
+  <text x="600" y="72" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" letter-spacing="4" fill="#52766b">LOCAL-FIRST RECEIPT FLOW</text>
+  <g filter="url(#shadow)" font-family="system-ui, sans-serif">
+    <rect x="70" y="180" width="230" height="142" rx="20" fill="#fff" stroke="#173d35" stroke-width="3"/>
+    <rect x="485" y="150" width="250" height="202" rx="20" fill="#123c34"/>
+    <rect x="900" y="180" width="230" height="142" rx="20" fill="#fff" stroke="#173d35" stroke-width="3"/>
+    <rect x="485" y="394" width="250" height="88" rx="18" fill="#dff5e7" stroke="#238050" stroke-width="3"/>
+  </g>
+  <g font-family="system-ui, sans-serif" text-anchor="middle">
+    <text x="185" y="232" font-size="22" font-weight="700" fill="#102a24">Your application</text><text x="185" y="264" font-size="16" fill="#52766b">SDK or agent</text>
+    <text x="610" y="224" font-size="25" font-weight="700" fill="#fff">Don't-Lie proxy</text><text x="610" y="257" font-size="16" fill="#c5e4d6">captures exact bytes</text><text x="610" y="289" font-size="16" fill="#c5e4d6">signs locally</text>
+    <text x="1015" y="232" font-size="22" font-weight="700" fill="#102a24">AI provider</text><text x="1015" y="264" font-size="16" fill="#52766b">unchanged upstream</text>
+    <text x="610" y="432" font-size="19" font-weight="700" fill="#15593a">Local receipt vault</text><text x="610" y="457" font-size="14" fill="#34765a">Ed25519 signature · SHA-256 chain</text>
+  </g>
+  <g fill="none" stroke="#173d35" stroke-width="4" marker-end="url(#arrow)"><path d="M312 251h156"/><path d="M747 251h141"/><path d="M610 365v18"/></g>
+  <g fill="#76d997" stroke="#173d35" stroke-width="3"><path d="M573 310l18 18 43-49"/><circle cx="610" cy="312" r="51" fill="none"/></g>
+</svg>

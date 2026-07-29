@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
+  <title id="title">Portable offline verification</title>
+  <desc id="desc">Receipts become a portable bundle that can be verified offline on a clean laptop.</desc>
+  <defs><linearGradient id="bg" x1="0" x2="1"><stop stop-color="#102a24"/><stop offset="1" stop-color="#173d35"/></linearGradient><marker id="a" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0 0 12 6 0 12z" fill="#a8edbc"/></marker></defs>
+  <rect width="1200" height="520" rx="28" fill="url(#bg)"/>
+  <text x="600" y="74" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" letter-spacing="4" fill="#a8edbc">PORTABLE PROOF, NO NETWORK REQUIRED</text>
+  <g font-family="system-ui, sans-serif" text-anchor="middle"><g fill="#fff" stroke="#a8edbc" stroke-width="3"><rect x="72" y="170" width="240" height="190" rx="20"/><rect x="480" y="170" width="240" height="190" rx="20"/><rect x="888" y="170" width="240" height="190" rx="20"/></g><g fill="#d9eee3"><text x="192" y="240" font-size="22" font-weight="700">Signed receipts</text><text x="192" y="276" font-size="16">exact request + response bytes</text><text x="600" y="240" font-size="22" font-weight="700">Portable bundle</text><text x="600" y="276" font-size="16">hand it to anyone</text><text x="1008" y="240" font-size="22" font-weight="700">Offline verify</text><text x="1008" y="276" font-size="16">on a clean laptop</text></g></g>
+  <g fill="none" stroke="#a8edbc" stroke-width="4" marker-end="url(#a)"><path d="M325 265h140"/><path d="M733 265h140"/></g>
+  <g fill="#76d997"><path d="M158 320l25 23 50-58"/><path d="M566 320l25 23 50-58"/><path d="M974 320l25 23 50-58"/></g>
+</svg>

@@ -10,6 +10,8 @@
 [![Anthropic compatible](https://img.shields.io/badge/Anthropic-compatible-16a34a?style=flat-square)](#how-it-works)
 [![Local-first](https://img.shields.io/badge/local--first-MIT-16a34a?style=flat-square)](#philosophy)
 
+![An illustrated signed receipt connected by a hash chain to a local vault](docs/assets/dontlie-receipt-chain-hero.png)
+
 ---
 
 ```bash
@@ -72,20 +74,7 @@ The wedge is honesty. We don't claim AI is truthful. We claim the record is tamp
 
 ## How it works
 
-```
-┌──────────────┐    ┌─────────────────┐    ┌──────────────┐
-│  Your app    │───▶│  Don't-Lie proxy │───▶│  AI provider │
-│  (SDK)       │    │  (localhost)     │    │  (OpenAI,    │
-└──────────────┘    └────────┬──────────┘    │   Anthropic) │
-                            │               └──────────────┘
-                            ▼
-                    ┌──────────────┐
-                    │  SQLite vault │
-                    │  - SHA-256    │
-                    │  - Ed25519    │
-                    │  - chain v2   │
-                    └──────────────┘
-```
+![Application requests route through the Don't-Lie proxy to an AI provider while signed, hash-linked receipts are stored locally](docs/assets/dontlie-architecture.svg)
 
 1. Point any OpenAI-compatible client at `http://localhost:8080/v1`
 2. Don't-Lie forwards the request and captures the exact request/response
@@ -93,6 +82,10 @@ The wedge is honesty. We don't claim AI is truthful. We claim the record is tamp
 4. Verify offline with `dontlie verify`
 5. Export a portable bundle with `dontlie export --bundle`
 6. Render an HTML proof report with `python3 demo/scripts/render_report.py`
+
+### Verify anywhere
+
+![Signed receipts become a portable bundle that anyone can verify offline on a clean laptop](docs/assets/dontlie-offline-verify.svg)
 
 ---
 
