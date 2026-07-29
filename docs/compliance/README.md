@@ -1,6 +1,6 @@
 # Don't-Lie compliance memos
 
-Per-regime guides for the buyers we name in `PRODUCT_STRATEGY.md`: regulated-industry AI engineers in healthcare, legal, financial services, and the EU. Each memo is **2 pages** and answers three questions in plain language:
+Per-regime guides for our primary buyers: regulated-industry AI engineers in healthcare, legal, financial services, and the EU. Each memo is **2 pages** and answers three questions in plain language:
 
 1. What does the regime require?
 2. What does a Don't-Lie receipt prove or not prove?

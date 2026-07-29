@@ -207,16 +207,14 @@ Full transcript: [demo/output/BENCHMARK.md](demo/output/BENCHMARK.md)
 ## Documentation
 
 - [LAUNCH.md](LAUNCH.md) — customer-facing release notes
-- [PITCH.md](PITCH.md) — one-page product brief
-- [PRODUCT_STRATEGY.md](PRODUCT_STRATEGY.md) — wedge, urgent buyer, pricing rule
-- [COMPETITOR_RESEARCH.md](COMPETITOR_RESEARCH.md) — landscape scan
-- [COMPETITOR_RESEARCH.md](COMPETITOR_RESEARCH.md) — public landscape and differentiation plan
+- [competitive.md](competitive.md) — public landscape and positioning
 - [PRIVACY.md](PRIVACY.md) — privacy commitments
 - [SECURITY.md](SECURITY.md) — threat model and reporting
 - [PLDG.md](PLDG.md) — No-Phone-Home pledge (enforced by `test_phone_home.py`)
-- [OUTREACH_AUDIENCES.md](OUTREACH_AUDIENCES.md) — 5-audience outbound playbook
-- [company/ONE_PAGER.md](company/ONE_PAGER.md) — investor-facing one-pager
 - [company/BRAND.md](company/BRAND.md) — style guide
+- [company/PRIVACY_POLICY.md](company/PRIVACY_POLICY.md)
+- [company/TERMS_OF_SERVICE.md](company/TERMS_OF_SERVICE.md)
+- [company/DPA.md](company/DPA.md) — Data Processing Agreement
 
 ---
 

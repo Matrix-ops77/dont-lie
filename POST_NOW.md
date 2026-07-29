@@ -153,7 +153,7 @@ The video is the highest-leverage ship. **Post Tweet 1 + the video first.** Ever
 If you want me to:
 - Install fly CLI and walk through the deploy
 - Try the cloudflared tunnel again (maybe a fresh morning)
-- Draft the cold emails from `OUTREACH_BOMB.md`
+- Draft the cold emails from the outreach playbook (held internally)
 - Generate more videos (different stories: "the chain restored", "the import on a clean laptop")
 
 Just say the word.

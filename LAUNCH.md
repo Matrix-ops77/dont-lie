@@ -77,7 +77,7 @@ transcript.
 ## Pricing
 
 The current build is free and local-only. Encrypted cross-device sync
-and shared namespaces are planned (see `pricing_analysis.md`).
+and shared namespaces are planned for the Compliance tier (target: Q4).
 
 ## Limits (current release)
 

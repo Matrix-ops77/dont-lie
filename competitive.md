@@ -1,8 +1,9 @@
 # Competitive position
 
 The signed-AI-evidence category is active. Don't-Lie should not claim that it
-invented signed receipts or that no competitor exists. The detailed, dated scan
-is in [`COMPETITOR_RESEARCH.md`](COMPETITOR_RESEARCH.md).
+invented signed receipts or that no competitor exists. This file is the
+public-facing summary; the full dated scan and per-competitor feature
+comparison is held internally.
 
 ## Direct categories
 
