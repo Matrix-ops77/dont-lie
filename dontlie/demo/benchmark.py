@@ -89,6 +89,38 @@ def _measure_export() -> dict:
     }
 
 
+def _measure_render() -> dict:
+    """Time the HTML evidence report render on the captured chain.
+
+    The render reads a portable bundle (not the live vault) and
+    produces a self-contained HTML file with no external assets.
+    """
+    # Use the JSONL export we just wrote and wrap it in a single
+    # bundle dict so render_report can read it. We don't need a
+    # separate bundle export step here — the render tool accepts
+    # JSONL-shaped bundles too, but the single-object bundle is
+    # the canonical form. Build it in-process.
+    import json
+    from dontlie.demo.render_report import render as render_report
+
+    jsonl_path = Path(os.environ["DONTLIE_DB"]).with_suffix(".bench-export.jsonl")
+    rows = [json.loads(line) for line in jsonl_path.read_text().splitlines() if line.strip()]
+    bundle_path = jsonl_path.with_suffix(".bench-bundle.json")
+    bundle_path.write_text(json.dumps({"receipts": rows}) + "\n", encoding="utf-8")
+
+    out = jsonl_path.with_suffix(".bench-report.html")
+    t0 = time.perf_counter()
+    html = render_report(bundle_path)
+    out.write_text(html, encoding="utf-8")
+    elapsed = time.perf_counter() - t0
+    return {
+        "n": len(rows),
+        "elapsed_sec": round(elapsed, 4),
+        "render_per_sec": round(len(rows) / elapsed, 2) if elapsed > 0 else None,
+        "html_bytes": out.stat().st_size,
+    }
+
+
 def _machine_info() -> dict:
     return {
         "python": sys.version.split()[0],
@@ -153,12 +185,18 @@ def main() -> int:
     export = _measure_export()
     print(f"   {export['export_per_sec']} rows/sec, {export['jsonl_bytes']} bytes", file=sys.stderr)
 
+    print("==> rendering HTML report", file=sys.stderr)
+    render_meas = _measure_render()
+    print(f"   {render_meas['render_per_sec']} receipts/sec, "
+          f"{render_meas['html_bytes']} bytes", file=sys.stderr)
+
     transcript = {
         "machine": machine,
         "workdir": str(work),
         "sign": sign,
         "verify": verify,
         "export": export,
+        "render": render_meas,
         "db_sha256": _sha256_file(Path(os.environ["DONTLIE_DB"])),
     }
     args.transcript.parent.mkdir(parents=True, exist_ok=True)

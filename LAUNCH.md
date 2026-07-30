@@ -76,8 +76,13 @@ transcript.
 
 ## Pricing
 
-The current build is free and local-only. Encrypted cross-device sync
-and shared namespaces are planned for the Compliance tier (target: Q4).
+The current v0.3.x release is MIT-licensed and free, forever, for
+local-first use. There is no hosted service today. Encrypted
+cross-device sync and shared namespaces are research items on the
+roadmap but are **not** promised for any specific quarter. When
+(if ever) a hosted service ships, its terms and pricing will be
+documented separately and the MIT-licensed local-first product will
+not be degraded to push users to the hosted service.
 
 ## Limits (current release)
 

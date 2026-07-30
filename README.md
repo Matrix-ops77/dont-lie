@@ -4,8 +4,8 @@
 > A drop-in proxy that signs every AI call, hash-links it to the last one, and lets anyone verify it offline on a clean machine.
 
 [![MIT](https://img.shields.io/badge/license-MIT-16a34a?style=flat-square)](LICENSE)
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-16a34a?style=flat-square)](https://www.python.org)
-[![Tests](https://img.shields.io/badge/tests-356%20passing-16a34a?style=flat-square)](#benchmarks)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-16a34a?style=flat-square)](https://www.python.org)
+[![Tests](https://img.shields.io/badge/tests-412%20passing-16a34a?style=flat-square)](#benchmarks)
 [![OpenAI compatible](https://img.shields.io/badge/OpenAI-compatible-16a34a?style=flat-square)](#how-it-works)
 [![Anthropic compatible](https://img.shields.io/badge/Anthropic-compatible-16a34a?style=flat-square)](#how-it-works)
 [![Local-first](https://img.shields.io/badge/local--first-MIT-16a34a?style=flat-square)](#philosophy)
@@ -156,7 +156,7 @@ dontlie/
 ├── clients/            # SDK adapters (LangChain, LlamaIndex)
 ├── demo/               # Offline + live runbooks
 ├── site/               # Landing, demo, explorer, checkout
-└── tests/              # 356 tests, < 60s
+└── tests/              # 412 tests, < 60s
 ```
 
 ---
@@ -170,31 +170,43 @@ dontlie/
 
 ---
 
-## Pricing
+## Pricing (v0.3.x — local-first only)
 
-| Tier | Price | Audience |
-|---|---|---|
-| Free · Local | $0 | Solo devs, OSS maintainers |
-| Developer | $19/mo | Indie devs, freelancers |
-| Team | $299/mo | Small teams (5–25) shipping agents |
-| Enterprise | $25K+/yr | Regulated teams (50–500) |
+| Tier | Price | Status | Audience |
+|---|---|---|---|
+| Local (MIT) | $0 | **Available now** | Solo devs, OSS maintainers, anyone running on their own hardware |
 
-**Free tier never gates integrity, signer, provider, or chain verification.** That's the wedge.
+The Developer, Team, and Enterprise tiers above represent a planned
+hosted service that does not yet exist. They are listed for context
+only. **Do not budget against them.** The hosted service will
+launch under a separate agreement and these tiers will be replaced
+with final pricing and a status of "Available" at that time.
+
+**The local-first software is and will remain MIT-licensed.** The
+free tier is not a teaser for a future paywall. It is the product.
+If a hosted service ships, the local-first product is not degraded
+to push users to it. The integrity, signer, provider, and chain
+verification features that are free today will remain free in the
+local-first product.
 
 ---
 
 ## Benchmarks
 
-Measured on Apple M-class hardware, single-threaded:
+Measured via `python3 -m dontlie.demo.benchmark 5000` on Apple M-class
+hardware, Python 3.10, dontlie 0.3.4, single-threaded. Numbers are
+rounded conservatively and re-run by anyone with
+`python3 -m dontlie.demo.benchmark`:
 
-| Operation | Throughput |
-|---|---|
-| Sign + store | ~300 receipts/sec |
-| Verify | ~1,900 receipts/sec |
-| Bundle export | ~2,400 receipts/sec |
-| HTML report render | ~80 receipts/sec |
+| Operation | Throughput | Notes |
+|---|---|---|
+| Sign + store | ~380 receipts/sec | p50 latency ~2.1 ms, p95 ~5.1 ms |
+| Verify chain | ~3,000 receipts/sec | 12,003 receipts verified in the captured run |
+| Export JSONL | ~15,000 rows/sec | 10 MB written for 12,003 rows (~830 B/receipt) |
+| HTML report render | ~29,000 receipts/sec | 2.3 MB self-contained HTML, no external assets |
 
-Full transcript: [demo/output/BENCHMARK.md](demo/output/BENCHMARK.md)
+Full machine-pinned transcript:
+[demo/output/benchmark.transcript.json](demo/output/benchmark.transcript.json)
 
 ---
 
@@ -258,7 +270,7 @@ landed in commit `50dd58c` (v0.3.3). The old workspace at
 
 ## Philosophy
 
-> **The free tier must always let a solo developer prove integrity, signer, provider, and chain.** If we ever gate those behind a paywall, the wedge collapses, because the wedge is honesty about the proof, and honesty is not a paid feature.
+> **The local-first product is MIT-licensed and will stay that way.** Integrity, signer, provider, and chain verification are free in the local-first software today and will remain free in the local-first software tomorrow. A hosted service may eventually add operational conveniences on top, but it cannot paywall what already works on your hardware, because the wedge is honesty about the proof, and honesty is not a paid feature.
 
 Don't-Lie is a notary, not a judge. We record what the model said. We don't claim it was right. That narrower claim is defensible in court, in audit, and in your customer's security review.
 

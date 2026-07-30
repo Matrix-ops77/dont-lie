@@ -34,6 +34,7 @@ test = [
 
 [project.scripts]
 dontlie = "dontlie.cli:main"
+dontlie-passive = "onboard.cli:main"
 
 [project.urls]
 Homepage = "https://dontlie.pages.dev"
@@ -51,6 +52,14 @@ include = ["dontlie*", "onboard*"]
 # tamper_walkthrough, cleanup, benchmark) are normal sub-modules and
 # don't need a package-data directive — they ship automatically.
 "dontlie.demo" = ["*.sh"]
+# The `dontlie-passive` shim is the user-facing entry point for the
+# `onboard` package's passive instrumentation. It MUST be in the
+# wheel — without it, `pip install dontlie` followed by running
+# `dontlie-passive` fails with "command not found" because the
+# package ships only `onboard/cli.py` (a module) and not the
+# `onboard/dontlie-passive` script that imports from it. The
+# quoted key is required by setuptools for package-data targets.
+"onboard" = ["dontlie-passive"]
 
 [tool.ruff]
 # Scope lint to the core product. Clients and demos have their own rules.

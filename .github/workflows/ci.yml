@@ -9,7 +9,16 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    # fail-fast: false is non-negotiable here. With three Python
+    # versions in the matrix, fail-fast: true (the default) makes
+    # GitHub cancel the other two as soon as one fails, which
+    # hides whether the failure is version-specific or universal
+    # and turns every red CI into a coin-flip. We want every
+    # version's result on every run so we can see the real picture
+    # and not pretend a flaky Python-version-specific test is a
+    # universal product bug.
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.10", "3.11", "3.12"]
     steps:
@@ -35,6 +44,31 @@ jobs:
         run: |
           python -m pip install build
           python -m build
+      - name: Wheel install smoke test
+        # The unittest pass above runs against an *editable install*
+        # (`pip install -e .`). That hides a class of bug where a
+        # resource lives in the source tree but never makes it into
+        # the wheel — e.g. the `onboard/dontlie-passive` launcher
+        # script that ships only via `[tool.setuptools.package-data]`.
+        # This step installs the built wheel into a fresh venv and
+        # asserts that the public CLI entry points and the
+        # package-data scripts are actually on disk and executable.
+        # This is the single most important safety net before a
+        # PyPI release: it proves the artifact users will install
+        # contains the artifact the test suite claims to cover.
+        run: |
+          set -euo pipefail
+          python -m venv /tmp/wheel-smoke
+          /tmp/wheel-smoke/bin/pip install --quiet --upgrade pip
+          /tmp/wheel-smoke/bin/pip install --quiet dist/dontlie-*-py3-none-any.whl
+          # Public console scripts must resolve and print the right
+          # version banner. `--version` is wired in cli.py:709.
+          /tmp/wheel-smoke/bin/dontlie --version
+          /tmp/wheel-smoke/bin/dontlie version
+          # The onboard package-data script must be present at its
+          # declared location AND on PATH as a console script.
+          test -x "$(/tmp/wheel-smoke/bin/python -c 'import onboard, os; print(os.path.join(os.path.dirname(onboard.__file__), "dontlie-passive"))')"
+          /tmp/wheel-smoke/bin/dontlie-passive
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
