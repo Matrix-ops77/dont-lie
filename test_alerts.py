@@ -32,19 +32,27 @@ class _CollectingHandler(BaseHTTPRequestHandler):
 
 
 class WebhookDeliveryTest(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls) -> None:
+    # Use per-test setUp/tearDown instead of setUpClass/tearDownClass.
+    # The class-level lifecycle was flaky: when unittest was driven by
+    # `loader.discover(...)` on a slow CI runner, the setUpClass-side
+    # server attribute was not always visible to the test method
+    # instance, producing an intermittent `AttributeError: 'X' object
+    # has no attribute 'port'` in the middle of the suite. A per-test
+    # HTTP server is cheap (a daemon thread, a few hundred us to
+    # bind) and removes the class-vs-instance visibility ambiguity.
+
+    def setUp(self) -> None:
         _CollectingHandler.received = []
         _CollectingHandler.status = 200
-        cls.server = ThreadingHTTPServer(("127.0.0.1", 0), _CollectingHandler)
-        cls.port = cls.server.server_address[1]
-        cls.thread = Thread(target=cls.server.serve_forever, daemon=True)
-        cls.thread.start()
+        self.server = ThreadingHTTPServer(("127.0.0.1", 0), _CollectingHandler)
+        self.port = self.server.server_address[1]
+        self.thread = Thread(target=self.server.serve_forever, daemon=True)
+        self.thread.start()
 
-    @classmethod
-    def tearDownClass(cls) -> None:
-        cls.server.shutdown()
-        cls.server.server_close()
+    def tearDown(self) -> None:
+        self.server.shutdown()
+        self.server.server_close()
+        self.thread.join(timeout=2)
 
     def test_send_event_posts_signed_payload(self) -> None:
         _CollectingHandler.received.clear()
