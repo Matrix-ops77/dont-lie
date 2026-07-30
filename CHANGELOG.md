@@ -1,5 +1,54 @@
 # Changelog
 
+## 0.3.5 — 2026-07-30
+
+Stress-test hardening for the receipt system before launch.
+
+- `cmd_witness_attest` now recomputes the canonical payload hash locally and
+  refuses to attest a tampered receipt. The witness service is a hash notary
+  by design; the CLI was the place to enforce "what I sign matches what's in
+  the vault."
+- `storage._connect()` defensively wraps a `str` `db_path` in `Path()` so
+  callers that pass `args.vault` (a string) don't crash on
+  `db_path.parent.mkdir`.
+- `onboard/dontlie-passive` is now actually tracked in git with mode
+  `100755`; it was previously excluded by `.gitignore`, which made every
+  fresh checkout (and the CI run) fail
+  `test_zero_arg_executable_works_before_activation`.
+- Test suite now runs cleanly on Python 3.10, 3.11, 3.12 from a fresh
+  checkout — no `PYTHONPATH=REPO_ROOT` shadowing, no port collisions on
+  the demo, no `httpx`/`cryptography` missing in subprocess tests.
+- Release workflow now treats the wheel-install smoke test as a hard
+  gate before publishing to PyPI or creating a GitHub release.
+- Public paperwork (Terms, Privacy, DPA, README pricing) rewritten to
+  match v0.3.x local-first reality; hosted-service terms are drafted but
+  labeled "when the hosted service ships."
+
+## 0.3.4 — 2026-07-29
+
+- Three release-blocking onboarding bugs reported by Codex in a fresh
+  venv: missing `dontlie-passive` on PATH after `pip install`,
+  zero-arg invocation before activation, and the launcher pointing at a
+  non-existent bootstrap directory.
+- Encryption + verify-url + phone-home tests now respect whether
+  `dontlie` is already installed in the test runner.
+- Demo scripts refactored into `dontlie/demo/` and hardened against
+  port collisions and slow CI runners.
+- Live provider tests gated behind `DONTLIE_RUN_LIVE_TESTS=1` so CI
+  never makes silent network calls.
+
+## 0.3.3 — 2026-07-28
+
+- Force-push to a clean repo history to drop early scaffold commits
+  and start the public history at a clean v0.3.x state.
+- README rewritten as a visual story; the dark, screenshot-driven
+  layout matches the v0.3.x visual direction.
+- Internal strategy / sales / personal docs moved to a private
+  `dontlie-internal` repo via `git-filter-repo` + force-push.
+- GitHub repo renamed `Matrix-ops77/dontlie` → `Matrix-ops77/dont-lie`
+  via the API; the Python package name stays `dontlie` to match the
+  CLI.
+
 ## 0.2.0 — 2026-07-24
 
 - Added chain-v2 previous-payload SHA-256 links and parent continuity checks.
