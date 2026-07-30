@@ -68,10 +68,10 @@ fi
 MOCK_PID=$!
 printf '%s\n' "$MOCK_PID" > "$WORK/mock.pid"
 
-# Wait up to 5s for the mock provider to actually be listening. The
+# Wait up to 15s for the mock provider to actually be listening. The
 # `sleep 0.5` was racey on slow CI runners where Python startup +
-# import can exceed 500ms.
-for _ in $(seq 1 50); do
+# import can exceed 500ms. 15s is generous for any Linux runner.
+for _ in $(seq 1 150); do
     if curl -fsS "http://127.0.0.1:$MOCK_PORT/health" >/dev/null 2>&1; then
         break
     fi
@@ -84,7 +84,7 @@ PROXY_PID=$!
 printf '%s\n' "$PROXY_PID" > "$WORK/proxy.pid"
 
 # Same wait-for-listen pattern for the proxy.
-for _ in $(seq 1 50); do
+for _ in $(seq 1 150); do
     if curl -fsS "http://127.0.0.1:$PROXY_PORT/_dontlie/health" >/dev/null 2>&1; then
         break
     fi
