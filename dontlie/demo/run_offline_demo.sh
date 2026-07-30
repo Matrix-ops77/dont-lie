@@ -67,13 +67,29 @@ fi
 "$PY" -m dontlie.demo.mock_provider --port "$MOCK_PORT" >"$WORK/mock.log" 2>&1 &
 MOCK_PID=$!
 printf '%s\n' "$MOCK_PID" > "$WORK/mock.pid"
-sleep 0.5
+
+# Wait up to 5s for the mock provider to actually be listening. The
+# `sleep 0.5` was racey on slow CI runners where Python startup +
+# import can exceed 500ms.
+for _ in $(seq 1 50); do
+    if curl -fsS "http://127.0.0.1:$MOCK_PORT/health" >/dev/null 2>&1; then
+        break
+    fi
+    sleep 0.1
+done
 
 # --- start dontlie proxy ---
 "$PY" -m dontlie proxy --port "$PROXY_PORT" >"$WORK/proxy.log" 2>&1 &
 PROXY_PID=$!
 printf '%s\n' "$PROXY_PID" > "$WORK/proxy.pid"
-sleep 1
+
+# Same wait-for-listen pattern for the proxy.
+for _ in $(seq 1 50); do
+    if curl -fsS "http://127.0.0.1:$PROXY_PORT/_dontlie/health" >/dev/null 2>&1; then
+        break
+    fi
+    sleep 0.1
+done
 
 cleanup() {
     kill "$PROXY_PID" "$MOCK_PID" 2>/dev/null || true
