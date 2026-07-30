@@ -2,12 +2,14 @@
 
 Generates a URL like:
 
-    https://queued-inlet-pmqa.here.now/#v=BASE64URL(JSON)
+    <operator-supplied-base-url>/#v=BASE64URL(JSON)
 
-Where the JSON is a single-receipt portable bundle. Anyone with the
-URL can open it in a browser and verify the receipt entirely
-client-side, with no network calls, no server, and no Dont-Lie
-account.
+Where the JSON is a single-receipt portable bundle. The base URL is
+supplied by the operator (typically the URL of the verifier they
+operate — the shipped `site/demo.html` Browser Proof Lab, or a self-
+hosted verifier). Anyone with the URL can open it in a browser and
+verify the receipt entirely client-side, with no network calls, no
+server, and no Dont-Lie account.
 
 This is a key unfair-advantage: the receipt and the verification
 tools travel together in a single link. The user can paste the URL
@@ -56,6 +58,7 @@ from __future__ import annotations
 import base64
 import binascii
 import json
+import os
 from typing import Any
 from urllib.parse import urlparse, urlunparse
 
@@ -63,12 +66,15 @@ from . import sign as signing
 from . import storage
 
 FORMAT_VERSION = 1
-# Where the live verifier is hosted. The CLI prints this in the URL it
-# generates; users can also host their own verifier and override.
-DEFAULT_VERIFIER_URL = "https://queued-inlet-pmqa.here.now/"
+# Where the embedded verify URL points by default. There is no
+# Don't-Lie-operated verifier; the operator passes --base-url or
+# sets $DONTLIE_VERIFY_URL_BASE. The CLI's default is a blank
+# string — the operator must supply their own.
+DEFAULT_VERIFIER_URL = os.environ.get("DONTLIE_VERIFY_URL_BASE", "")
 # Path on the verifier URL where the verify-hash flow lives. The
-# deployed site is the static index.html; the hash fragment is read
-# by app.js on page load.
+# canonical implementation is `site/demo.html` (the Browser Proof
+# Lab) which reads the hash fragment on page load. If the operator
+# runs their own verifier, they point --base-url at it.
 DEFAULT_VERIFIER_PATH = "/"
 
 
@@ -84,11 +90,14 @@ def _b64url_decode(s: str) -> bytes:
     return base64.urlsafe_b64decode(s + pad)
 
 
-def build_payload(receipt: storage.Receipt) -> dict[str, Any]:
+def build_payload(receipt: storage.Receipt, base_url: str = "") -> dict[str, Any]:
     """Build the JSON dict that gets encoded into the URL.
 
     The dict is JSON-serializable. The caller is responsible for
-    base64url-encoding and adding the URL prefix.
+    base64url-encoding and adding the URL prefix. The ``base_url``
+    is the verifier URL the operator chose to embed; it is the
+    ``url`` field of the encoded payload and is operator-supplied,
+    not operator-defaulted.
     """
     # The canonical form is the exact bytes the signer signed.
     body_canon = storage._canonical_payload(receipt).decode("utf-8")
@@ -114,7 +123,7 @@ def build_payload(receipt: storage.Receipt) -> dict[str, Any]:
 
     return {
         "v": FORMAT_VERSION,
-        "url": "https://dontlie.pages.dev",
+        "url": base_url,
         "issued_at": _now_iso(),
         "receipt": rec_dict,
         "public_key_pem": signing.public_key_pem(),
@@ -132,13 +141,19 @@ def encode_url(receipt: storage.Receipt, base_url: str = DEFAULT_VERIFIER_URL) -
 
     Args:
         receipt: the receipt to encode
-        base_url: the verifier URL (default: queued-inlet-pmqa.here.now)
+        base_url: the verifier URL (default: $DONTLIE_VERIFY_URL_BASE or empty)
 
     Returns:
         a full URL with the receipt data in the fragment, ready to
-        paste into chat, email, or a regulatory submission.
+        paste into chat, email, or a regulatory submission. The
+        URL must point at a verifier the operator has vetted —
+        there is no Don't-Lie-operated verifier service.
     """
-    payload = build_payload(receipt)
+    if not base_url:
+        raise ValueError(
+            "verifier URL is required: pass --base-url or set $DONTLIE_VERIFY_URL_BASE"
+        )
+    payload = build_payload(receipt, base_url=base_url)
     json_bytes = json.dumps(payload, separators=(",", ":"), sort_keys=True).encode("utf-8")
     encoded = _b64url_encode(json_bytes)
 

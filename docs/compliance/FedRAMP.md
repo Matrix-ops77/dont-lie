@@ -35,9 +35,9 @@
 ## What you need to do additionally
 
 1. **Ask the right boundary question.** Per https://truvisory.com/federal/verify-ai-contractor-cmmc-fedramp/, the first question to an AI vendor is not "are you FedRAMP authorized?" but **"is the specific generative-AI or inference component my users will call inside your authorization boundary?"** If prompts, outputs, or context windows leave the boundary, the authorization doesn't cover them. Run the AI call through Don't-Lie *inside* the boundary, and the Receipt is itself inside the boundary.
-2. **Pick the tier based on boundary.** Solo (free, local) and Pro ($19/seat/mo, local + cloud sync) are out-of-scope for FedRAMP — no federal cloud involvement, no Don't-Lie-controlled systems. The **Compliance tier** ($999/mo) is the only tier in which any data leaves the customer's machine, and even then the data lives in the customer's *own* S3 bucket (customer-controlled KMS, customer-controlled Object Lock). Don't-Lie itself is not a FedRAMP service provider; the customer is.
-3. **Export Receipts as OSCAL fragments for KSI collection.** FedRAMP 20x wants machine-readable evidence. A v2 that emits OSCAL fragments directly from the vault maps to KSIs in the `monitoring` and `audit-logging` families. Today's `dontlie export --oscal-fragment` is the first cut; track this in the Compliance tier roadmap.
-4. **Anchor the chain via the witness notary for cross-agency admissibility.** The witness notary's co-signature is the strongest available evidence that the timestamp was not backdated. For a federal record subject to NARA's General Records Schedule 6.5 (electronic records), the witness notary's RFC 3161 timestamp is the artifact a federal records officer will accept.
+2. **Don't-Lie is not a FedRAMP service.** Don't-Lie is a local-first Python package the operator runs on their own hardware, inside the enclave. The Receipt does not introduce a FedRAMP authorization boundary of its own; the operator's enclave boundary governs it. The vault file lives in the operator's storage; the witness is a process the operator runs (or contracts for) on their own infrastructure.
+3. **Export Receipts as OSCAL fragments for KSI collection.** FedRAMP 20x wants machine-readable evidence. The vault can be exported and mapped to KSIs in the `monitoring` and `audit-logging` families; that mapping is the operator's work.
+4. **Anchor the chain via a witness notary the operator runs for cross-agency admissibility.** The witness notary's co-signature is the strongest available evidence that the timestamp was not backdated. For a federal record subject to NARA's General Records Schedule 6.5 (electronic records), an RFC 3161 timestamp from a witness the operator vets is the artifact a federal records officer will accept. Don't-Lie ships a `dontlie witness-service` subcommand so the operator can run the witness themselves.
 5. **For "High-Impact" AI per OMB M-25-21:** ensure every Receipt carries the model version (in `model` field), the full prompt (`prompt`), and the full response (`response`). Don't-Lie's schema already does this; do not redact prompts/responses before signing — the value of the Receipt is byte-exactness.
 6. **Document the Reasonable Doubt panel for the 3PAO.** The 3PAO's standard question is "what does the receipt not prove?" Have a written answer ready. The five RD items are: (1) who held the key, (2) whether the proxy process was compromised, (3) whether the call was authorized, (4) whether the upstream provider is itself authorized, (5) whether the timestamp is anchored. Each has a separate control.
 7. **For 20x KSI automation, integrate `dontlie verify` into the continuous-monitoring pipeline.** 20x's 80% automation target means control evidence must be machine-checkable. The Receipt's signed JSON is already machine-checkable. The `dontlie trust-score --json` exit code is a candidate for a KSI "audit-log-integrity" check.
@@ -72,14 +72,14 @@ A federal agency operating a FedRAMP-Moderate enclave wants to deploy an LLM-bac
 6. Hand the 3PAO a portable bundle, run `dontlie verify` on a clean 3PAO laptop, get a 30-second yes/no on chain integrity
 7. The 3PAO maps the Receipt to KSIs in the audit-logging and monitoring families
 
-Total integration: 1 day. Total operator cost: $999/mo for the Compliance tier (HSM-backed key isolation, witness notary, S3 Object Lock).
+Total integration: 1 day. Total operator cost: software is free under MIT; the storage, the witness, the enclave deployment, and the 3PAO engagement are not.
 
 ## Where to get help
 
 - `docs/integrations/SIEM.md` — wire the receipts into the agency's existing SIEM
-- The witness notary (`docs/WITNESS_PROTOCOL.md` v0.4) — provides the timestamp anchoring
-- The Compliance tier includes a designated success engineer familiar with FedRAMP and OMB M-25-21
-- For a hosted Compliance tier, talk to us about an EU/UK-only witness notary for cross-border deployments under FISMA + the EU AI Act
+- `docs/groundtruth.md` — vendor-independent route attestation (opt-in lane)
+- GitHub Issues: open a question at `github.com/Matrix-ops77/dont-lie/issues`
+- For EU/UK cross-border deployments under FISMA + the EU AI Act, run your own witness notary in the relevant jurisdiction
 
 ## Sources
 

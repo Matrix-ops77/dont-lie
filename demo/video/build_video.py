@@ -81,7 +81,7 @@ def render_frame(events, frame_idx):
 
     draw.rectangle([0, HEIGHT - 30, WIDTH, HEIGHT], fill=(10, 10, 12))
     draw.text((28, HEIGHT - 24),
-              f"frame {frame_idx:04d}/{TOTAL_FRAMES}  ·  dontlie.dev/demo",
+              f"frame {frame_idx:04d}/{TOTAL_FRAMES}  ·  github.com/Matrix-ops77/dont-lie",
               font=FONT_SANS, fill=(110, 110, 120))
     return img
 

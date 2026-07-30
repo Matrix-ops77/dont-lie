@@ -45,7 +45,7 @@ network.
 | Command | What it does | Network target | Opt-in |
 |---|---|---|---|
 | `dontlie proxy --upstream https://api.openai.com` | MITM proxy for an LLM SDK | the upstream LLM API | explicit `--upstream` flag required |
-| `dontlie witness-attest <id>` | co-sign a receipt with the hosted witness | the configured witness URL | explicit command + key fingerprint printed first |
+| `dontlie witness-attest <id>` | co-sign a receipt with a third-party witness | the configured witness URL | explicit command + key fingerprint printed first |
 | `dontlie witness-coverage` | co-sign every receipt in the namespace | the configured witness URL | explicit command |
 | `dontlie anchor --remote` | anchor to an external TSA | the configured TSA URL | `--remote` flag required |
 | `dontlie import --from-url <url>` | import a remote export | the URL | `--from-url` flag required |
@@ -55,25 +55,31 @@ Every opt-in command also respects the `DONTLIE_OFFLINE=1` environment
 variable. If that is set, the opt-in command will refuse to make the
 network call and exit with a clear error.
 
-## The web UI (deployed at queued-inlet-pmqa.here.now)
+## The web UI (`site/index.html` and `site/demo.html`)
 
-The web UI is a static site served by here.now. It contains:
+The public site is two static HTML files in the `site/` folder. The
+operator hosts them where they choose — S3, GitHub Pages, Cloudflare
+Pages, or `python -m http.server` on their own laptop. There is no
+"Don't-Lie-operated" hosting of these files; the operator picks
+the host.
+
+The shipped pages contain:
 
 - No analytics scripts (no GA, no Plausible, no Fathom)
 - No third-party fonts (uses the system font stack)
-- No CDN fetches (every byte is in the deployed bundle)
+- No CDN fetches (every byte is in the file)
 - No "call home" to check for updates
 - No cookies, no localStorage of any user data
 - No service worker (so it cannot run in the background)
 
 You can confirm this by:
 
-1. Opening the site in your browser
+1. Opening the file in a browser (`file://` works for both files)
 2. Opening the Network panel in DevTools
 3. Watching the page load
 
 The only network requests you'll see are for the static assets
-themselves (HTML, CSS, JS, images) served by here.now. There are no
+themselves, served by the host the operator chose. There are no
 requests to any other origin.
 
 ## How to verify the pledge yourself
@@ -90,8 +96,8 @@ dontlie verify
 dontlie trust-score
 sudo ifconfig en0 up
 
-# 3. Audit the deployed web UI
-# Open https://queued-inlet-pmqa.here.now/ in a browser
+# 3. Audit site/index.html and site/demo.html
+# Open the file in a browser (file:// or via any static host)
 # Open DevTools -> Network
 # Verify there are zero third-party requests
 ```

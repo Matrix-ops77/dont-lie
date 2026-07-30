@@ -74,14 +74,21 @@ dontlie tail --follow --json | while read -r line; do
 done
 ```
 
-## S3 (long-term archive for HIPAA / SOC 2 retention)
+## S3 (long-term archive — example: the operator's own retention policy)
+
+This section is an **example** of one way an operator might keep an
+off-vault copy of the daily bundle. Don't-Lie does not provide
+retention storage; you choose the storage, the retention period, and
+the access policy. The example below uses 7 years to match a typical
+audit-retention requirement, but the period is yours to set.
 
 ```bash
-# Daily: bundle + upload to S3 with object lock for 7 years
+# Daily: export the bundle, upload to your own S3 bucket with Object Lock
+# for whatever retention period your compliance program requires.
 BUCKET="s3://my-audit-vault/dontlie/"
 python3 -m dontlie export /tmp/daily.bundle.json --bundle
 aws s3 cp /tmp/daily.bundle.json "$BUCKET$(date +%Y-%m-%d).bundle.json" \
-  --object-lock-mode COMPLIANCE --object-lock-retain-until-date 2033-07-28T00:00:00Z
+  --object-lock-mode COMPLIANCE --object-lock-retain-until-date 2033-07-30T00:00:00Z
 ```
 
 ## Why this is the right shape

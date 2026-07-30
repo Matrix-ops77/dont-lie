@@ -40,7 +40,7 @@
 ## What you need to do additionally
 
 1. **Classify your system as in-scope or out-of-scope for "consequential decision" ADMT.** If your system makes or substantially influences a decision in education, employment, financial services, healthcare, housing, insurance, legal services, or essential government services, the ADMT Act applies. The Receipt is in-scope from day one; the Receipt does not tell you whether the AI is in-scope.
-2. **Run the receipt vault inside the consumer's data jurisdiction.** The Receipt contains the consumer's personal data (potentially). The ADMT Act interacts with the Colorado Privacy Act (CPA) and (if the consumer is in the EU/UK) GDPR. Local-first is the cleanest answer; the Solo tier keeps the vault on the deployer's machine. The Compliance tier offers a customer-controlled S3 bucket in the deployer's chosen region.
+2. **Run the receipt vault inside the consumer's data jurisdiction.** The Receipt contains the consumer's personal data (potentially). The ADMT Act interacts with the Colorado Privacy Act (CPA) and (if the consumer is in the EU/UK) GDPR. Local-first is the cleanest answer: the vault lives on the deployer's machine, in the deployer's chosen region. Backing up to S3 Object Lock is the deployer's choice; Don't-Lie does not host storage.
 3. **Tag every receipt that supports a consequential decision.** Pattern:
    ```python
    with dontlie_agent.installed() as h:
@@ -105,13 +105,12 @@ A Colorado-based employer uses an AI-assisted resume screener that filters appli
 
 If, mid-year, the developer (a third-party AI vendor) discovers a discrimination risk in the screener model, the developer logs a receipt of `type:incident discovery:algorithmic_discrimination` and the 90-day AG disclosure clock starts at that timestamp. The deployer can then point to the receipt and say "we knew on day X and disclosed to the AG on day X+72, within the 90-day window."
 
-Total time: 1 day of integration. Total operator cost: $0 Solo, $19/seat/mo Pro, $999/mo Compliance (with HSM keys + witness notary for timestamp anchoring).
+Total time: 1 day of integration. Total operator cost: software is free under MIT; the storage, the witness, the deployment, the impact assessment work, and the legal review are not.
 
 ## Where to get help
 
-- The Compliance tier includes a designated success engineer familiar with the Colorado AG's ADMT rulemaking
-- The witness notary (`docs/WITNESS_PROTOCOL.md` v0.4) is the strongest available timestamp evidence — especially important for the 90-day developer disclosure window
-- The Team tier ($199/mo) includes multi-user signing keys, which is the right tier for an employment-ops team where multiple reviewers need to sign the chain
+- `docs/groundtruth.md` — vendor-independent route attestation (opt-in lane)
+- GitHub Issues: open a question at `github.com/Matrix-ops77/dont-lie/issues`
 - For multi-state deployers, the same receipt chain satisfies California AB 2013 (training-data provenance) and the Colorado ADMT Act simultaneously — one set of receipts, multiple regimes
 
 ## Sources

@@ -251,7 +251,7 @@ Don't-Lie is a notary, not a judge. We record what the model said. We don't clai
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). Issues: [GitHub Issues](https://github.com/Matrix-ops77/dontlie/issues).
+See [CONTRIBUTING.md](CONTRIBUTING.md). Issues: [GitHub Issues](https://github.com/Matrix-ops77/dont-lie/issues).
 
 ---
 
@@ -272,7 +272,6 @@ MIT.
 ## Links
 
 - [GitHub](https://github.com/Matrix-ops77/dont-lie)
-- [Demo](https://dontlie.dev/demo.html)
-- [Receipt Explorer](https://dontlie.dev/RECEIPT_EXPLORER.html)
-- [Pricing](https://dontlie.dev#pricing)
-- [Contact](mailto:hello@dontlie.dev)
+- [Issues](https://github.com/Matrix-ops77/dont-lie/issues)
+- [Releases](https://github.com/Matrix-ops77/dont-lie/releases)
+- [Discussions](https://github.com/Matrix-ops77/dont-lie/discussions)

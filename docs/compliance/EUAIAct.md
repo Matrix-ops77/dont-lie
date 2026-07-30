@@ -1,16 +1,16 @@
-# Don't-Lie & EU AI Act — compliance memo
+# Don't-Lie & EU AI Act — operator reference
 
-**Date:** 2026-07-28
+**Date:** 2026-07-30
 **Audience:** AI Act compliance lead, legal counsel for EU deployments, deployer-side risk owner
-**Scope:** How Don't-Lie receipts help meet the EU AI Act's logging and transparency requirements for high-risk AI systems.
+**Scope:** How a Don't-Lie receipt vault, run by the operator on their own hardware, supports the EU AI Act's logging and transparency requirements for high-risk AI systems.
 
-> This memo is informational. The EU AI Act is in phased application through 2026–2027; confirm the latest applicable date and the specific classification of your system with counsel.
+> This memo is informational and is not legal advice. The EU AI Act is in phased application through 2026–2027; confirm the latest applicable date and the specific classification of your system with counsel. Don't-Lie is a local-first Python package. There is no hosted service, no hosted witness, no hosted vault, and no compliance product behind this memo.
 
 ---
 
 ## What the AI Act actually requires (the relevant articles)
 
-| Article | Requirement | Applies to AI call receipts? |
+| Article | Requirement | Applies to a locally-run AI call vault? |
 |---|---|---|
 | **Article 12** | **Automatic recording of events (logging)** | **Directly** — every LLM call is a logged event |
 | Article 13 | Transparency to deployers | Yes — the receipt is a deployer-visible artifact |
@@ -34,10 +34,10 @@
 - That human oversight was effective (Article 14)
 - That the response was correct or appropriate
 
-## What you need to do additionally
+## What the operator needs to do
 
 1. **Classify your system.** The AI Act obligations differ by risk class. Don't-Lie does not classify you; the deployer does. The receipt helps with logging across all risk classes.
-2. **Configure retention per Annex IV.** Annex IV §3 requires logs for "an appropriate period consistent with the intended purpose." For high-risk systems, this is typically the lifetime of the system plus a regulator-defined period (often 10 years for safety components). The Compliance tier offers 7-year S3 Object Lock by default; talk to us about longer.
+2. **Configure retention per Annex IV.** Annex IV §3 requires logs for "an appropriate period consistent with the intended purpose." For high-risk systems, this is typically the lifetime of the system plus a regulator-defined period (often 10 years for safety components). Don't-Lie produces a portable bundle; you choose where it lives and for how long. A common pattern is S3 Object Lock in COMPLIANCE mode, Azure Blob immutable storage, or GCS bucket lock — all on infrastructure you operate in your chosen jurisdiction.
 3. **Address the FRIA.** If you are a deployer of a high-risk system, Article 27 requires a fundamental-rights impact assessment. The receipt chain is the evidence base for many of the FRIA questions (what data went in, what came out, when, from whom).
 4. **Add the human-oversight event as a tag.** If your workflow includes a human reviewer, capture that event in a receipt too. Pattern:
    ```python
@@ -55,8 +55,8 @@
        )
    ```
 5. **Document Article 12 compliance in your technical file.** Don't-Lie is a control that implements Article 12 logging. Reference it from Annex IV §3 of your technical documentation.
-6. **For multi-region operators, anchor receipts in-region.** The Compliance tier includes EU-based witness notaries; the bundle will carry an EU-side co-signature, which closes some cross-border data concerns under GDPR + AI Act interaction.
-7. **Address the Reasonable Doubt panel.** RD #5 (timestamp anchoring) is especially important under the AI Act — co-signing the chain via the witness notary is the strongest available evidence that the timestamp was not backdated.
+6. **For multi-region operators, anchor receipts in-region.** Run your own witness notary in the region where you need the co-signature (or use any witness endpoint you have vetted). Don't-Lie does not provide a regional witness.
+7. **Address the Reasonable Doubt panel.** RD #5 (timestamp anchoring) is especially important under the AI Act — co-signing the chain via a witness you operate yourself is the strongest available evidence that the timestamp was not backdated.
 
 ## What Don't-Lie does **not** do for the AI Act
 
@@ -64,6 +64,8 @@
 - It does **not** perform risk management (Article 9) or data governance (Article 10).
 - It does **not** provide a conformity assessment (Article 43) — that's the deployer's job, on their own controls.
 - It does **not** substitute for human oversight (Article 14).
+- It does **not** host a regional witness. The operator runs (or contracts for) the witness.
+- It does **not** provide designated support staff for an AI Act program.
 
 ## Where this fits in a typical AI Act program
 
@@ -83,16 +85,16 @@
 
 A deployer of a high-risk AI system in credit scoring (Annex III §5(b)) is asked by their national supervisory authority to demonstrate Article 12 logging. They:
 
-1. Point the production OpenAI client at the Don't-Lie proxy
+1. Point the production OpenAI client at the Don't-Lie proxy running on their own hardware
 2. The proxy signs every call to a hash-linked chain
-3. Quarterly, export a portable bundle to a regulator-facing URL
+3. Quarterly, export a portable bundle to a regulator-facing URL the regulator controls
 4. The regulator runs `dontlie verify --export <bundle>` on a clean laptop
 5. The regulator sees the full audit trail of decisions made by the AI in that quarter
 
-Total time to first regulator delivery: 1 day of integration. Total operator cost: $0 for Solo, $19/mo per seat for Pro, $999/mo for Compliance with HSM-backed key isolation.
+Total time to first regulator delivery: 1 day of integration. Total operator cost: software is free under MIT; the storage, the witness, the deployment, and the operator's compliance work are not.
 
 ## Where to get help
 
-- The witness notary (see `docs/WITNESS_PROTOCOL.md` — v0.4) provides timestamp anchoring for Article 12 §2
-- The Compliance tier includes an EU-based witness notary and a designated success engineer
+- `docs/groundtruth.md` — vendor-independent route attestation (opt-in lane)
+- GitHub Issues: open a question at `github.com/Matrix-ops77/dont-lie/issues`
 - The Reasonable Doubt panel in every bundle shows the 5 gaps the receipts do not close; your FRIA should explicitly address each one

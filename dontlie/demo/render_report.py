@@ -187,7 +187,7 @@ custody, authorization, or truth questions. Here is the honest short list.
 <div class="item">
   <b>2. "The signing key is on the same machine as the LLM. Couldn't the LLM or the upstream provider have tampered with the prompt before signing?"</b>
   <p>The receipt is signed at the network boundary of the local proxy, on the operator's machine. A compromised upstream provider cannot tamper with a signed receipt after the fact; but a compromised local proxy that re-writes the prompt before signing could.</p>
-  <p class="close">To close this gap: run <code>dontlie proxy</code> as a separate process from your agent runtime, on a separate user account if possible, and audit the proxy source. Don't co-locate the signing key with code that can construct prompts. In Compliance tier, the key is HSM-backed and not co-located with the agent.</p>
+  <p class="close">To close this gap: run <code>dontlie proxy</code> as a separate process from your agent runtime, on a separate user account if possible, and audit the proxy source. Don't co-locate the signing key with code that can construct prompts. For higher assurance, hold the key in an HSM, macOS Keychain, or another key-management service you operate — Don't-Lie signs with whatever key backend the operator configures.</p>
 </div>
 <div class="item">
   <b>3. "The receipt records that this model was called. It does not record whether the call was authorized."</b>
@@ -202,7 +202,7 @@ custody, authorization, or truth questions. Here is the honest short list.
 <div class="item">
   <b>5. "The receipt is dated 2026-07-28. How do I know the date wasn't backdated?"</b>
   <p>The timestamp is part of the signed payload. The receipt itself does not anchor that timestamp to external time.</p>
-  <p class="close">To close this gap: anchor the chain to an external timestamping authority. The Don't-Lie witness notary co-signs a hash of the most recent receipt at intervals, optionally with an RFC 3161 timestamp from a trusted TSA. Compliance tier includes multi-region witness notaries with anchored timestamps as a default.</p>
+  <p class="close">To close this gap: anchor the chain to an external timestamping authority. Run a witness notary yourself (the CLI ships <code>dontlie witness-service</code>) and configure it to optionally fetch an RFC 3161 timestamp from a TSA you trust. Any third-party witness you point <code>dontlie witness-attest</code> at is a co-signature on the receipt hash; that witness's key fingerprint is the auditor's anchor.</p>
 </div>
 </div>
 </section>

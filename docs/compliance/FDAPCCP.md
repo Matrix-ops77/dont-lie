@@ -45,7 +45,7 @@
 3. **Log modification deployment as a separate receipt.** When the modification goes live, log a `type:pccp_modification` receipt that records the modification ID, the model version, the deployer, the timestamp, and the configuration delta. This is the artifact the FDA reviewer uses to confirm the modification was implemented.
 4. **Use the witness notary for Part 11-compliant timestamp anchoring.** The witness notary's co-signature provides the timestamp the FDA expects for "when was this modification implemented?" — important when the modification has a clinical-safety window. The witness notary is the strongest available evidence the timestamp is genuine.
 5. **Bundle the receipts into the Design History File (DHF).** For each PCCP modification, the manufacturer's DHF should include a portable bundle of the receipts over the modification's life. The bundle is verifiable on a clean FDA reviewer laptop with `dontlie verify --export <bundle>`.
-6. **For 21 CFR Part 11 compliance:** document the Ed25519 signing key in the manufacturer's Part 11 signature manifest. The receipt's signature is non-repudiable; the manufacturer's quality system is responsible for the key lifecycle (generation, rotation, revocation). The Compliance tier ($999/mo) supports HSM-backed key isolation for Part 11-grade key management.
+6. **For 21 CFR Part 11 compliance:** document the Ed25519 signing key in the manufacturer's Part 11 signature manifest. The receipt's signature is non-repudiable; the manufacturer's quality system is responsible for the key lifecycle (generation, rotation, revocation). For Part 11-grade key management, the operator should hold the key in an HSM, macOS Keychain, or equivalent key-management service they operate — Don't-Lie signs with whatever key backend the operator configures.
 7. **For the labeling-update requirement (final guidance):** when the manufacturer updates the Instructions for Use (IFU) to reflect a PCCP modification, log a `type:labeling_update` receipt that captures the IFU version before and after. This proves the manufacturer updated the labeling "as modifications are implemented" as the guidance requires.
 8. **For the joint FDA-Health Canada-MHRA principles:** document how the receipt chain satisfies "traceability" and "data integrity" in the PCCP's Modification Protocol. A one-page addendum is sufficient; the FDA reviewer expects to see this.
 9. **Document the gaps from the Reasonable Doubt panel in the PCCP's Impact Assessment.** Specifically RD #2 (was the proxy process compromised?) and RD #3 (was the call authorized?) — these are the questions an FDA inspector is most likely to press. The manufacturer's QMS should have a written answer.
@@ -82,12 +82,12 @@ A manufacturer of an AI-enabled cardiac arrhythmia detector submits a 510(k) wit
 6. On the FDA's annual inspection, the inspector asks "show me the evidence that modification M-002 was implemented as pre-authorized" — the manufacturer hands over the portable bundle, the inspector runs `dontlie verify` on a clean FDA laptop, gets a 30-second yes/no
 7. Six months later, an adverse event report traces back to a specific AI call on a specific date. The manufacturer's recall team reconstructs the failure from the receipt chain.
 
-Total integration: 1 day per SaMD. Total operator cost: $999/mo for the Compliance tier (HSM keys, witness notary, S3 Object Lock).
+Total integration: 1 day per SaMD. Total operator cost: software is free under MIT; the storage, the witness, the QMS / Part 11 controls, and the FDA submission work are not.
 
 ## Where to get help
 
-- The Compliance tier includes a designated success engineer familiar with FDA QMS / Part 11 / PCCP submissions
-- The witness notary (`docs/WITNESS_PROTOCOL.md` v0.4) is the strongest available timestamp evidence for Part 11-grade recordkeeping
+- `docs/groundtruth.md` — vendor-independent route attestation (opt-in lane)
+- GitHub Issues: open a question at `github.com/Matrix-ops77/dont-lie/issues`
 - For SaMD manufacturers in the EU, the same receipt chain supports the EU AI Act (high-risk AI logging under Article 12) — one set of receipts, FDA PCCP + EU AI Act
 
 ## Sources

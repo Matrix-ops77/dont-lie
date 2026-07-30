@@ -108,7 +108,7 @@ class TestVerifyURL(unittest.TestCase):
         receipt = storage.get_receipt(1)
         self.assertIsNotNone(receipt, "fixture: receipt #1 should exist")
 
-        url = verify_url.encode_url(receipt)
+        url = verify_url.encode_url(receipt, base_url="https://example.com/")
         # Must be a URL with #v= fragment
         self.assertIn("#v=", url, f"URL must have #v= fragment: {url[:80]}")
         # Fragment must be base64url (no +, /, = in the encoded part)
@@ -129,7 +129,7 @@ class TestVerifyURL(unittest.TestCase):
         from dontlie import storage, verify_url
 
         receipt = storage.get_receipt(1)
-        url = verify_url.encode_url(receipt)
+        url = verify_url.encode_url(receipt, base_url="https://example.com/")
         fragment = url.split("#v=", 1)[1]
         payload = verify_url.decode_fragment(fragment)
         ok, reason = verify_url.verify_payload_locally(payload)
@@ -138,7 +138,7 @@ class TestVerifyURL(unittest.TestCase):
     def test_verify_url_local_verify_cli(self) -> None:
         """The `dontlie verify-url <id> --verify` subcommand also succeeds."""
         result = subprocess.run(
-            [sys.executable, "-m", "dontlie", "verify-url", "1", "--verify"],
+            [sys.executable, "-m", "dontlie", "verify-url", "1", "--base-url", "https://example.com/", "--verify"],
             env=self.env, capture_output=True, text=True, timeout=30,
         )
         self.assertEqual(
@@ -147,14 +147,14 @@ class TestVerifyURL(unittest.TestCase):
             f"stdout={result.stdout!r} stderr={result.stderr!r}",
         )
         self.assertIn("local verify OK", result.stderr)
-        self.assertIn("https://queued-inlet-pmqa.here.now/#v=", result.stdout)
+        self.assertIn("https://example.com/#v=", result.stdout)
 
     def test_tampering_with_prompt_breaks_signature(self) -> None:
         """Modifying the prompt field in the payload should break verification."""
         from dontlie import storage, verify_url
 
         receipt = storage.get_receipt(1)
-        url = verify_url.encode_url(receipt)
+        url = verify_url.encode_url(receipt, base_url="https://example.com/")
         fragment = url.split("#v=", 1)[1]
         payload = verify_url.decode_fragment(fragment)
 
@@ -176,7 +176,7 @@ class TestVerifyURL(unittest.TestCase):
         from dontlie import storage, verify_url
 
         receipt = storage.get_receipt(1)
-        url = verify_url.encode_url(receipt)
+        url = verify_url.encode_url(receipt, base_url="https://example.com/")
         fragment = url.split("#v=", 1)[1]
         payload = verify_url.decode_fragment(fragment)
 
@@ -192,7 +192,7 @@ class TestVerifyURL(unittest.TestCase):
         from dontlie import storage, verify_url
 
         receipt = storage.get_receipt(1)
-        url = verify_url.encode_url(receipt)
+        url = verify_url.encode_url(receipt, base_url="https://example.com/")
         fragment = url.split("#v=", 1)[1]
         payload = verify_url.decode_fragment(fragment)
 
@@ -206,7 +206,7 @@ class TestVerifyURL(unittest.TestCase):
 
         bad_payload = {
             "v": 99,
-            "url": "https://dontlie.pages.dev",
+            "url": "https://example.com/verify/",
             "issued_at": "2026-07-29T00:00:00Z",
             "receipt": {"id": 1, "timestamp": "x", "model": "x", "prompt": "x", "response": "x",
                         "parent_id": None, "key_id": "x", "payload_sha256": "x", "tags": [],
@@ -233,7 +233,7 @@ class TestVerifyURL(unittest.TestCase):
             out_path = Path(tmp.name)
         try:
             result = subprocess.run(
-                [sys.executable, "-m", "dontlie", "verify-url", "1", "--out", str(out_path)],
+                [sys.executable, "-m", "dontlie", "verify-url", "1", "--base-url", "https://example.com/", "--out", str(out_path)],
                 env=self.env, capture_output=True, text=True, timeout=30,
             )
             self.assertEqual(result.returncode, 0, f"stderr: {result.stderr}")

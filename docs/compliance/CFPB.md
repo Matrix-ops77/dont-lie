@@ -86,13 +86,13 @@ A regional bank uses an LLM to generate the narrative portion of adverse action 
 5. Hands the examiner a portable bundle (`audit-2026Q1.bundle.json`), verifies in 30 seconds on a clean examiner laptop
 6. The examiner's report cites the bank's audit trail as "machine-verifiable, tamper-evident, and complete"
 
-Total time: 1 day of integration. Total operator cost: $0 for Solo, $19/mo per seat for Pro, $999/mo for Compliance with HSM-backed keys.
+Total time: 1 day of integration. Total operator cost: software is free under MIT; the storage, the witness, the deployment, the SCAN review work, and the SCAN rubric scoring are not.
 
 ## Where to get help
 
-- The Compliance tier includes a designated success engineer familiar with CFPB examination protocols and the SCAN framework
-- The witness notary (`docs/WITNESS_PROTOCOL.md` v0.4) is the strongest available evidence the timestamp is genuine — critical for the 30-day notice deadline and for any consumer dispute that arises months later
-- The Team tier ($199/mo) includes multi-user signing keys, which is the right tier for a credit-ops team where multiple underwriters need to sign the chain
+- `docs/groundtruth.md` — vendor-independent route attestation (opt-in lane)
+- GitHub Issues: open a question at `github.com/Matrix-ops77/dont-lie/issues`
+- The Reasonable Doubt panel in every bundle names the 5 gaps the receipts do not close. Your SCAN response should explicitly address each one.
 
 ## Sources
 

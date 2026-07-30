@@ -1003,14 +1003,13 @@ def build_parser() -> argparse.ArgumentParser:
                                 "~/.config/dontlie/witness)")
     p_witness.set_defaults(func=cmd_witness_service)
 
-    # Capability 7b: ask the hosted witness to co-sign a receipt hash.
-    # This is the "Bitcoin moment" — anyone with a receipt can get a
-    # public, no-permission co-signature from a notary that's not
-    # under their control. Defaults to the hosted dontlie witness;
-    # override with --url for a self-hosted one.
+    # Capability 7b: ask a third-party witness notary to co-sign a receipt
+    # hash. The witness service is a process the operator runs on their own
+    # hardware (or against any witness they trust); it is not a service Don't-Lie
+    # operates. Requires the witness URL via --url or $DONTLIE_WITNESS_URL.
     p_witness_attest = sub.add_parser(
         "witness-attest",
-        help="co-sign a receipt hash with the hosted witness notary",
+        help="co-sign a receipt hash with a third-party witness notary",
     )
     p_witness_attest.add_argument(
         "receipt",
@@ -1019,11 +1018,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_witness_attest.add_argument(
         "--url",
-        default=os.environ.get(
-            "DONTLIE_WITNESS_URL",
-            "https://dontlie-witness.buxmont-floodassist.workers.dev",
-        ),
-        help="witness service URL (default: hosted dontlie witness)",
+        default=os.environ.get("DONTLIE_WITNESS_URL"),
+        help="witness service URL (required: --url or $DONTLIE_WITNESS_URL)",
     )
     p_witness_attest.add_argument(
         "--parent-sha256",
@@ -1041,21 +1037,18 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_witness_attest.set_defaults(func=cmd_witness_attest)
 
-    # Capability 7c: co-sign every receipt in the current namespace with the
-    # witness notary. Improves the `dontlie trust-score` coverage component
-    # from 0/20 to 20/20, and converts "the chain did not break" from an
-    # operator claim into a third-party-witnessed claim.
+    # Capability 7c: co-sign every receipt in the current namespace with a
+    # third-party witness notary. The witness URL must be supplied via --url
+    # or $DONTLIE_WITNESS_URL. There is no default; Don't-Lie does not
+    # operate a witness service.
     p_witness_cov = sub.add_parser(
         "witness-coverage",
-        help="co-sign every receipt in the current namespace with the witness",
+        help="co-sign every receipt in the current namespace with a third-party witness",
     )
     p_witness_cov.add_argument(
         "--url",
-        default=os.environ.get(
-            "DONTLIE_WITNESS_URL",
-            "https://dontlie-witness.buxmont-floodassist.workers.dev",
-        ),
-        help="witness service URL (default: hosted dontlie witness)",
+        default=os.environ.get("DONTLIE_WITNESS_URL"),
+        help="witness service URL (required: --url or $DONTLIE_WITNESS_URL)",
     )
     p_witness_cov.add_argument("--limit", type=int, default=None)
     p_witness_cov.add_argument("--since", default=None)
@@ -1117,8 +1110,8 @@ def build_parser() -> argparse.ArgumentParser:
     p_verify_url.add_argument("receipt_id", type=int, help="the receipt id to encode")
     p_verify_url.add_argument(
         "--base-url",
-        default="https://queued-inlet-pmqa.here.now/",
-        help="verifier URL to embed (default: the live deployed verifier)",
+        default=os.environ.get("DONTLIE_VERIFY_URL_BASE"),
+        help="verifier URL to embed (default: $DONTLIE_VERIFY_URL_BASE or the GitHub raw URL for site/demo.html)",
     )
     p_verify_url.add_argument(
         "--out",
@@ -1333,12 +1326,14 @@ def cmd_import(args) -> int:
 
 
 def cmd_witness_attest(args) -> int:
-    """Co-sign a receipt hash with the hosted witness service.
+    """Co-sign a receipt hash with a third-party witness service.
 
     Two-phase: POST a JSON request to the witness /attest endpoint,
     then locally verify the returned signature against the witness's
-    advertised public key. Default endpoint is the hosted dontlie
-    witness at dontlie-witness.buxmont-floodassist.workers.dev.
+    advertised public key. The witness URL is supplied via --url or
+    $DONTLIE_WITNESS_URL. Don't-Lie does not operate a witness service;
+    the witness is a process the operator runs on their own hardware,
+    or any witness endpoint the operator chooses to trust.
 
     Closes Reasonable Doubt #5: the receipt's existence is now
     co-signed by a third party whose key the operator doesn't hold.
@@ -1408,6 +1403,18 @@ def cmd_witness_attest(args) -> int:
         )
         return 2
 
+    # The witness URL is required. Don't-Lie does not operate a witness
+    # service; the operator must supply the URL of a witness they trust
+    # (their own self-hosted one, or a third-party they have vetted).
+    if not args.url:
+        print(
+            "witness URL is required: pass --url or set $DONTLIE_WITNESS_URL. "
+            "Don't-Lie does not operate a witness service; see "
+            "`dontlie witness-service --help` to run your own.",
+            file=sys.stderr,
+        )
+        return 2
+
     # Discover the operator's signing key id. The witness co-signs
     # (hash, operator_key_id, parent, nonce, now) so it needs to
     # know which operator is asking. Pull it from the local vault.
@@ -1440,7 +1447,7 @@ def cmd_witness_attest(args) -> int:
         url, data=body, method="POST",
         headers={
             "Content-Type": "application/json",
-            "User-Agent": f"dontlie-cli/{__version__} (+https://dontlie.pages.dev)",
+            "User-Agent": f"dontlie-cli/{__version__} (+https://github.com/Matrix-ops77/dont-lie)",
         },
     )
     try:

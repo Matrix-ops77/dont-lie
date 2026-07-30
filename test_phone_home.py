@@ -245,17 +245,18 @@ storage.append(model='test-model', prompt='second prompt', response='second resp
 class TestNoPhoneHomeStaticSite(unittest.TestCase):
     """Parse site/index.html and assert no third-party URL.
 
-    The deployed web UI is a static site at queued-inlet-pmqa.here.now.
-    The PLDG says: no third-party URLs in the deployed HTML.
+    The site/ folder contains the project's public landing page and
+    the Browser Proof Lab. The PLDG says: no third-party URLs in the
+    shipped HTML. The page is a single static file; if the operator
+    chooses to host it, the only acceptable network resources are
+    same-origin.
     """
 
     # These are the only acceptable URL prefixes for resources in the
-    # deployed site. Anything else is a violation.
+    # shipped page. Anything else is a violation.
     # Note: relative paths (no scheme) and bare filenames are same-origin.
     ALLOWED_PREFIXES = (
-        "https://queued-inlet-pmqa.here.now/",  # the deployed origin
-        "https://here.now/",                    # the platform root
-        "https://github.com/Matrix-ops77/dontlie",  # view-source link
+        "https://github.com/Matrix-ops77/dont-lie",  # the project repo
         "http://localhost:",                    # local-dev demo links
         "http://127.0.0.1:",                    # local-dev demo links
         "/",          # same-origin absolute path

@@ -1,6 +1,0 @@
-{
-  "name": "dontlie-witness",
-  "version": "0.1.0",
-  "private": true,
-  "main": "src/worker.js"
-}

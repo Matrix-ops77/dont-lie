@@ -1,5 +1,5 @@
 """dontlie witness-coverage — co-sign every receipt in the local vault
-with the hosted witness notary.
+with a third-party witness notary.
 
 Iterates all receipts in the current namespace, posts each one's
 payload_sha256 to the witness /attest endpoint, locally verifies the
@@ -10,6 +10,11 @@ Closes Reasonable Doubt #5 at scale: the entire chain's existence is
 co-signed by a third party whose key the operator doesn't hold. This
 is what makes "the chain did not break" a third-party-witnessed claim,
 not just an operator claim.
+
+Don't-Lie does not operate a witness service. The witness URL is
+supplied by the operator via --url or $DONTLIE_WITNESS_URL, and
+should point to a witness the operator has vetted (typically one the
+operator runs themselves via `dontlie witness-service`).
 
 Usage:
     dontlie witness-coverage                    # all receipts in current namespace
@@ -99,7 +104,7 @@ def _record_witness_attestation(
 def _witness_pubkey(url: str, timeout: int = 10) -> dict:
     pkreq = urllib.request.Request(
         url.rstrip("/") + "/pubkey", method="GET",
-        headers={"User-Agent": f"dontlie-cli/{__version__} (+https://dontlie.pages.dev)"},
+        headers={"User-Agent": f"dontlie-cli/{__version__} (+https://github.com/Matrix-ops77/dont-lie)"},
     )
     with urllib.request.urlopen(pkreq, timeout=timeout) as resp:
         return json.loads(resp.read())
@@ -206,7 +211,7 @@ def coverage_iter(
     since: str | None = None,
     resume: bool = False,
     dry_run: bool = False,
-    url: str = "https://dontlie-witness.buxmont-floodassist.workers.dev",
+    url: str = "",
     on_progress=None,
 ) -> tuple[int, int, int, list[str]]:
     """Iterate all matching receipts and co-sign each with the witness.
@@ -303,12 +308,14 @@ def _print_progress(idx: int, total: int, rid: int, status: str) -> None:
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(
         prog="dontlie witness-coverage",
-        description="Co-sign every receipt in the current namespace with the witness.",
+        description=(
+            "Co-sign every receipt in the current namespace with a third-party "
+            "witness notary. Don't-Lie does not operate a witness service; the "
+            "URL must be supplied via --url or $DONTLIE_WITNESS_URL."
+        ),
     )
-    p.add_argument("--url", default=os.environ.get(
-        "DONTLIE_WITNESS_URL",
-        "https://dontlie-witness.buxmont-floodassist.workers.dev",
-    ), help="witness service URL (default: hosted dontlie witness)")
+    p.add_argument("--url", default=os.environ.get("DONTLIE_WITNESS_URL"),
+                   help="witness service URL (required: --url or $DONTLIE_WITNESS_URL)")
     p.add_argument("--limit", type=int, default=None,
                    help="max number of receipts to attest (default: all)")
     p.add_argument("--since", default=None,
@@ -320,6 +327,15 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--quiet", action="store_true",
                    help="suppress per-receipt progress output")
     args = p.parse_args(argv)
+
+    if not args.url:
+        print(
+            "witness URL is required: pass --url or set $DONTLIE_WITNESS_URL. "
+            "Don't-Lie does not operate a witness service; see "
+            "`dontlie witness-service --help` to run your own.",
+            file=sys.stderr,
+        )
+        return 2
 
     # PLDG.md: refuse to make a network call if DONTLIE_OFFLINE=1
     from .offline import OfflineRefused

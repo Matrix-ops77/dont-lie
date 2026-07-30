@@ -5,8 +5,9 @@ chain's daily Merkle root to three external parties:
      over the day's receipts' SHA-256 leaves.
   2. An OTS-compatible pending attestation (Bitcoin-anchorable later)
      for the Merkle root, not for each receipt.
-  3. A witness attestation POST (hosted dontlie witness) for the
-     Merkle root.
+  3. A witness attestation POST (third-party witness) for the
+     Merkle root. The witness URL is supplied by the operator;
+     Don't-Lie does not operate a witness service.
 
 This is the "chain did not break" claim with a third-party witness
 applied to the daily root. With the receipt-level witness-coverage
@@ -158,15 +159,21 @@ def main(argv: list[str] | None = None) -> int:
     )
     p.add_argument("--day", default=None,
                    help="UTC day to anchor, YYYY-MM-DD (default: today UTC)")
-    p.add_argument("--url", default=os.environ.get(
-        "DONTLIE_WITNESS_URL",
-        "https://dontlie-witness.buxmont-floodassist.workers.dev",
-    ), help="witness service URL")
+    p.add_argument("--url", default=os.environ.get("DONTLIE_WITNESS_URL"),
+                   help="witness service URL (required: --url or $DONTLIE_WITNESS_URL)")
     p.add_argument("--dry-run", action="store_true",
                    help="show what would be anchored without making any requests")
     p.add_argument("--tag", action="append", default=["daily-anchor"],
                    help="tags to apply to the batch (default: daily-anchor)")
     args = p.parse_args(argv)
+
+    if not args.url:
+        print(
+            "witness URL is required: pass --url or set $DONTLIE_WITNESS_URL. "
+            "Don't-Lie does not operate a witness service.",
+            file=sys.stderr,
+        )
+        return 2
 
     today = date.today().isoformat() if args.day is None else args.day
     receipts = _receipts_for_day(today)
