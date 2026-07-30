@@ -87,6 +87,13 @@ jobs:
     needs: [test, build]
     runs-on: ubuntu-latest
     environment: pypi
+    permissions:
+      # Trusted Publishing (PyPI OIDC) requires id-token: write on the
+      # job — not the workflow — so the workflow-level `contents: write`
+      # does not propagate. Without this, `pypa/gh-action-pypi-publish`
+      # fails with "ACTIONS_ID_TOKEN_REQUEST_TOKEN environment variable
+      # was unset".
+      id-token: write
     steps:
       - uses: actions/download-artifact@v4
         with:
