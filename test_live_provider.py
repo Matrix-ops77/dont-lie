@@ -1,10 +1,23 @@
 """Live-network integration tests against the real MiniMax provider.
 
-These tests are skipped unless the worktree key file is reachable. They
+These tests are skipped by default. They require an explicit opt-in
+via the ``DONTLIE_RUN_LIVE_TESTS`` environment variable AND a
+reachable worktree key file at ``~/.pi/agent/auth.json``. They
 exercise both the OpenAI-compatible and the Anthropic-compatible
 endpoints of the real provider, confirming that Don't-Lie's
-`AnthropicMessagesAdapter` works end-to-end on a real network and not
-only on synthetic fixtures.
+``AnthropicMessagesAdapter`` works end-to-end on a real network
+and not only on synthetic fixtures.
+
+Why opt-in rather than opt-out: a CI runner that happens to have
+a ``~/.pi/agent/auth.json`` file (because someone ran the live
+test on it once, or because the runner image pre-installs one,
+or because the test runner accidentally inherits the developer's
+home directory) will silently run network tests against the
+real provider. That makes the CI red on a flake, exposes the
+key in CI logs, and on a slow day turns every green merge into
+a coin flip. The opt-in is the wall between "developer can run
+this locally with their own key" and "CI does not run this on
+principle".
 """
 
 from __future__ import annotations
@@ -23,7 +36,7 @@ import httpx
 
 
 def _worktree_key() -> str | None:
-    """Load the worktree key. Skip if not present."""
+    """Load the worktree key. Returns None if not present or malformed."""
     candidates = [
         Path.home() / ".pi" / "agent" / "auth.json",
     ]
@@ -40,8 +53,23 @@ def _worktree_key() -> str | None:
     return None
 
 
+# Two-step gate: the env var must be set explicitly, AND the
+# worktree key file must be reachable. Either missing -> skip.
+# This means a developer who wants to run the live test does:
+#
+#   DONTLIE_RUN_LIVE_TESTS=1 python3 -m unittest test_live_provider -v
+#
+# A CI runner that doesn't have the env var set will skip the
+# entire file regardless of whether the key file is reachable.
 KEY = _worktree_key()
-SKIP_REASON = None if KEY else "no real MiniMax key reachable"
+_SKIP_REASON_ENV = "DONTLIE_RUN_LIVE_TESTS not set"
+_SKIP_REASON_NO_KEY = "no real MiniMax key reachable at ~/.pi/agent/auth.json"
+if os.environ.get("DONTLIE_RUN_LIVE_TESTS") != "1":
+    SKIP_REASON = _SKIP_REASON_ENV
+elif not KEY:
+    SKIP_REASON = _SKIP_REASON_NO_KEY
+else:
+    SKIP_REASON = None
 OPENAI_BASE = "https://api.minimax.io"
 ANTHROPIC_BASE = "https://api.minimax.io/anthropic"
 
