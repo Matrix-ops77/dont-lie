@@ -24,7 +24,7 @@ URL format spec (v1):
 
     {
       "v": 1,                     # URL format version
-      "url": "https://dontlie.pages.dev",  # canonical project URL
+      "url": "<operator-supplied verifier URL>",  # the base URL the operator chose
       "issued_at": "2026-07-29T...",        # when the URL was generated
       "receipt": {
         "id": int,
