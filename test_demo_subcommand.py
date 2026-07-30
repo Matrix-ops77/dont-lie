@@ -76,6 +76,16 @@ class DemoSubcommandExecutionTest(unittest.TestCase):
         self.work = _isolated_work(id(self))
         self.env = with_dontlie_env()
         self.env["DONTLIE_DEMO_WORK"] = str(self.work)
+        # Pick OS-assigned ports for the demo's mock + proxy so we
+        # never collide with a leftover bound port from a previous
+        # run (or with a concurrent test on the same runner).
+        import socket as _socket
+        with _socket.socket(_socket.AF_INET, _socket.SOCK_STREAM) as _m, \
+                _socket.socket(_socket.AF_INET, _socket.SOCK_STREAM) as _p:
+            _m.bind(("127.0.0.1", 0))
+            _p.bind(("127.0.0.1", 0))
+            self.env["MOCK_PORT"] = str(_m.getsockname()[1])
+            self.env["PROXY_PORT"] = str(_p.getsockname()[1])
         _demo_lock()
 
     def tearDown(self) -> None:
@@ -131,6 +141,14 @@ class TamperWalkthroughPipingTest(unittest.TestCase):
         self.work = _isolated_work(id(self) + 50000)
         self.env = with_dontlie_env()
         self.env["DONTLIE_DEMO_WORK"] = str(self.work)
+        # See DemoSubcommandExecutionTest.setUp for the port choice.
+        import socket as _socket
+        with _socket.socket(_socket.AF_INET, _socket.SOCK_STREAM) as _m, \
+                _socket.socket(_socket.AF_INET, _socket.SOCK_STREAM) as _p:
+            _m.bind(("127.0.0.1", 0))
+            _p.bind(("127.0.0.1", 0))
+            self.env["MOCK_PORT"] = str(_m.getsockname()[1])
+            self.env["PROXY_PORT"] = str(_p.getsockname()[1])
         _demo_lock()
 
     def tearDown(self) -> None:

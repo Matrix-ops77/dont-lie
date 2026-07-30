@@ -50,9 +50,37 @@ from dontlie.demo import tamper_walkthrough as _TAMPER_MOD
 
 
 def _port_pair(seed: int) -> tuple[str, str]:
-    """Pick two high-numbered ports unlikely to collide with local dev."""
-    base = 24000 + (seed % 4000)
-    return str(base), str(base + 1)
+    """Pick two high-numbered ports unlikely to collide with local dev.
+
+    Each call returns a pair (mock, proxy) in the range 24000-48000,
+    spread by a stride of 2 so two concurrent _port_pair() calls
+    anchored at adjacent seeds never overlap. The base is derived
+    from a hash of the caller's id() (mod 12000) so two unrelated
+    test classes in the same test run get different ranges. The
+    ports are also explicitly free at allocation time — if either
+    is taken, the search walks forward up to 200 slots before giving
+    up (which would itself be a CI signal, not a silent collision).
+    """
+    import socket
+
+    base = 24000 + (hash(seed) % 12000) * 2
+    for offset in range(0, 200, 2):
+        candidate_mock = base + offset
+        candidate_proxy = candidate_mock + 1
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s_mock, \
+                socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s_proxy:
+            s_mock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            s_proxy.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            try:
+                s_mock.bind(("127.0.0.1", candidate_mock))
+                s_proxy.bind(("127.0.0.1", candidate_proxy))
+                return str(candidate_mock), str(candidate_proxy)
+            except OSError:
+                continue
+    raise RuntimeError(
+        f"_port_pair: no free port pair found starting at {base}; "
+        "test environment may be saturated"
+    )
 
 
 def _isolated_work(label: str) -> Path:
