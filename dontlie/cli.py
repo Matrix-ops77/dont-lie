@@ -1364,6 +1364,39 @@ def cmd_witness_attest(args) -> int:
         if r is None:
             print(f"receipt {receipt_id} not found", file=sys.stderr)
             return 2
+        # Local integrity check: the receipt's stored payload_sha256
+        # must match a fresh recompute of the canonical payload hash.
+        # If they disagree, the receipt has been mutated (response,
+        # tags, extra, etc.) without recomputing the hash — and the
+        # witness signature we are about to request would attest the
+        # OLD hash, not the receipt's current content. A downstream
+        # verifier would reject the bundle as hash-mismatched, and
+        # the operator would have paid for an attestation they can't
+        # use. Refuse early with a clear error rather than producing
+        # a useless signature.
+        try:
+            from . import storage as _storage
+            recomputed = _storage._canonical_payload(r)
+            import hashlib as _hashlib
+            actual = _hashlib.sha256(recomputed).hexdigest()
+            if actual != r.payload_sha256:
+                print(
+                    f"receipt {receipt_id} has been mutated: "
+                    f"stored payload_sha256={r.payload_sha256[:16]}... "
+                    f"does not match recomputed {actual[:16]}... "
+                    "The witness can only attest a hash; attesting this "
+                    "receipt would sign a hash that the (tampered) "
+                    "content does not match. Run `dontlie verify` to "
+                    "see the chain state. If you intended to remove a "
+                    "tampered receipt, the right move is to keep this "
+                    "receipt and the old hash, or to start a new "
+                    "vault. Refusing to attest.",
+                    file=sys.stderr,
+                )
+                return 2
+        except Exception as e:
+            print(f"could not verify local receipt integrity: {e}", file=sys.stderr)
+            return 2
         receipt_sha = r.payload_sha256
         if parent_sha is None:
             parent_sha = r.extra.get("_dontlie_parent_sha256") if r.extra else None
