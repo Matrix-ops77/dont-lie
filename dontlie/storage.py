@@ -150,6 +150,13 @@ def _canonical_payload(r: Receipt) -> bytes:
 def _connect(db_path: Path | None = None) -> sqlite3.Connection:
     if db_path is None:
         db_path = DB_PATH
+    # Defensive: callers in dontlie/cli.py and dontlie/web.py assign
+    # `storage.DB_PATH = args.vault` where args.vault is a string from
+    # argparse. The legacy module-level DB_PATH is a Path, but
+    # anything that overrides it post-import may not be. Accept
+    # both; sqlite3.connect will accept either.
+    if not isinstance(db_path, Path):
+        db_path = Path(db_path)
     db_path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(db_path, isolation_level=None)
     if os.environ.get("DONTLIE_NO_WAL"):
