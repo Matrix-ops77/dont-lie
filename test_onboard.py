@@ -327,9 +327,12 @@ class OnboardingCLITest(unittest.TestCase):
                 "        return kwargs\n"
             )
             environment = os.environ.copy()
-            environment["PYTHONPATH"] = os.pathsep.join(
-                (str(project_root), str(bootstrap), temporary)
-            )
+            # The test wants `onboard.runtime` (now installed in the
+            # venv as an editable package, so no project_root path
+            # needed) and the fake `openai/fixture.py` (from temporary)
+            # on the subprocess's path. The bootstrap path enables the
+            # sitecustomize.py auto-load.
+            environment["PYTHONPATH"] = os.pathsep.join((str(bootstrap), temporary))
             completed = subprocess.run(
                 [
                     sys.executable,
@@ -387,11 +390,12 @@ class OnboardingCLITest(unittest.TestCase):
             )
             vault = root / "project-vault.db"
             environment = os.environ.copy()
+            # See test_sitecustomize_patches_module_loaded_after_process_start
+            # for the PYTHONPATH rationale. `onboard` is now installed
+            # in the venv so we don't need project_root on PYTHONPATH.
             environment.update(
                 {
-                    "PYTHONPATH": os.pathsep.join(
-                        (str(project_root), str(bootstrap), temporary)
-                    ),
+                    "PYTHONPATH": os.pathsep.join((str(bootstrap), temporary)),
                     "DONTLIE_PROJECT_VAULT": str(vault),
                     "DONTLIE_KEY_DIR": str(key_dir),
                     "DONTLIE_NO_WAL": "1",

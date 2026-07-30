@@ -90,7 +90,21 @@ def _isolated_env() -> dict:
     env["DONTLIE_NO_WAL"] = "1"
     env["DONTLIE_OFFLINE"] = "1"  # belt-and-suspenders for opt-in commands
     env["TEST_PHONE_HOME_CALLS_FILE"] = str(CALLS_FILE)
-    env["PYTHONPATH"] = str(REPO_ROOT) + os.pathsep + env.get("PYTHONPATH", "")
+    # Only prepend REPO_ROOT to PYTHONPATH when dontlie is NOT already
+    # importable from a venv (wheel or editable install). When the
+    # package IS installed, setting PYTHONPATH here makes the subprocess
+    # replace its site-packages with REPO_ROOT, which breaks
+    # `import httpx` and similar — see test_helpers.py for the
+    # full analysis. The downstream sign_script doesn't actually
+    # need PYTHONPATH since it imports `from dontlie import storage`
+    # which resolves via the venv.
+    try:
+        import dontlie  # noqa: F401
+        _NEEDS_PYTHONPATH = False
+    except ImportError:
+        _NEEDS_PYTHONPATH = True
+    if _NEEDS_PYTHONPATH:
+        env["PYTHONPATH"] = str(REPO_ROOT) + os.pathsep + env.get("PYTHONPATH", "")
     return env
 
 
@@ -119,17 +133,23 @@ class TestNoPhoneHomeCLI(unittest.TestCase):
         # Inject the patcher so subprocess calls to the dontlie CLI
         # have their network modules patched before the command runs.
         self.env["PYTHONSTARTUP"] = str(PATCHER_PATH)
+        # The subprocess must NOT inherit the source repo as its cwd,
+        # otherwise Python finds the source `dontlie/` directory first
+        # and imports a half-installed version that can't see venv
+        # site-packages. Use the temp dir as cwd so `dontlie` resolves
+        # through the venv's installed copy.
+        clean_cwd = str(Path(self.env["DONTLIE_KEY_DIR"]).parent)
         # Generate a fresh key so the isolated vault can sign
         subprocess.run(
             [sys.executable, "-m", "dontlie", "gen-key"],
             env=self.env,
+            cwd=clean_cwd,
             check=True,
             capture_output=True,
         )
         # Sign a couple of receipts so list/verify/trust-score have data
         sign_script = """
 import sys
-sys.path.insert(0, '.')
 from dontlie import storage
 storage.append(model='test-model', prompt='test prompt', response='test response')
 storage.append(model='test-model', prompt='second prompt', response='second response', parent_id=1)
@@ -137,9 +157,9 @@ storage.append(model='test-model', prompt='second prompt', response='second resp
         subprocess.run(
             [sys.executable, "-c", sign_script],
             env=self.env,
+            cwd=clean_cwd,
             check=True,
             capture_output=True,
-            cwd=str(REPO_ROOT),
         )
         # Clean up any prior calls
         if CALLS_FILE.exists():

@@ -38,7 +38,21 @@ def _isolated_env() -> dict:
     env["DONTLIE_DB"] = str(tmp / "vault.db")
     env["DONTLIE_KEY_DIR"] = str(keys)
     env["DONTLIE_NO_WAL"] = "1"
-    env["PYTHONPATH"] = str(REPO_ROOT) + os.pathsep + env.get("PYTHONPATH", "")
+    # Only prepend REPO_ROOT to PYTHONPATH when dontlie is NOT already
+    # importable from a venv (wheel or editable install). When the
+    # package IS installed, setting PYTHONPATH here makes the subprocess
+    # replace its site-packages with REPO_ROOT, which breaks
+    # `import httpx` and similar — see test_helpers.py for the
+    # full analysis. The downstream subprocess in _make_receipt uses
+    # `from dontlie import storage` which resolves via the venv, so
+    # it does not need PYTHONPATH either.
+    try:
+        import dontlie  # noqa: F401
+        _NEEDS_PYTHONPATH = False
+    except ImportError:
+        _NEEDS_PYTHONPATH = True
+    if _NEEDS_PYTHONPATH:
+        env["PYTHONPATH"] = str(REPO_ROOT) + os.pathsep + env.get("PYTHONPATH", "")
     return env
 
 

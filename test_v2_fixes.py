@@ -23,6 +23,14 @@ import sys
 import tempfile
 import time
 import unittest
+
+# argon2-cffi is needed for the whole-file encryption tests. Skip
+# those tests when the optional dep is missing.
+try:
+    import argon2  # noqa: F401
+    _HAS_ARGON2 = True
+except ImportError:  # pragma: no cover
+    _HAS_ARGON2 = False
 import urllib.request
 from pathlib import Path
 
@@ -122,6 +130,7 @@ class StorageMigrationTest(unittest.TestCase):
         self.assertIn("namespace", cols)
 
 
+@unittest.skipUnless(_HAS_ARGON2, "argon2-cffi unavailable")
 class EncryptionFileTest(unittest.TestCase):
     """Whole-file encrypt / decrypt round-trip."""
 
@@ -242,6 +251,7 @@ class WitnessServiceTest(unittest.TestCase):
                 proc.kill()
 
 
+@unittest.skipUnless(_HAS_ARGON2, "argon2-cffi unavailable")
 class EncryptCliTest(unittest.TestCase):
     """``dontlie encrypt`` and ``dontlie unlock`` must accept a
     positional vault path."""

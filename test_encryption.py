@@ -13,20 +13,29 @@ os.environ["DONTLIE_DB"] = str(Path(_TMP) / "vault.db")
 os.environ["DONTLIE_NO_WAL"] = "1"
 
 # argon2-cffi is not always available; we skip encryption tests that
-# require it if it's missing.
+# require it if it's missing. We check `import argon2` directly
+# because the dontlie.encryption module imports lazily and an
+# `from dontlie.encryption import ...` succeeds even when argon2 is
+# absent — only the runtime call to _require_argon2() fails.
 try:
-    from dontlie.encryption import (
-        DecryptionError,
-        decrypt_column,
-        encrypt_column,
-        encrypt_with_passphrase,
-        unwrap_dek,
-        wrap_dek,
-    )
+    import argon2  # noqa: F401
     _HAS_ARGON2 = True
-except Exception as e:  # pragma: no cover
+except ImportError as e:  # pragma: no cover
     _HAS_ARGON2 = False
     _IMPORT_ERROR = str(e)
+
+# Re-export the encryption module's symbols so the test body
+# doesn't have to repeat the import pattern (and so the module
+# gets loaded, which is what registers the _ARGON2 flag the
+# runtime check consults).
+from dontlie.encryption import (  # noqa: E402
+    DecryptionError,
+    decrypt_column,
+    encrypt_column,
+    encrypt_with_passphrase,
+    unwrap_dek,
+    wrap_dek,
+)
 
 
 @unittest.skipUnless(_HAS_ARGON2, f"argon2-cffi unavailable: {_IMPORT_ERROR if not _HAS_ARGON2 else ''}")
