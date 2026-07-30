@@ -87,9 +87,17 @@ class TamperWalkthroughEndToEndTest(unittest.TestCase):
         self.work = _isolated_work(f"tamper-{id(self)}")
         self.mock_port, self.proxy_port = _port_pair(id(self) % 4000)
         self.env = os.environ.copy()
-        # Subprocess-launched scripts need PYTHONPATH to find the local
-        # `dontlie` package when the test isn't run from an editable install.
-        self.env["PYTHONPATH"] = str(REPO_ROOT) + os.pathsep + self.env.get("PYTHONPATH", "")
+        # Only set PYTHONPATH if dontlie isn't already importable. When
+        # the test runs from an editable install or wheel, setting
+        # PYTHONPATH to REPO_ROOT replaces the venv's site-packages and
+        # breaks imports of third-party deps (e.g. httpx).
+        try:
+            import dontlie  # noqa: F401
+            _NEEDS_PYTHONPATH = False
+        except ImportError:
+            _NEEDS_PYTHONPATH = True
+        if _NEEDS_PYTHONPATH:
+            self.env["PYTHONPATH"] = str(REPO_ROOT) + os.pathsep + self.env.get("PYTHONPATH", "")
         self.env["DONTLIE_DEMO_WORK"] = str(self.work)
         self.env["MOCK_PORT"] = self.mock_port
         self.env["PROXY_PORT"] = self.proxy_port
@@ -142,7 +150,16 @@ class TamperWalkthroughMissingInputsTest(unittest.TestCase):
             shutil.rmtree(work, ignore_errors=True)
         work.mkdir(parents=True, exist_ok=True)
         env = os.environ.copy()
-        env["PYTHONPATH"] = str(REPO_ROOT) + os.pathsep + env.get("PYTHONPATH", "")
+        # Only set PYTHONPATH if dontlie isn't already importable. In
+        # an editable install, setting PYTHONPATH=REPO_ROOT would
+        # shadow the venv's site-packages and break dep imports.
+        try:
+            import dontlie  # noqa: F401
+            _NEEDS_PYTHONPATH = False
+        except ImportError:
+            _NEEDS_PYTHONPATH = True
+        if _NEEDS_PYTHONPATH:
+            env["PYTHONPATH"] = str(REPO_ROOT) + os.pathsep + env.get("PYTHONPATH", "")
         try:
             result = subprocess.run(
                 [sys.executable, str(TAMPER_WALK), str(work)],
@@ -165,9 +182,17 @@ class TamperWalkthroughInProcessTest(unittest.TestCase):
         self.work = _isolated_work(f"tamper-inproc-{id(self)}")
         self.mock_port, self.proxy_port = _port_pair((id(self) + 1000) % 4000)
         self.env = os.environ.copy()
-        # Subprocess-launched scripts need PYTHONPATH to find the local
-        # `dontlie` package when the test isn't run from an editable install.
-        self.env["PYTHONPATH"] = str(REPO_ROOT) + os.pathsep + self.env.get("PYTHONPATH", "")
+        # Only set PYTHONPATH if dontlie isn't already importable. When
+        # the test runs from an editable install or wheel, setting
+        # PYTHONPATH to REPO_ROOT replaces the venv's site-packages and
+        # breaks imports of third-party deps (e.g. httpx).
+        try:
+            import dontlie  # noqa: F401
+            _NEEDS_PYTHONPATH = False
+        except ImportError:
+            _NEEDS_PYTHONPATH = True
+        if _NEEDS_PYTHONPATH:
+            self.env["PYTHONPATH"] = str(REPO_ROOT) + os.pathsep + self.env.get("PYTHONPATH", "")
         self.env["DONTLIE_DEMO_WORK"] = str(self.work)
         self.env["MOCK_PORT"] = self.mock_port
         self.env["PROXY_PORT"] = self.proxy_port
@@ -250,9 +275,17 @@ class TamperWalkthroughJsonlShapeTest(unittest.TestCase):
         self.work = _isolated_work(f"tamper-jsonl-{id(self)}")
         self.mock_port, self.proxy_port = _port_pair((id(self) + 2000) % 4000)
         self.env = os.environ.copy()
-        # Subprocess-launched scripts need PYTHONPATH to find the local
-        # `dontlie` package when the test isn't run from an editable install.
-        self.env["PYTHONPATH"] = str(REPO_ROOT) + os.pathsep + self.env.get("PYTHONPATH", "")
+        # Only set PYTHONPATH if dontlie isn't already importable. When
+        # the test runs from an editable install or wheel, setting
+        # PYTHONPATH to REPO_ROOT replaces the venv's site-packages and
+        # breaks imports of third-party deps (e.g. httpx).
+        try:
+            import dontlie  # noqa: F401
+            _NEEDS_PYTHONPATH = False
+        except ImportError:
+            _NEEDS_PYTHONPATH = True
+        if _NEEDS_PYTHONPATH:
+            self.env["PYTHONPATH"] = str(REPO_ROOT) + os.pathsep + self.env.get("PYTHONPATH", "")
         self.env["DONTLIE_DEMO_WORK"] = str(self.work)
         self.env["MOCK_PORT"] = self.mock_port
         self.env["PROXY_PORT"] = self.proxy_port

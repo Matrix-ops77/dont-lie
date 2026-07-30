@@ -54,7 +54,7 @@ class DemoSubcommandRegistrationTest(unittest.TestCase):
         result = subprocess.run(
             [sys.executable, "-m", "dontlie", "--help"],
             cwd=str(REPO_ROOT),
-            env={**os.environ, "PYTHONPATH": str(REPO_ROOT)},
+            env=with_dontlie_env(),
             capture_output=True,
             text=True,
             timeout=30,

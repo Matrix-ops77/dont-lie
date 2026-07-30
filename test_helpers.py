@@ -10,10 +10,9 @@ subprocesses (or shell scripts that ultimately do):
     not reliable across checkouts, venvs, and CI.
 
   * `with_dontlie_env(base=None)` — return an env dict (copy of `base`
-    or the current process env) with `PYTHON` and `PYTHONPATH` set so
-    that both direct `python -m dontlie` calls and shell scripts using
-    `PY="${PYTHON:-python3}"` resolve to the right interpreter and can
-    import the `dontlie` package regardless of cwd.
+    or the current process env) with `PYTHON` set so that both direct
+    `python -m dontlie` calls and shell scripts using
+    `PY="${PYTHON:-python3}"` resolve to the right interpreter.
 
 Both helpers are deliberately tiny so tests can stay readable.
 """
@@ -27,9 +26,29 @@ from pathlib import Path
 # don't depend on a particular `python3` being on PATH.
 PYTHON = sys.executable
 
-# The repo root, computed from this file's location. Used to put the
-# `dontlie` package on PYTHONPATH for subprocess invocations.
+# The repo root, computed from this file's location. Used by callers
+# that need to cwd into it.
 REPO_ROOT = Path(__file__).resolve().parent
+
+
+def _dontlie_is_installed() -> bool:
+    """True if `dontlie` is already importable from the test runner's
+    site-packages (editable install, wheel, or sdist). When True, we
+    must NOT prepend REPO_ROOT to PYTHONPATH in subprocesses, because
+    doing so makes Python replace the venv's site-packages with the
+    repo dir, which hides deps like `httpx` from the subprocess.
+    """
+    try:
+        import dontlie  # noqa: F401
+
+        return True
+    except ImportError:
+        return False
+
+
+# Cached at import time. Tests are short-lived; the cost of recomputing
+# per test is trivial but the cache keeps things explicit.
+DONTLIE_INSTALLED = _dontlie_is_installed()
 
 
 def dontlie_cmd(*args: str) -> list[str]:
@@ -44,20 +63,25 @@ def dontlie_cmd(*args: str) -> list[str]:
 
 
 def with_dontlie_env(base: dict | None = None) -> dict:
-    """Return a copy of `base` (or os.environ) with PYTHON and PYTHONPATH
-    set so that subprocess invocations of `dontlie` work, regardless of
-    the parent's env or the subprocess's cwd.
+    """Return a copy of `base` (or os.environ) suitable for a subprocess
+    that needs to invoke `dontlie`.
 
     - `PYTHON=sys.executable` so shell scripts that use
       `PY="${PYTHON:-python3}"` pick up the test runner's interpreter.
-    - `PYTHONPATH=<repo_root>` so `python -m dontlie` and direct
-      `import dontlie` work even when the subprocess cwd is somewhere
-      other than the repo root.
+    - PYTHONPATH is only set if `dontlie` is NOT importable from the
+      test runner's site-packages. If the package is already installed
+      (editable install or wheel), prepending REPO_ROOT to PYTHONPATH
+      breaks the venv: Python replaces its site-packages with REPO_ROOT,
+      which hides third-party deps like `httpx` from the subprocess.
+      When `dontlie` is installed, the subprocess can find it via the
+      venv's site-packages — no PYTHONPATH override needed.
     """
     env = (base if base is not None else os.environ).copy()
     env["PYTHON"] = PYTHON
-    existing_pp = env.get("PYTHONPATH", "")
-    parts = [p for p in existing_pp.split(os.pathsep) if p]
-    if str(REPO_ROOT) not in parts:
-        env["PYTHONPATH"] = str(REPO_ROOT) + os.pathsep + existing_pp
+    if not DONTLIE_INSTALLED:
+        # Fall back to PYTHONPATH only when there's no installed copy.
+        existing_pp = env.get("PYTHONPATH", "")
+        parts = [p for p in existing_pp.split(os.pathsep) if p]
+        if str(REPO_ROOT) not in parts:
+            env["PYTHONPATH"] = str(REPO_ROOT) + os.pathsep + existing_pp
     return env
