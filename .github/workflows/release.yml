@@ -83,8 +83,38 @@ jobs:
           name: dist
           path: dist/
 
+  reproducibility:
+    name: reproducibility (${{ matrix.os }}, Python ${{ matrix.python-version }})
+    needs: build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - name: Reproduce a first-time wheel install
+        env:
+          PYTHON_BIN: python
+          DONTLIE_REPRO_TRANSCRIPT: ${{ runner.temp }}/reproducibility.txt
+        run: bash tools/reproducibility_check.sh dist/dontlie-*-py3-none-any.whl
+      - name: Upload reproducibility transcript
+        uses: actions/upload-artifact@v4
+        with:
+          name: reproducibility-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: ${{ runner.temp }}/reproducibility.txt
+
   publish:
-    needs: [test, build]
+    needs: [test, build, reproducibility]
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
@@ -102,7 +132,7 @@ jobs:
       - uses: pypa/gh-action-pypi-publish@release/v1
 
   github-release:
-    needs: [test, build]
+    needs: [test, build, reproducibility]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
