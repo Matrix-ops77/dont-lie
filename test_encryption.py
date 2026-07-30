@@ -28,7 +28,7 @@ except ImportError as e:  # pragma: no cover
 # doesn't have to repeat the import pattern (and so the module
 # gets loaded, which is what registers the _ARGON2 flag the
 # runtime check consults).
-from dontlie.encryption import (  # noqa: E402
+from dontlie.encryption import (
     DecryptionError,
     decrypt_column,
     encrypt_column,
