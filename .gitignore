@@ -27,8 +27,13 @@ keys/
 key_id
 dontlie.key
 dontlie.pub
-onboard/dontlie-passive
-**/dontlie-passive
+# Note: the file at onboard/dontlie-passive is the public user-facing
+# entry point for the onboard package's passive instrumentation. It
+# MUST be tracked in git so that `actions/checkout` ships it to CI
+# runners. Do not add it back to .gitignore; if you find yourself
+# wanting to ignore it, you are about to break CI. (Previous versions
+# of this file listed it as ignored, which is exactly what caused
+# the 33s CI flake that the local test suite could not reproduce.)
 
 # Demo runtime artifacts (not source)
 demo/work/
