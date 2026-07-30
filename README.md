@@ -68,7 +68,7 @@ The wedge is honesty. We don't claim AI is truthful. We claim the record is tamp
 - **Web UI** — `dontlie web` for non-engineer auditors (stdlib HTTP, no JS deps)
 - **TUI explorer** — `dontlie ui` for receipt browsing over SSH
 - **One-line agent SDK** — `import dontlie_agent; dontlie_agent.install()`
-- **Per-regime compliance memos** — HIPAA, SOC 2, EU AI Act, NY DFS in `docs/compliance/`
+- **Operator reference memos** — informational notes on HIPAA, SOC 2, EU AI Act, NY DFS, CFPB, Colorado ADMT, FDA PCCP, and FedRAMP in `docs/compliance/`. These are operator-facing reference material, **not** vendor certifications and not legal advice.
 
 ---
 
@@ -93,7 +93,7 @@ The wedge is honesty. We don't claim AI is truthful. We claim the record is tamp
 
 **Incident response** — your customer asks "what did the AI actually say?" Produce a one-page proof report in 30 seconds instead of digging through logs.
 
-**Compliance & audit** — SOC 2, GDPR, EU AI Act: hand auditors a signed chain of evidence that survives any local machine change.
+**Compliance & audit** — hand auditors a signed chain of evidence that survives any local machine change. The `docs/compliance/` memos explain which regime a receipt helps with and which parts of the regime are still the operator's job. They are not certifications and not legal advice.
 
 **Customer trust** — show your customers exactly what their data became, that you didn't change it, and which provider answered. Independently verifiable.
 
@@ -146,48 +146,42 @@ export OPENAI_API_KEY=dontlie-local
 dontlie/
 ├── storage.py          # SQLite vault, chain v2, append
 ├── sign.py             # Ed25519 signing, key management
-├── proxy.py            # OpenAI-compatible HTTP proxy
+├── proxy.py            # OpenAI- and Anthropic-compatible HTTP proxy
 ├── verify.py           # Offline verification, bundle export
 ├── render_report.py    # HTML proof report
 ├── redaction.py        # Secret detection and redaction
 ├── encryption.py       # Encrypted-at-rest vault option
 ├── groundtruth/        # Receipt ↔ source bytes reconciliation
 ├── anchor/             # External timestamp anchoring
-├── clients/            # SDK adapters (LangChain, LlamaIndex)
 ├── demo/               # Offline + live runbooks
-├── site/               # Landing, demo, explorer, checkout
+├── site/
+│   ├── index.html      # Single-page project landing (local-first, MIT)
+│   └── demo.html       # Browser Proof Lab (WebCrypto + IndexedDB, offline)
 └── tests/              # 412 tests, < 60s
 ```
 
 ---
 
-## Templates
+## Pages
 
-- [🏠 `site/index.html`](site/index.html) — Landing page
-- [🎬 `site/demo.html`](site/demo.html) — 30-second interactive proof
-- [🔍 `site/RECEIPT_EXPLORER.html`](site/RECEIPT_EXPLORER.html) — Receipt table UI
-- [💳 `site/CHECKOUT.html`](site/CHECKOUT.html) — Tier checkout
+- [🏠 `site/index.html`](site/index.html) — single-page landing (local-first, MIT, no hosted service)
+- [🎬 `site/demo.html`](site/demo.html) — Browser Proof Lab, 100% offline interactive proof
 
 ---
 
 ## Pricing (v0.3.x — local-first only)
 
-| Tier | Price | Status | Audience |
-|---|---|---|---|
-| Local (MIT) | $0 | **Available now** | Solo devs, OSS maintainers, anyone running on their own hardware |
+There is no hosted service. There are no paid tiers. v0.3.5 is a single MIT-licensed Python package.
 
-The Developer, Team, and Enterprise tiers above represent a planned
-hosted service that does not yet exist. They are listed for context
-only. **Do not budget against them.** The hosted service will
-launch under a separate agreement and these tiers will be replaced
-with final pricing and a status of "Available" at that time.
+| What you get | Where it lives |
+|---|---|
+| The local-first product | `pip install dontlie` |
+| The signing key | Your machine, in `~/.config/dontlie/keys/` |
+| The vault | Your machine, in `~/.local/share/dontlie/vault.db` (or `DONTLIE_DB`) |
+| The receipt chain | Local SQLite, hash-linked, Ed25519-signed |
+| The bundle for outside review | A JSON file you hand to a third party |
 
-**The local-first software is and will remain MIT-licensed.** The
-free tier is not a teaser for a future paywall. It is the product.
-If a hosted service ships, the local-first product is not degraded
-to push users to it. The integrity, signer, provider, and chain
-verification features that are free today will remain free in the
-local-first product.
+**The local-first product is and will remain MIT-licensed.** If a hosted service ever ships, it will be a separate product with a separate name, separate terms, and a separate page. It will not retroactively change the MIT-licensed local-first product, and it will not paywall what already works on your hardware.
 
 ---
 
@@ -214,57 +208,36 @@ Full machine-pinned transcript:
 
 - [LAUNCH.md](LAUNCH.md) — customer-facing release notes
 - [competitive.md](competitive.md) — public landscape and positioning
-- [PRIVACY.md](PRIVACY.md) — privacy commitments
-- [SECURITY.md](SECURITY.md) — threat model and reporting
+- [PRIVACY.md](PRIVACY.md) — privacy commitments (redaction, evidence modes, anchor manifests)
+- [security.md](security.md) — threat model and reporting
 - [PLDG.md](PLDG.md) — No-Phone-Home pledge (enforced by `test_phone_home.py`)
+- [docs/compliance/](docs/compliance/) — operator reference memos (informational, not legal advice)
 - [company/BRAND.md](company/BRAND.md) — style guide
 - [company/PRIVACY_POLICY.md](company/PRIVACY_POLICY.md)
 - [company/TERMS_OF_SERVICE.md](company/TERMS_OF_SERVICE.md)
-- [company/DPA.md](company/DPA.md) — Data Processing Agreement
+- [company/DPA.md](company/DPA.md) — Data Processing Agreement template
 
 ---
 
-## Deploy
+## Run the local site
 
-This repo is the **single source of truth** for both the CLI and the deployed site.
-There is no second copy of `site/` anywhere else on this machine.
-
-### Deploy the static site
-
-The `site/` folder is what runs at [queued-inlet-pmqa.here.now](https://queued-inlet-pmqa.here.now/).
-The `herenow` CLI is not installed on this dev machine, so the deploy is a manual
-drag-and-drop:
-
-1. `dontlie backup` — snapshot the live vault first (the safety net)
-2. Open the [here.now upload page](https://here.now/upload) in a browser
-3. Drag the entire `site/` folder onto the upload area
-4. Verify the deployed URL renders with `view-source:https://queued-inlet-pmqa.here.now/`
-5. Open `https://queued-inlet-pmqa.here.now/#v=<any-receipt>` to confirm the
-   shareable verify-URL flow still works
-
-The `site/` folder is self-contained: no CDN fetches, no analytics, no
-third-party fonts. See [PLDG.md](PLDG.md) for the pledge and the
-enforcement test that runs in CI.
-
-### Deploy the witness notary
-
-The Cloudflare Worker that backs `witness-attest` and `witness-coverage` lives in
-[`projects/dontlie/witness-worker/`](projects/dontlie/witness-worker/).
-Deploy with:
+The `site/` folder is two static HTML files. There is no hosted site today.
+If you want to open them locally:
 
 ```bash
-cd projects/dontlie/witness-worker
-wrangler deploy
+open site/index.html     # macOS — the single landing page
+open site/demo.html      # macOS — the offline Browser Proof Lab
 ```
 
-The worker URL is then passed to `dontlie witness-coverage --url https://your-worker.workers.dev`.
+Both pages are self-contained: no CDN fetches, no analytics, no
+third-party fonts. See [PLDG.md](PLDG.md) for the no-phone-home
+pledge and the enforcement test that runs in CI.
 
-### Single-location rule
-
-If you find yourself editing a `site/` or `dontlie/` folder anywhere outside this
-repo, **stop** — those are stale copies. The collapse from two locations to one
-landed in commit `50dd58c` (v0.3.3). The old workspace at
-`~/orca projects/dontlie/` was deleted; do not recreate it.
+The Browser Proof Lab is the strongest public surface for v0.3.5:
+Ed25519 signing, IndexedDB vault, and receipt verification all run
+in the browser via WebCrypto. The CSP header refuses every
+non-`self` connection, so opening the file on an air-gapped
+laptop gives the same proof as opening it online.
 
 ---
 
@@ -284,20 +257,21 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). Issues: [GitHub Issues](https://github.c
 
 ## Security
 
-See [SECURITY.md](SECURITY.md). To report a vulnerability: security@dontlie.dev.
+See [security.md](security.md). To report a vulnerability, open a private
+issue or contact the maintainer via the email listed in
+[security.md](security.md).
 
 ---
 
 ## License
 
-MIT. Built by team Don't-Lie.
+MIT.
 
 ---
 
 ## Links
 
-- [GitHub](https://github.com/Matrix-ops77/dontlie)
-- [Documentation](https://dontlie.dev)
+- [GitHub](https://github.com/Matrix-ops77/dont-lie)
 - [Demo](https://dontlie.dev/demo.html)
 - [Receipt Explorer](https://dontlie.dev/RECEIPT_EXPLORER.html)
 - [Pricing](https://dontlie.dev#pricing)

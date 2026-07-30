@@ -1,1299 +1,173 @@
-<!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<!doctype html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Don't-Lie signs every LLM call with Ed25519 and hash-links it to the last one. A portable, offline-verifiable AI receipt vault built for EU AI Act, HIPAA, SOC 2, and NY DFS." />
-  <meta name="theme-color" content="#09090b" />
-  <title>Don't-Lie — AI receipts that hold up on a clean laptop</title>
-
-  <!-- PLDG.md pledge: zero third-party network calls. System font stack only. -->
-  <link rel="stylesheet" href="styles.css" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2309090b'/%3E%3Cpath d='M8 16 L14 22 L24 10' stroke='%2322c55e' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+  <meta name="description" content="Don't-Lie — a local-first signed receipt vault for OpenAI- and Anthropic-compatible AI calls. MIT-licensed. v0.3.5 on GitHub. No account, no cloud, no hosted service." />
+  <meta name="color-scheme" content="dark light" />
+  <title>Don't-Lie — local-first signed AI receipts</title>
+  <style>
+    :root {
+      --bg: #0a0a0b;
+      --surface: #111114;
+      --line: #1f1f24;
+      --text: #e6e6ea;
+      --muted: #8a8a93;
+      --verified: #22c55e;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --link: #7dd3fc;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    main { max-width: 760px; margin: 0 auto; padding: 4rem 1.5rem 6rem; }
+    h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); line-height: 1.15; margin: 0 0 0.5rem; letter-spacing: -0.02em; }
+    h2 { font-size: 1.2rem; margin: 3rem 0 0.5rem; letter-spacing: -0.005em; }
+    p { margin: 0 0 1rem; color: var(--text); }
+    .lede { font-size: 1.1rem; color: var(--muted); margin-bottom: 2rem; }
+    a { color: var(--link); text-decoration: none; border-bottom: 1px solid transparent; }
+    a:hover { border-bottom-color: var(--link); }
+    code, pre {
+      font: 0.92rem/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    pre {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      overflow-x: auto;
+      margin: 0 0 1.5rem;
+    }
+    code { background: var(--surface); border: 1px solid var(--line); padding: 0.1em 0.4em; border-radius: 4px; }
+    pre code { background: transparent; border: none; padding: 0; }
+    .meta {
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      font-size: 0.9rem; color: var(--muted);
+      margin: 0 0 2.5rem;
+    }
+    .meta a { color: var(--text); }
+    .grid { display: grid; gap: 1.2rem; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); margin: 0 0 1.5rem; }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 1.2rem 1.4rem; }
+    .card h3 { margin: 0 0 0.4rem; font-size: 0.95rem; }
+    .card p { font-size: 0.9rem; color: var(--muted); margin: 0; }
+    .doubt { border-left: 3px solid var(--amber); padding: 0.6rem 0 0.6rem 1rem; margin: 0.4rem 0; }
+    .doubt b { color: var(--text); }
+    .doubt p { margin: 0.2rem 0 0; color: var(--muted); font-size: 0.92rem; }
+    .doubt.proves { border-left-color: var(--verified); }
+    .note { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 1rem 1.2rem; color: var(--muted); font-size: 0.92rem; margin: 1.5rem 0; }
+    .note b { color: var(--text); }
+    .btn-row { display: flex; gap: 0.8rem; flex-wrap: wrap; margin: 1.5rem 0 0.5rem; }
+    .btn { display: inline-block; padding: 0.55rem 1rem; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--text); font-size: 0.92rem; }
+    .btn:hover { border-color: var(--verified); }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 3rem 0; }
+    footer { color: var(--muted); font-size: 0.85rem; margin-top: 4rem; }
+  </style>
 </head>
 <body>
-  <!-- ============== NOISE OVERLAY ============== -->
-  <div class="noise" aria-hidden="true"></div>
+<main>
+  <h1>Don't-Lie</h1>
+  <p class="lede">A local-first signed receipt vault for OpenAI- and Anthropic-compatible AI calls. MIT-licensed. You operate the key. You verify offline on a clean machine.</p>
 
-  <!-- ============== GLOW BLOBS ============== -->
-  <div class="glow-bg" aria-hidden="true">
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
+  <div class="meta">
+    <span>v0.3.5</span>
+    <a href="https://github.com/Matrix-ops77/dont-lie">github.com/Matrix-ops77/dont-lie</a>
+    <a href="https://github.com/Matrix-ops77/dont-lie/releases/tag/v0.3.5">Release notes</a>
+    <span>MIT</span>
   </div>
 
-  <!-- ============== NAV ============== -->
-  <header class="nav">
-    <div class="nav__inner">
-      <a class="nav__brand" href="#top">
-        <span class="brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M5 12 L10 17 L19 7" />
-          </svg>
-        </span>
-        <span class="brand-word">Don't-Lie</span>
-        <span class="brand-tag">v0.3.0</span>
-      </a>
+  <div class="btn-row">
+    <a class="btn" href="https://github.com/Matrix-ops77/dont-lie">GitHub</a>
+    <a class="btn" href="demo.html">Browser Proof Lab (offline)</a>
+  </div>
 
-      <nav class="nav__links" aria-label="Primary">
-        <a href="#proof">Proof</a>
-        <a href="#how">How it works</a>
-        <a href="#demo">Live demo</a>
-        <a href="#pricing">Pricing</a>
-        <a href="#explorer">Explorer</a>
-        <a class="nav__github" href="https://github.com/Matrix-ops77/dontlie" target="_blank" rel="noreferrer">
-          GitHub
-          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 L17 7"/><path d="M9 7 H17 V15"/></svg>
-        </a>
-      </nav>
+  <h2>Install</h2>
+  <pre><code>pip install dontlie
+dontlie --version
+dontlie demo            # 30-second offline proof
+dontlie web             # local HTTP UI on a port you pick</code></pre>
 
-      <div class="nav__cta">
-        <a class="btn btn--ghost" href="#install">
-          <span>Install</span>
-          <span class="btn__cmd">$ pip install dontlie</span>
-        </a>
-        <a class="btn btn--solid" href="#pricing">Get hosted</a>
-      </div>
+  <p>That's it. No account, no Docker, no cloud, no environment variables you must set. The CLI and the passive SDK launcher land on <code>$PATH</code>.</p>
 
-      <button class="nav__menu" aria-label="Menu" id="navMenu">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </header>
+  <h2>What you get in 5 minutes</h2>
+  <ol>
+    <li><code>pip install dontlie</code> lands the CLI, the <code>dontlie-passive</code> launcher, and the OpenAI / Anthropic SDK patches.</li>
+    <li><code>eval $(dontlie-passive)</code> in your shell — every detected SDK now routes through the local proxy.</li>
+    <li>Your next call lands in a SQLite vault you control, signed with an Ed25519 key you generated, hash-linked to the receipt before it.</li>
+    <li><code>dontlie verify</code> walks the chain in 0.4s. A tampered receipt fails with <em>payload sha256 mismatch</em> + <em>signature verification failed</em>.</li>
+    <li><code>dontlie export --bundle bundle.json</code> gives outside counsel a portable, self-contained file. They verify it in 0.8s on a clean laptop with no Don't-Lie install needed.</li>
+  </ol>
 
-  <main id="top">
+  <h2>What a receipt proves</h2>
+  <div class="grid">
+    <div class="card"><h3>Local integrity</h3><p>The signed bytes are byte-for-byte what crossed the wire. A locally mutated receipt breaks verification.</p></div>
+    <div class="card"><h3>Chain continuity</h3><p>Each receipt hash-links to the previous one. Delete or insert a row in the middle and the chain breaks.</p></div>
+    <div class="card"><h3>Signer</h3><p>The bundle embeds the public keys. Pin a key externally to prove the bundle was authored by a key you trust.</p></div>
+    <div class="card"><h3>Provider route</h3><p>The receipt records the model name, endpoint, and raw response body up to 16 MiB.</p></div>
+  </div>
 
-    <!-- ============== HERO ============== -->
-    <section class="hero">
-      <div class="hero__inner">
-        <!-- Left: copy -->
-        <div class="hero__copy">
-          <div class="kicker">
-            <span class="dot"></span>
-            <span>Live: <span id="liveCount">0</span> receipts signed in this tab</span>
-          </div>
+  <h2>What a receipt does <em>not</em> prove</h2>
+  <p>This is the honest list, called out before you buy:</p>
+  <div class="doubt"><b>That the model was truthful.</b><p>Receipts record what the model said. They do not judge whether it was correct. Hallucinations are recorded faithfully; that is the point.</p></div>
+  <div class="doubt"><b>That the upstream provider is who it claims to be.</b><p>The local proxy can record <code>model=gpt-4o</code> but cannot independently attest that the upstream service is actually OpenAI. Trust the provider separately.</p></div>
+  <div class="doubt"><b>Which person or organization held the signing key.</b><p>The receipt proves a key signed it. It does not prove who held that key. Use external key pinning for that.</p></div>
+  <div class="doubt"><b>Resistance to an attacker who already has the key.</b><p>An attacker who holds the private key can forge new receipts that chain into history. Once a key is revoked, receipts signed after revocation fail verification.</p></div>
+  <div class="doubt"><b>Content semantics beyond the bytes.</b><p>The receipt binds bytes. It does not interpret them.</p></div>
 
-          <h1 class="hero__title">
-            <span class="line">AI receipts</span>
-            <span class="line">that hold up on</span>
-            <span class="line line--accent">a clean laptop.</span>
-          </h1>
+  <h2>How it works in one line</h2>
+  <p>Point any OpenAI- or Anthropic-compatible client at the local proxy on a port you choose. The proxy forwards the request to your provider and signs the response into a SQLite vault. Offline verification needs no private key, no Don't-Lie install, and no network.</p>
 
-          <p class="hero__sub">
-            Don't-Lie is a drop-in proxy that intercepts every LLM call, signs it
-            locally with <span class="kbd">Ed25519</span>, and hash-links it to the
-            one before it. Hand an auditor a portable bundle. They verify the
-            entire chain offline, on a clean machine, without you in the room.
-          </p>
+  <h2>What is <em>not</em> in this release</h2>
+  <ul>
+    <li><b>No hosted service.</b> There is no SaaS, no dashboard, no account, no cloud sync, no shared namespace, no team seats. v0.3.5 is a Python package you install and operate yourself.</li>
+    <li><b>No hosted witness.</b> The optional <code>dontlie witness-service</code> notary runs as a process on hardware you control. It is not a public service.</li>
+    <li><b>No SOC 2 / HIPAA / GDPR / EU AI Act "compliance" claims.</b> The <a href="https://github.com/Matrix-ops77/dont-lie/tree/main/docs/compliance">operator reference memos</a> in the repository are explicit <em>informational</em> material. They tell an operator what a receipt does and does not cover for each regime. They are not certifications, and they are not legal advice.</li>
+    <li><b>No paid tiers, no checkout, no subscription, no billing.</b></li>
+  </ul>
 
-          <div class="hero__cta">
-            <a class="btn btn--primary btn--lg" href="#demo">
-              <span>See the tamper demo</span>
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
-            </a>
-            <a class="btn btn--outline btn--lg" href="#install">
-              <span class="btn__prompt">$</span>
-              <span class="btn__cmd">pip install dontlie</span>
-            </a>
-          </div>
+  <p>When (and only if) a hosted service ever ships, it will be a separate product with its own name, its own terms, and its own page. It will not retroactively change the MIT-licensed local-first product.</p>
 
-          <ul class="hero__chips" aria-label="Regulatory coverage">
-            <li>EU AI Act Art. 12</li>
-            <li>HIPAA 2025 Security Rule</li>
-            <li>SOC 2 CC7.2</li>
-            <li>NY DFS 500.06</li>
-          </ul>
+  <h2>What is in this release</h2>
+  <div class="grid">
+    <div class="card"><h3>OpenAI- and Anthropic-compatible proxy</h3><p>Streaming, non-streaming, and tool-use calls all produce signed receipts on the same chain.</p></div>
+    <div class="card"><h3>Passive SDK launcher</h3><p><code>eval $(dontlie-passive)</code> auto-redirects detected SDKs through the proxy.</p></div>
+    <div class="card"><h3>Portable signed bundle</h3><p><code>dontlie export --bundle</code> produces a self-contained JSON file. Anyone can verify with the same CLI.</p></div>
+    <div class="card"><h3>HTML proof report</h3><p>Self-contained, no JS deps, opens on an air-gapped laptop.</p></div>
+    <div class="card"><h3>Reasonable Doubt panel</h3><p>Five honest limits named in the report itself.</p></div>
+    <div class="card"><h3>412 tests, &lt; 60s</h3><p>Test matrix on Python 3.10, 3.11, 3.12. All green on the v0.3.5 release.</p></div>
+  </div>
 
-          <p class="hero__why-now" aria-label="Why now" style="margin-top: 1.25rem; font-size: 0.85rem; line-height: 1.55; color: var(--text-60, #a1a1aa); max-width: 36rem; padding: 0.75rem 1rem; border-left: 3px solid var(--verified, #22c55e); background: rgba(34, 197, 94, 0.04); border-radius: 0.375rem;">
-            <strong style="color: var(--verified, #22c55e); font-weight: 600;">Why now:</strong> 8 of 11 AI observability vendors were acquired
-            or shut down in 14 months — including Helicone → Mintlify (maintenance),
-            WhyLabs → Apple (discontinued), Langfuse → ClickHouse. Your receipts
-            shouldn't die with the vendor.
-          </p>
-        </div>
+  <h2>Try it in 30 seconds</h2>
+  <pre><code>pip install dontlie
+dontlie demo
+open demo/work/receipt-report.html</code></pre>
+  <p>You will see three signed receipts, a tampered row caught by the verifier, and a clean chain after a restore. No network, no API key, no signup.</p>
 
-        <!-- Right: live receipt feed -->
-        <aside class="hero__receipts" aria-label="Live receipt feed">
-          <div class="receipt-feed">
-            <div class="receipt-feed__head">
-              <span class="receipt-feed__title">
-                <span class="rec-dot"></span>
-                <span>witness feed</span>
-              </span>
-              <span class="receipt-feed__time" id="feedTime">--:--:--</span>
-            </div>
-            <div class="receipt-feed__body" id="feedBody">
-              <!-- Receipts inserted by JS -->
-            </div>
-            <div class="receipt-feed__foot">
-              <span class="mono">~300 receipts/sec sign</span>
-              <span class="mono">~1,900 receipts/sec verify</span>
-              <span class="mono">zero network required</span>
-            </div>
-          </div>
-        </aside>
-      </div>
+  <h2>Try the browser proof</h2>
+  <p>The <a href="demo.html">Browser Proof Lab</a> runs the same proof in your browser using WebCrypto Ed25519 and an IndexedDB vault. Zero network calls, zero dependencies. Open the file, click through the steps.</p>
 
-      <!-- trust strip -->
-      <div class="trust-strip">
-        <div class="trust-strip__inner">
-          <span class="trust-strip__label">Used by teams that need proof, not vibes</span>
-          <div class="trust-strip__logos" aria-hidden="true">
-            <span class="logo-mark">NEXA Health</span>
-            <span class="logo-mark">Solera Legal</span>
-            <span class="logo-mark">Vantage Capital</span>
-            <span class="logo-mark">Aperture Defense</span>
-            <span class="logo-mark">Halcyon Labs</span>
-            <span class="logo-mark">Kestrel Audit</span>
-          </div>
-        </div>
-      </div>
-    </section>
+  <h2>Limits (current release)</h2>
+  <ul>
+    <li>v2 receipt chain only. v0.1.x receipts are still verifiable and upgrade on append.</li>
+    <li>Single-machine key. Cross-machine reconciliation uses exported bundles and pinned keys.</li>
+    <li>Streaming responses are reconstructed from the final chunk; the full raw SSE body is stored alongside (up to 16 MiB by default).</li>
+    <li>The proxy is OpenAI- and Anthropic-Messages-compatible. Other provider shapes need a small adapter.</li>
+  </ul>
 
-    <!-- ============== THE PROBLEM ============== -->
-    <section class="section section--problem" id="problem">
-      <div class="section__inner">
-        <div class="section__head section__head--center">
-          <span class="eyebrow">The problem</span>
-          <h2 class="display">
-            Your AI is making decisions.
-            <span class="muted">Nobody can prove it.</span>
-          </h2>
-        </div>
+  <hr />
 
-        <div class="problem-grid">
-          <article class="problem-card problem-card--bad">
-            <span class="problem-card__num">01</span>
-            <h3>Black-box prompts</h3>
-            <p>A regulator asks: <em>"What did the model actually see on March 14?"</em> You have nothing but vendor console screenshots.</p>
-          </article>
-          <article class="problem-card problem-card--bad">
-            <span class="problem-card__num">02</span>
-            <h3>Mutable logs</h3>
-            <p>Your "audit log" lives in a database the same team administers. It can be edited before the auditor arrives.</p>
-          </article>
-          <article class="problem-card problem-card--bad">
-            <span class="problem-card__num">03</span>
-            <h3>No portable evidence</h3>
-            <p>The auditor needs to verify without calling your API, opening a VPN, or trusting your infrastructure. You can't ship that today.</p>
-          </article>
-        </div>
-      </div>
-    </section>
+  <div class="note">
+    <b>No phone home.</b> Every core CLI command makes zero outbound network calls. The <a href="https://github.com/Matrix-ops77/dont-lie/blob/main/PLDG.md">No-Phone-Home Pledge</a> is enforced by <code>test_phone_home.py</code> in CI.
+  </div>
 
-    <!-- ============== TAMPER DEMO ============== -->
-    <section class="section section--demo" id="demo">
-      <div class="section__inner">
-        <div class="section__head">
-          <span class="eyebrow">Live demo</span>
-          <h2 class="display">
-            Tamper with one byte.<br>
-            <span class="muted">The whole chain knows.</span>
-          </h2>
-          <p class="lede">
-            This is running in your browser right now. The receipt below was
-            signed with a real <span class="kbd">Ed25519</span> key generated
-            on this device, hash-linked to the one above it. Click
-            <span class="kbd">Tamper</span> to flip a single byte in the
-            model field. The signature check, the chain check, and the
-            verdict all update live.
-          </p>
-        </div>
-
-        <div class="tamper">
-          <!-- LEFT: chain list -->
-          <div class="tamper__chain">
-            <div class="chain-list" id="chainList" aria-label="Receipt chain">
-              <!-- receipts inserted by JS -->
-            </div>
-          </div>
-
-          <!-- RIGHT: active receipt + verdict -->
-          <div class="tamper__panel">
-            <div class="receipt-card" id="activeReceipt" data-state="ok">
-              <div class="receipt-card__head">
-                <span class="receipt-card__id" id="rcptId">#3</span>
-                <span class="receipt-card__verdict" id="rcptVerdict">VERIFIED</span>
-              </div>
-
-              <dl class="receipt-fields">
-                <div>
-                  <dt>issued_at</dt>
-                  <dd class="mono" id="rcptTs">2026-07-28T14:02:11.482Z</dd>
-                </div>
-                <div>
-                  <dt>model</dt>
-                  <dd class="mono" id="rcptModel">MiniMax-M3</dd>
-                </div>
-                <div>
-                  <dt>endpoint</dt>
-                  <dd class="mono">/v1/chat/completions</dd>
-                </div>
-                <div>
-                  <dt>parent_sha256</dt>
-                  <dd class="mono" id="rcptParent">c76d60c003fcf58…</dd>
-                </div>
-                <div>
-                  <dt>payload_sha256</dt>
-                  <dd class="mono" id="rcptSha">a054984340de4f37…</dd>
-                </div>
-                <div>
-                  <dt>signature</dt>
-                  <dd class="mono" id="rcptSig">9JRA95WhIZc6ufN…</dd>
-                </div>
-                <div>
-                  <dt>key_id</dt>
-                  <dd class="mono" id="rcptKey">7fd3731de0ec72f2</dd>
-                </div>
-              </dl>
-
-              <div class="receipt-card__actions">
-                <button class="btn btn--danger" id="tamperBtn" type="button">
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M9 9l-3 9 9-3 6-6a2.5 2.5 0 0 0-3.5-3.5L9 9z"/></svg>
-                  Tamper this receipt
-                </button>
-                <button class="btn btn--ghost btn--sm" id="regenBtn" type="button">
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
-                  New chain
-                </button>
-                <button class="btn btn--ghost btn--sm" id="exportBtn" type="button">
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
-                  Export bundle
-                </button>
-              </div>
-            </div>
-
-            <div class="verify-card" id="verifyCard" data-state="ok">
-              <div class="verify-card__head">
-                <span class="verify-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
-                </span>
-                <div>
-                  <h4>Chain verification</h4>
-                  <p class="verify-card__sub" id="verifySub">all 3 receipts intact, signatures valid, parent links unbroken</p>
-                </div>
-              </div>
-              <ul class="verify-checks" id="verifyChecks">
-                <!-- generated by JS -->
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============== TESTIMONIAL ============== -->
-    <section class="section section--testimonial">
-      <div class="section__inner">
-        <div class="testimonial">
-          <div class="testimonial__quote">
-            <svg class="testimonial__mark" viewBox="0 0 32 32" width="36" height="36" fill="none" aria-hidden="true">
-              <path d="M0 22 Q0 12 10 8 L10 14 Q4 16 4 22 L10 22 L10 32 L0 32 Z" fill="currentColor" opacity="0.3"/>
-              <path d="M16 22 Q16 12 26 8 L26 14 Q20 16 20 22 L26 22 L26 32 L16 32 Z" fill="currentColor" opacity="0.3"/>
-            </svg>
-            <p>
-              We pulled a 6,240-receipt bundle off a customer's laptop, ran
-              <code class="mono">dontlie verify</code> in front of their outside
-              counsel, and watched it complete in 2.7 seconds. No API call.
-              No VPN. No "trust us." The chain held, the case settled, and
-              opposing counsel never asked for the raw logs.
-            </p>
-            <div class="testimonial__attr">
-              <div class="testimonial__avatar" aria-hidden="true">RM</div>
-              <div>
-                <div class="testimonial__name">Renata Mahalingam</div>
-                <div class="testimonial__role">Senior Counsel · Kestrel Audit, LLP</div>
-              </div>
-            </div>
-          </div>
-          <div class="testimonial__meta">
-            <div class="testimonial__metric">
-              <span class="testimonial__num">2.7s</span>
-              <span class="testimonial__lbl">to verify a 6,240-receipt bundle</span>
-            </div>
-            <div class="testimonial__metric">
-              <span class="testimonial__num">0</span>
-              <span class="testimonial__lbl">API calls · 0 network hops</span>
-            </div>
-            <div class="testimonial__metric">
-              <span class="testimonial__num">100%</span>
-              <span class="testimonial__lbl">of audit objections met offline</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============== WHAT WE PROVE / DON'T ============== -->
-    <section class="section section--proof" id="proof">
-      <div class="section__inner">
-        <div class="section__head section__head--center">
-          <span class="eyebrow">Honest scope</span>
-          <h2 class="display">
-            What a receipt proves.
-            <span class="muted">And what it doesn't.</span>
-          </h2>
-          <p class="lede lede--center">
-            We're not a fact-checker. We don't claim the model was correct.
-            We claim something narrower and provable.
-          </p>
-        </div>
-
-        <div class="proof-grid">
-          <article class="proof-card proof-card--yes">
-            <span class="proof-card__icon">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
-            </span>
-            <span class="proof-card__tag">PROVES</span>
-            <h3>The receipt was signed by the documented key.</h3>
-            <p>Every receipt embeds the Ed25519 public key that signed it. Anyone can re-verify offline.</p>
-          </article>
-          <article class="proof-card proof-card--yes">
-            <span class="proof-card__icon">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
-            </span>
-            <span class="proof-card__tag">PROVES</span>
-            <h3>The chain is unbroken from the first receipt.</h3>
-            <p>Each receipt's parent_sha256 points to the one before. Reorder, drop, or insert — verification fails.</p>
-          </article>
-          <article class="proof-card proof-card--no">
-            <span class="proof-card__icon">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg>
-            </span>
-            <span class="proof-card__tag">DOES NOT PROVE</span>
-            <h3>The model was correct or truthful.</h3>
-            <p>Hallucinations are signed faithfully. That's the whole point — use receipts as evidence of <em>what</em>, not of <em>whether</em>.</p>
-          </article>
-          <article class="proof-card proof-card--no">
-            <span class="proof-card__icon">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg>
-            </span>
-            <span class="proof-card__tag">DOES NOT PROVE</span>
-            <h3>Which person held the signing key.</h3>
-            <p>We record the key. Identity comes from your org — HSM, SSO, audit trail of who controls which key.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============== DATA CUSTODY ============== -->
-    <section class="section section--custody" id="custody">
-      <div class="section__inner">
-        <div class="custody">
-          <div class="custody__intro">
-            <span class="eyebrow">Your data. Your custody.</span>
-            <h2 class="display">
-              We never see your prompts.
-              <span class="muted">Neither does anyone else.</span>
-            </h2>
-            <p class="lede">
-              The most common question we get from HIPAA and FinTech buyers
-              is some version of: <em>"Are my prompts sitting in plain text
-              on your servers?"</em> The honest answer:
-              there are no servers. The vault lives on the laptop it's
-              signed on. You can put it on an encrypted volume, hash-only
-              mode, or your own S3 — and the signature still works.
-            </p>
-          </div>
-
-          <div class="custody__grid">
-            <article class="custody-card custody-card--ok">
-              <div class="custody-card__icon">
-                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M2 22h20"/><path d="M8 22v-4h8v4"/></svg>
-              </div>
-              <h3>Local-first by default</h3>
-              <p>
-                Every receipt is signed on the machine that made the call.
-                The vault is a single <code class="mono">vault.jsonl</code>
-                file on your disk. We have no service that receives your
-                prompts, no logs we own, no "trust us."
-              </p>
-            </article>
-
-            <article class="custody-card custody-card--ok">
-              <div class="custody-card__icon">
-                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>
-              </div>
-              <h3>Hash-only mode</h3>
-              <p>
-                The vault can store only the SHA-256 of each prompt/response
-                — never the plaintext. The signature still anchors the chain
-                to the original bytes. Switch with one flag:
-              </p>
-              <div class="mini-term" aria-label="terminal command">
-                <span class="mini-term__prompt">$</span>
-                <span class="mini-term__cmd">dontlie config --payload-mode=hash</span>
-              </div>
-            </article>
-
-            <article class="custody-card custody-card--ok">
-              <div class="custody-card__icon">
-                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V6a4 4 0 0 1 8 0v4"/></svg>
-              </div>
-              <h3>Drop-in on encrypted volumes</h3>
-              <p>
-                <code class="mono">vault.jsonl</code> is just a file.
-                Put it on FileVault (macOS), LUKS (Linux), BitLocker (Windows),
-                or an encrypted EBS volume in AWS. The receipt format
-                doesn't care where it lives.
-              </p>
-            </article>
-
-            <article class="custody-card custody-card--ok">
-              <div class="custody-card__icon">
-                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>
-              </div>
-              <h3>Bring-your-own object lock</h3>
-              <p>
-                Pro and above can write the bundle directly to S3 with
-                Object Lock in compliance mode. Even AWS can't tamper
-                with it after the lock window closes. Your auditor gets
-                a URL; you keep the key.
-              </p>
-            </article>
-          </div>
-
-          <div class="custody__flow">
-            <span class="custody__flow-label">anatomy of a private deployment</span>
-            <div class="custody__flow-diagram" aria-hidden="true">
-              <div class="flow-node flow-node--box">
-                <span class="flow-node__icon">
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M2 22h20"/></svg>
-                </span>
-                <span class="flow-node__title">your laptop</span>
-                <span class="flow-node__sub">Ed25519 key · never leaves</span>
-              </div>
-              <div class="flow-arrow">→</div>
-              <div class="flow-node">
-                <span class="flow-node__icon">
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
-                </span>
-                <span class="flow-node__title">vault.jsonl</span>
-                <span class="flow-node__sub">plaintext or hash-only · your disk</span>
-              </div>
-              <div class="flow-arrow">→</div>
-              <div class="flow-node">
-                <span class="flow-node__icon">
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-                </span>
-                <span class="flow-node__title">S3 + Object Lock</span>
-                <span class="flow-node__sub">optional · AWS can't tamper</span>
-              </div>
-              <div class="flow-arrow">→</div>
-              <div class="flow-node flow-node--accent">
-                <span class="flow-node__icon">
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
-                </span>
-                <span class="flow-node__title">auditor's clean laptop</span>
-                <span class="flow-node__sub">1 cmd · zero network</span>
-              </div>
-            </div>
-            <p class="custody__flow-note">
-              No hop between you and the witness service is required for
-              verification. The witness is an optional co-signature; the
-              core proof is local.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============== HOW IT WORKS ============== -->
-    <section class="section section--how" id="how">
-      <div class="section__inner">
-        <div class="section__head">
-          <span class="eyebrow">How it works</span>
-          <h2 class="display">
-            Three steps.<br>
-            <span class="muted">One local-first vault.</span>
-          </h2>
-        </div>
-
-        <ol class="how-steps">
-          <li class="how-step">
-            <div class="how-step__num">01</div>
-            <div class="how-step__body">
-              <h3>Intercept</h3>
-              <p>
-                Point your client at <code class="mono">http://localhost:8768</code> instead
-                of the upstream provider. Don't-Lie proxies every request, captures
-                the canonical payload, and forwards it unchanged.
-              </p>
-              <ul class="how-step__list">
-                <li>OpenAI, Anthropic, local models, anything HTTP/JSON</li>
-                <li>Streaming and non-streaming responses both supported</li>
-                <li>Zero code change in the calling app</li>
-              </ul>
-            </div>
-            <div class="how-step__viz" aria-hidden="true">
-              <div class="viz-card">
-                <div class="viz-card__row"><span>POST</span><span class="ok">/v1/chat/completions</span></div>
-                <div class="viz-card__row"><span>model</span><span>MiniMax-M3</span></div>
-                <div class="viz-card__row"><span>messages</span><span>[3 items]</span></div>
-                <div class="viz-card__row viz-card__row--accent"><span>→ proxy</span><span>capturing</span></div>
-              </div>
-            </div>
-          </li>
-
-          <li class="how-step how-step--reverse">
-            <div class="how-step__num">02</div>
-            <div class="how-step__body">
-              <h3>Sign</h3>
-              <p>
-                Each captured receipt is canonicalized (sorted-key JSON),
-                hashed (SHA-256), and signed with an Ed25519 key that
-                never leaves your machine. The signature is appended
-                to the receipt.
-              </p>
-              <ul class="how-step__list">
-                <li>Ed25519 via your platform's crypto provider</li>
-                <li>Optional key rotation with monotonic key_id</li>
-                <li>Optional co-signature from the hosted witness service</li>
-              </ul>
-            </div>
-            <div class="how-step__viz" aria-hidden="true">
-              <div class="viz-card">
-                <div class="viz-card__row"><span>payload</span><span class="mono mono--sm">sha256:a054984…</span></div>
-                <div class="viz-card__row"><span>key_id</span><span class="mono mono--sm">7fd3731d…</span></div>
-                <div class="viz-card__row viz-card__row--accent"><span>signature</span><span class="mono mono--sm">9JRA95Wh…</span></div>
-              </div>
-            </div>
-          </li>
-
-          <li class="how-step">
-            <div class="how-step__num">03</div>
-            <div class="how-step__body">
-              <h3>Link &amp; verify</h3>
-              <p>
-                Every receipt records <code class="mono">parent_sha256</code> — the
-                hash of the previous receipt. To verify, the auditor walks the
-                chain forward, checking each signature and parent link. One
-                tampered byte anywhere breaks the rest.
-              </p>
-              <ul class="how-step__list">
-                <li>Single self-contained JSONL bundle</li>
-                <li>One command: <code class="mono">dontlie verify --verbose</code></li>
-                <li>No network, no API keys, no clock skew to argue about</li>
-              </ul>
-            </div>
-            <div class="how-step__viz" aria-hidden="true">
-              <div class="viz-card viz-card--chain">
-                <div class="chain-mini">
-                  <span class="chain-mini__node" title="genesis"></span>
-                  <span class="chain-mini__line"></span>
-                  <span class="chain-mini__node" title="#2"></span>
-                  <span class="chain-mini__line"></span>
-                  <span class="chain-mini__node chain-mini__node--active" title="#3"></span>
-                  <span class="chain-mini__line chain-mini__line--ghost"></span>
-                  <span class="chain-mini__node chain-mini__node--ghost"></span>
-                </div>
-                <div class="viz-card__row"><span>depth</span><span>1,047 receipts</span></div>
-                <div class="viz-card__row"><span>verify time</span><span>0.51s</span></div>
-                <div class="viz-card__row viz-card__row--accent"><span>result</span><span class="ok">VERIFIED</span></div>
-              </div>
-            </div>
-          </li>
-
-          <li class="how-step">
-            <div class="how-step__num">04</div>
-            <div class="how-step__body">
-              <h3>Share</h3>
-              <p>
-                One URL proves the receipt — no Dont-Lie account, no Dont-Lie
-                server, no installer on the verifier's side. Paste the URL
-                into a chat, an email, or a court exhibit. The recipient's
-                browser verifies the Ed25519 signature entirely client-side.
-              </p>
-              <ul class="how-step__list">
-                <li>Self-contained: the receipt + public key live in the URL hash</li>
-                <li>Zero network calls during verification (PLDG.md)</li>
-                <li>Works on a clean laptop, an air-gapped forensic workstation, or a phone</li>
-              </ul>
-              <pre class="term"><code><span class="term-prompt">$</span> <span class="term-cmd">dontlie verify-url 42</span>
-<span class="term-out">https://queued-inlet-pmqa.here.now/#v=eyJ2IjoxLC...</span></code></pre>
-            </div>
-            <div class="how-step__viz" aria-hidden="true">
-              <div class="viz-card viz-card--share">
-                <div class="viz-card__row"><span>URL</span><span class="mono" style="font-size:10px;">queued-inlet-pmqa.here.now/#v=eyJ2Ijox…</span></div>
-                <div class="viz-card__row"><span>verify</span><span>client-side</span></div>
-                <div class="viz-card__row"><span>network</span><span>0 requests</span></div>
-                <div class="viz-card__row viz-card__row--accent"><span>result</span><span class="ok">VERIFIED</span></div>
-              </div>
-            </div>
-          </li>
-        </ol>
-      </div>
-    </section>
-
-    <!-- ============== INSTALL / CODE ============== -->
-    <section class="section section--install" id="install">
-      <div class="section__inner section__inner--narrow">
-        <div class="install-pledges" aria-label="Trust pledges">
-          <div class="install-pledge install-pledge--ok" title="See PLDG.md — no analytics, no telemetry, no third-party calls">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>
-            No-Phone-Home
-          </div>
-          <div class="install-pledge" title="Verifiable offline on a clean machine — no Dont-Lie server">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            Offline-verifiable
-          </div>
-          <div class="install-pledge" title="MIT licensed, code is auditable">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
-            MIT · Auditable
-          </div>
-          <a class="install-pledge install-pledge--link" href="https://github.com/Matrix-ops77/dontlie/blob/main/PLDG.md" target="_blank" rel="noreferrer">
-            PLDG.md →
-          </a>
-        </div>
-
-        <div class="section__head section__head--center">
-          <span class="eyebrow">Get started</span>
-          <h2 class="display">60 seconds from <code class="mono">pip install</code> to your first signed receipt.</h2>
-        </div>
-
-        <div class="terminal">
-          <div class="terminal__head">
-            <span class="terminal__dot" style="background:#ef4444"></span>
-            <span class="terminal__dot" style="background:#f59e0b"></span>
-            <span class="terminal__dot" style="background:#22c55e"></span>
-            <span class="terminal__title">~/projects/my-agent &mdash; zsh</span>
-            <button class="terminal__copy" id="copyInstall" type="button" aria-label="Copy install command">copy</button>
-          </div>
-          <pre class="terminal__body" id="installBlock"><span class="term-prompt">$</span> <span class="term-cmd">pip install dontlie</span>
-<span class="term-out">Collecting dontlie
-  Downloading dontlie-0.3.3-py3-none-any.whl (52.1 kB)
-  Downloading dontlie_crypto-0.3.3-cp311-cp311-macosx_14_0_arm64.whl (218.9 kB)
-Installing collected packages: dontlie, dontlie-crypto
-Successfully installed dontlie-0.3.3 dontlie-crypto-0.3.3</span>
-<span class="term-prompt">$</span> <span class="term-cmd">dontlie init</span>
-<span class="term-out">created ./dontlie/vault.jsonl
-created ./dontlie/keys/operator.ed25519.pem
-public key:  7fd3731de0ec72f2  &lt;c76d60c003fcf58…&gt;</span>
-<span class="term-prompt">$</span> <span class="term-cmd">export OPENAI_BASE_URL=http://localhost:8768</span>
-<span class="term-prompt">$</span> <span class="term-cmd">python my_agent.py</span>
-<span class="term-out">[12:04:11] receipt #1 signed   &lt;a054984…&gt;
-[12:04:13] receipt #2 signed   &lt;e89bc02…&gt;
-[12:04:14] receipt #3 signed   &lt;71fa4d0…&gt;
-…</span>
-<span class="term-prompt">$</span> <span class="term-cmd">dontlie verify --verbose</span>
-<span class="term-out ok">3 ok · 0 bad · chain unbroken · 0.004s</span>
-</pre>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============== BENTO FEATURES ============== -->
-    <section class="section section--features">
-      <div class="section__inner">
-        <div class="section__head">
-          <span class="eyebrow">Built for the people who get the subpoena</span>
-          <h2 class="display">Receipts your legal team can hand over.</h2>
-        </div>
-
-        <div class="bento">
-          <article class="bento__cell bento__cell--lg">
-            <div class="bento__icon">
-              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5l-8-3z"/></svg>
-            </div>
-            <h3>Portable offline verification</h3>
-            <p>
-              The whole chain exports to a single JSONL file under 10&nbsp;MB for
-              10,000 receipts. The auditor runs one command. No cloud. No API
-              key. No "trust us."
-            </p>
-            <div class="bento__metric">
-              <span class="mono">~1,900 receipts/sec verify</span>
-              <span class="muted">on a 2021 MacBook Air</span>
-            </div>
-          </article>
-
-          <article class="bento__cell">
-            <div class="bento__icon">
-              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 1v6"/><path d="M12 17v6"/><path d="M4.2 4.2l4.3 4.3"/><path d="M15.5 15.5l4.3 4.3"/><path d="M1 12h6"/><path d="M17 12h6"/></svg>
-            </div>
-            <h3>Witness co-signature</h3>
-            <p>
-              Optional hosted notary co-signs each receipt hash with an
-              independent Ed25519 key. Adds a second party who can attest
-              "yes, this hash reached us at this time."
-            </p>
-          </article>
-
-          <article class="bento__cell">
-            <div class="bento__icon">
-              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 9h6v6H9z"/></svg>
-            </div>
-            <h3>HSM-backed customer keys + rotation</h3>
-            <p>
-              Compliance tier pins the operator key to an HSM
-              (AWS CloudHSM, GCP KMS, Azure Key Vault). Keys rotate on a
-              monotonic <code class="mono">key_id</code> — old receipts
-              verify against the old public key, new ones against the
-              new. The chain keeps the rotation history.
-            </p>
-            <ul class="bento__rot">
-              <li><span class="mono">key_id</span> embedded in every receipt</li>
-              <li><span class="mono">operator_pub_sha256</span> pins the public key</li>
-              <li><span class="mono">rotation_tx</span> in the bundle header</li>
-            </ul>
-          </article>
-
-          <article class="bento__cell bento__cell--md">
-            <div class="bento__icon">
-              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M2 12h20"/><path d="M12 2a14 14 0 0 1 0 20"/><path d="M12 2a14 14 0 0 0 0 20"/></svg>
-            </div>
-            <h3>Multi-region notaries</h3>
-            <p>
-              <span class="mono">us-east</span> · <span class="mono">eu-west</span> ·
-              <span class="mono">apac</span>. Pin the witness to a region
-              inside your data-residency boundary. Each receipt gets a
-              notarization from the region you choose.
-            </p>
-            <div class="bento__map" aria-hidden="true">
-              <span class="region region--us"><span></span> US</span>
-              <span class="region region--eu"><span></span> EU</span>
-              <span class="region region--apac"><span></span> APAC</span>
-            </div>
-          </article>
-
-          <article class="bento__cell bento__cell--md">
-            <div class="bento__icon">
-              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h18"/><path d="M3 12h18"/><path d="M3 17h12"/></svg>
-            </div>
-            <h3>Drop-in for every provider &amp; framework</h3>
-            <p>
-              One env var and your existing code starts producing receipts.
-              Works with any HTTP/JSON provider, plus the agent frameworks
-              teams already ship on. The <span class="kbd">/v1/chat/completions</span>
-              shape is the only contract.
-            </p>
-            <div class="bento__stack-labels">
-              <span class="bento__stack-label">Providers</span>
-              <div class="bento__stack" aria-hidden="true">
-                <span>openai</span>
-                <span>anthropic</span>
-                <span>ollama</span>
-                <span>vllm</span>
-              </div>
-              <span class="bento__stack-label">Frameworks</span>
-              <div class="bento__stack" aria-hidden="true">
-                <span>LangChain</span>
-                <span>LlamaIndex</span>
-                <span>CrewAI</span>
-                <span>AutoGen</span>
-              </div>
-            </div>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============== EXPLORER (visual of dashboard) ============== -->
-    <section class="section section--explorer" id="explorer">
-      <div class="section__inner">
-        <div class="explorer">
-          <div class="explorer__copy">
-            <span class="eyebrow">Explorer</span>
-            <h2 class="display">Browse the chain like a log file. Verify it like a courtroom exhibit.</h2>
-            <p>
-              The included TUI and web explorer let non-engineers search
-              receipts, see the model, the prompt, the response, and the
-              chain position — then run a one-click integrity report.
-            </p>
-            <ul class="explorer__list">
-              <li><span class="dot dot--ok"></span> Search prompt, response, model, key_id, tags</li>
-              <li><span class="dot dot--ok"></span> Drill from a single receipt to the full chain</li>
-              <li><span class="dot dot--ok"></span> One-click export of a verifiable bundle</li>
-              <li><span class="dot dot--ok"></span> Slack &amp; PagerDuty on verification failure</li>
-            </ul>
-          </div>
-          <div class="explorer__viz">
-            <div class="dashboard">
-              <div class="dashboard__head">
-                <span class="dashboard__title">Dont-Lie · receipt explorer</span>
-                <span class="dashboard__tabs">
-                  <span class="tab tab--active">Dashboard</span>
-                  <span>Search</span>
-                  <span>Verify</span>
-                  <span>Export</span>
-                </span>
-              </div>
-              <div class="dashboard__stats">
-                <div class="stat">
-                  <div class="stat__num ok">1,047</div>
-                  <div class="stat__label">total receipts</div>
-                </div>
-                <div class="stat">
-                  <div class="stat__num">1,041<span class="stat__sep">/</span><span class="muted">6</span></div>
-                  <div class="stat__label">chain status · ok / bad</div>
-                </div>
-                <div class="stat">
-                  <div class="stat__num">78<span class="muted">/100</span></div>
-                  <div class="stat__label">trust score</div>
-                  <ul class="stat__bars">
-                    <li>
-                      <span class="stat__bars-label">chain integrity</span>
-                      <span class="stat__bars-track"><span class="stat__bars-fill" style="width: 100%; background: var(--ok)"></span></span>
-                      <span class="stat__bars-val mono">40/40</span>
-                    </li>
-                    <li>
-                      <span class="stat__bars-label">key rotation</span>
-                      <span class="stat__bars-track"><span class="stat__bars-fill" style="width: 86.6%; background: var(--ok)"></span></span>
-                      <span class="stat__bars-val mono">13/15</span>
-                    </li>
-                    <li>
-                      <span class="stat__bars-label">coverage</span>
-                      <span class="stat__bars-track"><span class="stat__bars-fill" style="width: 0%; background: var(--bad)"></span></span>
-                      <span class="stat__bars-val mono bad">0/20</span>
-                    </li>
-                    <li>
-                      <span class="stat__bars-label">provider attestation</span>
-                      <span class="stat__bars-track"><span class="stat__bars-fill" style="width: 100%; background: var(--ok)"></span></span>
-                      <span class="stat__bars-val mono">15/15</span>
-                    </li>
-                    <li>
-                      <span class="stat__bars-label">freshness</span>
-                      <span class="stat__bars-track"><span class="stat__bars-fill" style="width: 100%; background: var(--ok)"></span></span>
-                      <span class="stat__bars-val mono">10/10</span>
-                    </li>
-                  </ul>
-                </div>
-                <div class="stat">
-                  <div class="stat__num mono">Ed25519</div>
-                  <div class="stat__label">signature scheme</div>
-                </div>
-              </div>
-              <div class="dashboard__search mono">search prompt / response / tags…</div>
-              <div class="dashboard__row mono">
-                <span>#1047</span>
-                <span>2026-07-28 14:02:11</span>
-                <span>MiniMax-M3</span>
-                <span>7fd3731d…</span>
-                <span class="ellipsis">"Summarize the Q2 risk report, return only JSON."</span>
-              </div>
-              <div class="dashboard__row mono">
-                <span>#1046</span>
-                <span>2026-07-28 14:02:09</span>
-                <span>MiniMax-M3</span>
-                <span>7fd3731d…</span>
-                <span class="ellipsis">"Classify this support ticket, return category + severity."</span>
-              </div>
-              <div class="dashboard__row mono">
-                <span>#1045</span>
-                <span>2026-07-28 14:02:07</span>
-                <span>MiniMax-M3</span>
-                <span>7fd3731d…</span>
-                <span class="ellipsis">"Extract entities, return as JSON-LD."</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============== SAMPLE AUDIT DELIVERABLE ============== -->
-    <section class="section section--sample" id="sample">
-      <div class="section__inner">
-        <div class="section__head">
-          <span class="eyebrow">What the deliverable looks like</span>
-          <h2 class="display">
-            Hand outside counsel a folder.<br>
-            <span class="muted">They verify it in 3 seconds.</span>
-          </h2>
-          <p class="lede">
-            A real audit deliverable is a small folder: the signed JSONL
-            bundle, the public key, and a one-page verify report. Download
-            the sample below — it's 8 real receipts, each signed with a
-            real Ed25519 key, hash-linked into a chain you can run
-            <code class="mono">dontlie verify</code> against.
-          </p>
-        </div>
-
-        <div class="deliverable">
-          <aside class="deliverable__files">
-            <header>
-              <span class="deliverable__icon">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-              </span>
-              <div>
-                <span class="deliverable__name">audit-bundle-2026-07-22</span>
-                <span class="deliverable__meta">8 receipts · 7.6 KB · us-east witness</span>
-              </div>
-            </header>
-            <ul class="deliverable__tree">
-              <li class="deliverable__tree-row deliverable__tree-row--dir">
-                <span class="deliverable__tree-indent"></span>
-                <span class="deliverable__tree-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M3 6a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></svg>
-                </span>
-                <span class="deliverable__tree-name">audit-bundle-2026-07-22</span>
-                <span class="deliverable__tree-meta mono">/</span>
-              </li>
-              <li class="deliverable__tree-row deliverable__tree-row--file">
-                <span class="deliverable__tree-indent"></span>
-                <span class="deliverable__tree-icon deliverable__tree-icon--json" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13c0-1 1-1.5 2-1.5s2 .5 2 1.5"/><path d="M9 17c0 1 1 1.5 2 1.5s2-.5 2-1.5"/></svg>
-                </span>
-                <span class="deliverable__tree-name">receipts.bundle.jsonl</span>
-                <span class="deliverable__tree-meta mono">jsonl · 7.6 KB</span>
-              </li>
-              <li class="deliverable__tree-row deliverable__tree-row--file">
-                <span class="deliverable__tree-indent"></span>
-                <span class="deliverable__tree-icon deliverable__tree-icon--key" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="14" r="4"/><path d="M11 11l9-9"/><path d="M16 6l3 3"/></svg>
-                </span>
-                <span class="deliverable__tree-name">operator.pub.pem</span>
-                <span class="deliverable__tree-meta mono">pem · 1.2 KB</span>
-              </li>
-              <li class="deliverable__tree-row deliverable__tree-row--file">
-                <span class="deliverable__tree-indent"></span>
-                <span class="deliverable__tree-icon deliverable__tree-icon--html" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13l1 4 2-2 2 2 1-4"/></svg>
-                </span>
-                <span class="deliverable__tree-name">verify-report.html</span>
-                <span class="deliverable__tree-meta mono">html · 2.4 KB</span>
-              </li>
-              <li class="deliverable__tree-row deliverable__tree-row--file">
-                <span class="deliverable__tree-indent"></span>
-                <span class="deliverable__tree-icon deliverable__tree-icon--txt" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h6"/></svg>
-                </span>
-                <span class="deliverable__tree-name">README.txt</span>
-                <span class="deliverable__tree-meta mono">txt · 0.4 KB</span>
-              </li>
-            </ul>
-            <a class="btn btn--primary btn--block" href="sample-audit-bundle.jsonl" download="sample-audit-bundle.jsonl">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
-              Download the sample bundle
-            </a>
-            <a class="btn btn--ghost btn--block" href="sample-verify-report.json" download="sample-verify-report.json">
-              Download verify report (.json)
-            </a>
-            <a class="btn btn--ghost btn--block" href="sample-public-key.pem" download="operator.pub.pem">
-              Download public key (.pem)
-            </a>
-          </aside>
-
-          <div class="deliverable__report">
-            <div class="report report--browser">
-              <div class="report__chrome">
-                <div class="report__chrome-dots">
-                  <span style="background:#ef4444"></span>
-                  <span style="background:#f59e0b"></span>
-                  <span style="background:#22c55e"></span>
-                </div>
-                <div class="report__chrome-nav">
-                  <span class="report__chrome-arrow">‹</span>
-                  <span class="report__chrome-arrow">›</span>
-                  <span class="report__chrome-reload">↻</span>
-                </div>
-                <div class="report__chrome-url">
-                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V6a4 4 0 0 1 8 0v4"/></svg>
-                  <span class="mono">file:///audit-bundle-2026-07-22/verify-report.html</span>
-                </div>
-                <div class="report__chrome-menu">
-                  <span>⋯</span>
-                </div>
-              </div>
-              <header class="report__head">
-                <div>
-                  <span class="report__title">Don't-Lie · verify report</span>
-                  <span class="report__sub">self-contained HTML · no network required</span>
-                </div>
-                <span class="report__badge report__badge--ok">VERIFIED</span>
-              </header>
-              <div class="report__stats">
-                <div class="report__stat">
-                  <span class="report__num ok">8</span>
-                  <span class="report__lbl">valid receipts</span>
-                </div>
-                <div class="report__stat">
-                  <span class="report__num">0</span>
-                  <span class="report__lbl">invalid receipts</span>
-                </div>
-                <div class="report__stat">
-                  <span class="report__num">0.6<span class="report__unit">s</span></span>
-                  <span class="report__lbl">verify time</span>
-                </div>
-                <div class="report__stat">
-                  <span class="report__num">Ed25519</span>
-                  <span class="report__lbl">signature scheme</span>
-                </div>
-              </div>
-              <p class="report__verdict">
-                <strong>One-line verdict:</strong> All 8 receipts intact and
-                were signed by the documented key. Parent links unbroken
-                from receipt #1 to receipt #8.
-              </p>
-              <div class="report__chain">
-                <span class="report__chain-node" title="1"></span>
-                <span class="report__chain-line"></span>
-                <span class="report__chain-node" title="2"></span>
-                <span class="report__chain-line"></span>
-                <span class="report__chain-node" title="3"></span>
-                <span class="report__chain-line"></span>
-                <span class="report__chain-node" title="4"></span>
-                <span class="report__chain-line"></span>
-                <span class="report__chain-node" title="5"></span>
-                <span class="report__chain-line"></span>
-                <span class="report__chain-node" title="6"></span>
-                <span class="report__chain-line"></span>
-                <span class="report__chain-node" title="7"></span>
-                <span class="report__chain-line"></span>
-                <span class="report__chain-node report__chain-node--active" title="8"></span>
-              </div>
-              <pre class="report__terminal"><span class="term-prompt">$</span> <span class="term-cmd">dontlie verify receipts.bundle.jsonl</span>
-<span class="term-out ok">8 ok · 0 bad · chain unbroken · 0.6s</span>
-<span class="term-out">key_id: <span class="mono">8X38g9C0L1BoX+/s</span> · first_id: 1 · last_id: 8</span>
-<span class="term-out">signature scheme: Ed25519 · hash: SHA-256 · format: JSONL</span></pre>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============== COMPLIANCE ============== -->
-    <section class="section section--compliance">
-      <div class="section__inner">
-        <div class="section__head">
-          <span class="eyebrow">Compliance mapping</span>
-          <h2 class="display">What your auditor actually needs.</h2>
-          <p class="lede">
-            Receipts satisfy the evidence-of-integrity clause in the four
-            frameworks people ask us about most. We don't issue a
-            certification &mdash; we issue the artifact one makes.
-          </p>
-        </div>
-
-        <div class="compliance-grid">
-          <article class="compliance-card">
-            <header>
-              <span class="compliance-card__tag">EU</span>
-              <h3>EU AI Act · Article 12</h3>
-            </header>
-            <p>Automatic logging of events over the lifecycle of the high-risk AI system, with traceability of the system's functioning.</p>
-            <footer class="mono">covers Art. 12(1)(a) and 12(2)</footer>
-          </article>
-          <article class="compliance-card">
-            <header>
-              <span class="compliance-card__tag">US-HC</span>
-              <h3>HIPAA · 2025 Security Rule</h3>
-            </header>
-            <p>Audit controls, integrity of PHI, person or entity authentication. Tamper-evident logs satisfy the §164.312(b) controls.</p>
-            <footer class="mono">NIST SP 800-66 Rev. 3</footer>
-          </article>
-          <article class="compliance-card">
-            <header>
-              <span class="compliance-card__tag">US-SOX</span>
-              <h3>SOC 2 · CC7.2</h3>
-            </header>
-            <p>System monitoring, anomaly detection, and evaluation of incidents. Receipts provide the evidence backing the assertion.</p>
-            <footer class="mono">TSC 2017, rev. 2022</footer>
-          </article>
-          <article class="compliance-card">
-            <header>
-              <span class="compliance-card__tag">US-NY</span>
-              <h3>NY DFS · 500.06</h3>
-            </header>
-            <p>Audit trail requirements for cybersecurity events. Hash-linked, signed, append-only. 5-year retention covered by default.</p>
-            <footer class="mono">23 NYCRR 500.06(a)(2)</footer>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============== PRICING ============== -->
-    <section class="section section--pricing" id="pricing">
-      <div class="section__inner">
-        <div class="section__head section__head--center">
-          <span class="eyebrow">Pricing</span>
-          <h2 class="display">One price for the part that matters.</h2>
-          <p class="lede lede--center">
-            The signed-receipt vault is the wedge. We charge for the team
-            and compliance features that regulated buyers need. The
-            local-first, MIT-licensed core is free forever for solo and
-            non-commercial use.
-          </p>
-        </div>
-
-        <div class="pricing-grid">
-          <article class="plan">
-            <header>
-              <span class="plan__name">Solo</span>
-              <div class="plan__price">
-                <span class="plan__amount">$0</span>
-                <span class="plan__period">/ forever</span>
-              </div>
-            </header>
-            <p class="plan__sub">For individuals, hobbyists, students, and non-commercial research.</p>
-            <ul class="plan__list">
-              <li><span class="check">✓</span> Local-first proxy + vault</li>
-              <li><span class="check">✓</span> Unlimited receipts on your machine</li>
-              <li><span class="check">✓</span> OpenAI / Anthropic / local models</li>
-              <li><span class="check">✓</span> CLI, TUI, web UI — all included</li>
-              <li><span class="check">✓</span> Offline verification (your machine, your key)</li>
-              <li><span class="check">✓</span> MIT license, full source</li>
-              <li><span class="check">✓</span> Community support</li>
-            </ul>
-            <a class="btn btn--outline btn--block" href="#install">Download</a>
-            <p class="plan__foot">No account required. <code class="mono">pip install dontlie</code></p>
-          </article>
-
-          <article class="plan plan--featured">
-            <span class="plan__badge">Most popular</span>
-            <header>
-              <span class="plan__name">Pro</span>
-              <div class="plan__price">
-                <span class="plan__amount">$19</span>
-                <span class="plan__period">/ seat / month</span>
-              </div>
-            </header>
-            <p class="plan__sub">For professional developers shipping production agents.</p>
-            <ul class="plan__list">
-              <li><span class="check">✓</span> Everything in Solo</li>
-              <li><span class="check">✓</span> Hosted witness notary (co-sign every receipt)</li>
-              <li><span class="check">✓</span> Cloud-synced vault across machines (encrypted at rest)</li>
-              <li><span class="check">✓</span> Receipt bundle export to S3 with object lock</li>
-              <li><span class="check">✓</span> Up to 1M receipts / month</li>
-              <li><span class="check">✓</span> Web UI for non-engineer auditors</li>
-              <li><span class="check">✓</span> Email support, 24-hour response</li>
-            </ul>
-            <a class="btn btn--primary btn--block" href="#start">Start Pro</a>
-            <p class="plan__foot">Annual = $190/yr (save $38)</p>
-          </article>
-
-          <article class="plan plan--studio">
-            <header>
-              <span class="plan__name">Studio <span class="plan__name-tag">team starter</span></span>
-              <div class="plan__price">
-                <span class="plan__amount">$79</span>
-                <span class="plan__period">/ month · 3 seats</span>
-              </div>
-            </header>
-            <p class="plan__sub">For 2–4 person teams who need shared receipts and a real audit log — without jumping to a full department plan.</p>
-            <ul class="plan__list">
-              <li><span class="check">✓</span> Everything in Pro</li>
-              <li><span class="check">✓</span> 3 seats included · $20 / extra seat</li>
-              <li><span class="check">✓</span> Team namespace (multi-tenant receipts)</li>
-              <li><span class="check">✓</span> Per-seat audit log (who exported what, when)</li>
-              <li><span class="check">✓</span> Slack alerts on verify failures</li>
-              <li><span class="check">✓</span> Up to 5M receipts / month</li>
-              <li><span class="check">✓</span> Email support, 24-hour response</li>
-            </ul>
-            <a class="btn btn--outline btn--block" href="#start">Start Studio</a>
-            <p class="plan__foot">Annual = $790/yr (save $158) · upgrades to Team at any time</p>
-          </article>
-
-          <article class="plan">
-            <header>
-              <span class="plan__name">Team</span>
-              <div class="plan__price">
-                <span class="plan__amount">$199</span>
-                <span class="plan__period">/ month · 5 seats</span>
-              </div>
-            </header>
-            <p class="plan__sub">For teams sharing a vault across a department or product.</p>
-            <ul class="plan__list">
-              <li><span class="check">✓</span> Everything in Pro</li>
-              <li><span class="check">✓</span> 5 seats included · $40 / extra seat</li>
-              <li><span class="check">✓</span> Team namespace (multi-tenant receipts)</li>
-              <li><span class="check">✓</span> Per-seat audit log (who exported what, when)</li>
-              <li><span class="check">✓</span> Slack &amp; PagerDuty alerts on verify failures</li>
-              <li><span class="check">✓</span> Up to 10M receipts / month</li>
-              <li><span class="check">✓</span> Shared Slack channel with the team</li>
-            </ul>
-            <a class="btn btn--outline btn--block" href="#start">Start Team</a>
-            <p class="plan__foot">Annual = $1,990/yr (save $398)</p>
-          </article>
-
-          <article class="plan">
-            <header>
-              <span class="plan__name">Compliance</span>
-              <div class="plan__price">
-                <span class="plan__amount">$999</span>
-                <span class="plan__period">/ month</span>
-              </div>
-            </header>
-            <p class="plan__sub">For regulated industries: healthcare, legal, financial services, defense.</p>
-            <ul class="plan__list">
-              <li><span class="check">✓</span> Everything in Team</li>
-              <li><span class="check">✓</span> SOC 2 Type II report (we'll get there with you)</li>
-              <li><span class="check">✓</span> HIPAA, EU AI Act, NY DFS compliance memos</li>
-              <li><span class="check">✓</span> 7-year retention guarantee (object-locked S3)</li>
-              <li><span class="check">✓</span> Multi-region witness notaries (US, EU, APAC)</li>
-              <li><span class="check">✓</span> Per-customer key isolation (HSM-backed)</li>
-              <li><span class="check">✓</span> Unlimited receipts</li>
-              <li><span class="check">✓</span> Designated success engineer</li>
-              <li><span class="check">✓</span> Quarterly compliance review call</li>
-            </ul>
-            <a class="btn btn--outline btn--block" href="mailto:sales@dontlie.example">Talk to sales</a>
-            <p class="plan__foot">Annual = $9,990/yr · 30-day pilot</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============== FINAL CTA ============== -->
-    <section class="section section--cta">
-      <div class="section__inner section__inner--narrow">
-        <div class="cta">
-          <h2 class="display">The receipts your AI should have been generating.</h2>
-          <p class="lede lede--center">
-            Install in 60 seconds. Sign your first receipt today.
-            Hand a verifier the chain by Friday.
-          </p>
-          <div class="cta__actions">
-            <a class="btn btn--primary btn--lg" href="#install">
-              <span>$ pip install dontlie</span>
-            </a>
-            <a class="btn btn--ghost btn--lg" href="#demo">Replay the tamper demo</a>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- ============== FOOTER ============== -->
-  <footer class="footer">
-    <div class="footer__inner">
-      <div class="footer__col">
-        <a class="nav__brand" href="#top">
-          <span class="brand-mark" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12 L10 17 L19 7" /></svg>
-          </span>
-          <span class="brand-word">Don't-Lie</span>
-        </a>
-        <p class="footer__tag">
-          Local-first AI receipt vault.<br>
-          Honest forensic evidence. Not a fact-checker.
-        </p>
-      </div>
-      <div class="footer__col">
-        <h4>Product</h4>
-        <a href="#proof">What it proves</a>
-        <a href="#how">How it works</a>
-        <a href="#demo">Live tamper demo</a>
-        <a href="#pricing">Pricing</a>
-      </div>
-      <div class="footer__col">
-        <h4>Resources</h4>
-        <a href="https://github.com/Matrix-ops77/dontlie" target="_blank" rel="noreferrer">Source on GitHub</a>
-        <a href="#">Docs</a>
-        <a href="#">Compliance memos</a>
-        <a href="#">Manifesto</a>
-      </div>
-      <div class="footer__col">
-        <h4>Trust</h4>
-        <span class="footer__meta">MIT licensed</span>
-        <span class="footer__meta">v0.3.0 · build 2026.07.28</span>
-        <span class="footer__meta">Ed25519 · SHA-256 · JSONL</span>
-      </div>
-    </div>
-    <div class="footer__base">
-      <span>© 2026 Don't-Lie. Receipts beat opinions.</span>
-      <span class="mono">// honest evidence, not vibes</span>
-    </div>
+  <footer>
+    <p>MIT license. Maintained by the Don't-Lie contributors. Source, issues, and release history on <a href="https://github.com/Matrix-ops77/dont-lie">GitHub</a>.</p>
   </footer>
-
-  <script src="app.js" defer></script>
+</main>
 </body>
 </html>

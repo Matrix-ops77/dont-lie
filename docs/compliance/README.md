@@ -1,5 +1,15 @@
 # Don't-Lie compliance memos
 
+> **Operator reference, not vendor certification.**
+> These memos are informational material for people evaluating Don't-Lie
+> against a regulatory regime. They tell an operator what a Don't-Lie
+> receipt does and does not cover. They are **not** a compliance
+> certification, **not** a SOC 2 report, **not** a BAA, and **not**
+> legal advice. Confirm any compliance position with your own counsel.
+> Don't-Lie v0.3.5 is a local-first Python package; there is no
+> hosted service, no hosted witness, and no compliance product behind
+> these memos.
+
 Per-regime guides for our primary buyers: regulated-industry AI engineers in healthcare, legal, financial services, and the EU. Each memo is **2 pages** and answers three questions in plain language:
 
 1. What does the regime require?
@@ -39,7 +49,7 @@ The memos are designed to be the document the operator's counsel works from — 
 - **For a sales conversation:** hand the relevant memo to the buyer's compliance team. "This is what we cover, this is what you still own."
 - **For a pilot design:** read the "what you need to do additionally" section. That is the operator's work plan.
 - **For an audit response:** export the relevant bundle, point the auditor at the Reasonable Doubt panel, walk through the 5 gaps and the controls that close them.
-- **For product roadmap:** the memos name the controls Don't-Lie does not yet provide (e.g., HSM-backed keys, multi-region witnesses, RFC 3161 timestamps). Those are the Compliance tier.
+- **For product roadmap:** the memos name the controls Don't-Lie does not yet provide (e.g., HSM-backed keys, multi-region witnesses, RFC 3161 timestamps). Those are operator-side workarounds today, not paid features.
 
 ## A note on the four regimes we picked
 
