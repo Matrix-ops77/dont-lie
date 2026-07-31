@@ -2,20 +2,20 @@
 
 This page points to design notes held in the project's private planning
 repository. The notes describe capabilities that are **not** part of
-v0.3.7 and are not promised for any specific release. They are kept
+v0.3.8 and are not promised for any specific release. They are kept
 public for transparency about the direction of the project, not as a
 roadmap commitment.
 
-## What's in v0.3.7 today
+## What's in v0.3.8 today
 
-v0.3.7 is a local-first, MIT-licensed Python package. It signs and
+v0.3.8 is a local-first, MIT-licensed Python package. It signs and
 verifies AI call receipts. The full set of capabilities lives in the
-README. Anything not described in the README is not in v0.3.7.
+README. Anything not described in the README is not in v0.3.8.
 
 ## What is being explored (no commitment, no timeline)
 
 The following capabilities have design notes but are not implemented in
-v0.3.7. They are held in the private planning repo at
+v0.3.8. They are held in the private planning repo at
 `github.com/Wayne-Dellmyer/dontlie-internal` under `architecture/`:
 
 - **SCITT-aligned Merkle tree + transparency log** — wraps the daily

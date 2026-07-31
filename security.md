@@ -53,6 +53,9 @@ Please do **not** open a public issue for suspected vulnerabilities.
 
 - The CI suite exercises Python 3.10–3.12, first-install wheel behavior,
   browser flows, public claims, and reproducible artifacts on Linux and macOS.
+- Controlled releases generate a CycloneDX SBOM, a SHA-256 manifest, and
+  keyless SLSA provenance covering the published assets. See
+  `docs/SUPPLY_CHAIN.md` for the independent verification procedure.
 - Strict mypy on the integrity core.
 - Quarterly third-party penetration test (planned).
 - Annual SOC 2 Type II (planned).

@@ -50,7 +50,7 @@ jobs:
           mypy --strict --follow-imports=skip dontlie/prove.py dontlie/demo/render_report.py
           mypy --strict dontlie/compliance.py tools/reproducible_build.py
       - name: Public-claims scan
-        # The v0.3.7 release is a local-first, MIT-licensed Python package.
+        # The v0.3.8 release is a local-first, MIT-licensed Python package.
         # A future contribution that re-introduces hosted-tier, paid, or
         # hosted-witness language into any tracked public file fails this
         # step before it can land. The scan is defined in

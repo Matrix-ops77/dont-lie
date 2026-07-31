@@ -38,7 +38,7 @@ rebuild their dashboards, routing, evaluation, or cost-management products.
 | Policy enforcement and DLP | Partial local policy/redaction | Pipelock | Integrate; do not become a firewall without a buyer requirement |
 | Agent/tool-action coverage | Partial | Halo, Obsigna, Pipelock | Define a versioned action envelope only after capture semantics are tested |
 | Compliance evidence mapping | Machine-readable HIPAA and EU AI Act support maps | Competitors publish framework mappings of varying depth | Keep sources official, dates explicit, and gaps executable with `--only-gaps` |
-| Supply-chain assurance | Reproducible wheel/sdist and SHA-pinned Actions | Pipelock publishes SLSA provenance and SBOM verification | Add release attestations and an SBOM before regulated pilots depend on the package |
+| Supply-chain assurance | Reproducible wheel/sdist; SHA-pinned Actions except the documented SLSA verifier compatibility exception; v0.3.8 workflow generates CycloneDX, checksums, and keyless provenance | Pipelock already publishes SLSA provenance and SBOM verification | Verify the first public v0.3.8 attestation before treating this gap as closed |
 
 ## Position to win
 
@@ -64,7 +64,8 @@ That position is defensible only while all five parts remain true:
 3. Production external checkpoint with independent verification.
 4. Recipient-key encrypted forensic disclosure.
 5. Frozen cross-language test vectors and independent verifier.
-6. Release SBOM and provenance attestation.
+6. Verify the first public SBOM and provenance attestation produced by the
+   v0.3.8 release.
 
 UI, hosted retention, broad policy engines, and more SDKs move forward only
 when a qualified buyer makes them part of a paid workflow.

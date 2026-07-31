@@ -12,7 +12,7 @@ Don't-Lie. Not customer-facing.
 - [ ] `mypy --strict --follow-imports=skip dontlie/prove.py dontlie/demo/render_report.py`
       — the proof-packet surface is strict-clean; older transitive storage
       modules remain outside this isolated gate
-- [ ] `mypy --strict tools/reproducible_build.py` — clean
+- [ ] `mypy --strict dontlie/compliance.py tools/reproducible_build.py` — clean
 - [ ] `python tools/public_claims_scan.py` — clean
 - [ ] `python -m compileall -q dontlie` — bytecode builds
 - [ ] `dontlie demo` — exit 0
@@ -26,6 +26,9 @@ Don't-Lie. Not customer-facing.
 - [ ] Inspect the normalized sdist and confirm regular files are `0644`,
       executable files/directories are `0755`, and ownership/timestamps are
       normalized
+- [ ] Confirm the release workflow generates a validated CycloneDX SBOM,
+      `SHA256SUMS`, and SLSA provenance for the wheel, sdist, SBOM, and checksum
+      manifest
 - [ ] No `print()` debug remnants in `dontlie/demo/` (lint catches them)
 - [ ] Git status: working tree clean of stray artifacts
 - [ ] Git status: no tracked changes to `dontlie/storage.py`, `sign.py`,
@@ -76,4 +79,7 @@ Don't-Lie. Not customer-facing.
 
 - [ ] Confirm PyPI release is visible
 - [ ] Smoke-test `pip install dontlie` in a clean venv
+- [ ] Download the public wheel, sdist, SBOM, checksum manifest, and provenance;
+      run the checksum and `slsa-verifier` commands in
+      `docs/SUPPLY_CHAIN.md`
 - [ ] Update any external docs (e.g. product wiki) if the public API changed

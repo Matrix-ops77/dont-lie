@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.3.8 — 2026-07-30
 
 - Added `dontlie compliance hipaa-security|eu-ai-act` with text, gap-only, and
   deterministic JSON output. The maps separate supported evidence,
@@ -16,6 +16,10 @@
   audit-pass language, and removed blanket compliance-memo exemptions.
 - Pinned the remaining PyPI-publish and GitHub-release Actions to exact commit
   SHAs.
+- Added a reproducible CycloneDX 1.6 SBOM, `SHA256SUMS`, and keyless SLSA
+  provenance to the controlled release workflow. Release publication now
+  waits for the provenance job as well as the full test and reproducibility
+  matrices.
 
 ## 0.3.7 — 2026-07-30
 
