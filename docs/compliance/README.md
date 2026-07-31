@@ -6,7 +6,7 @@
 > receipt does and does not cover. They are **not** a compliance
 > certification, **not** a SOC 2 report, **not** a BAA, **not** legal
 > advice, and **not** the work of counsel. Confirm any compliance
-> position with your own counsel. Don't-Lie v0.3.8 is a local-first
+> position with your own counsel. Don't-Lie v0.3.9 is a local-first
 > Python package; there is no hosted service, no hosted witness, no
 > hosted vault, and no compliance product behind these memos. All
 > retention, S3 Object Lock, KMS, witness, and operator-side controls

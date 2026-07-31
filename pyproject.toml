@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dontlie"
-version = "0.3.8"
+version = "0.3.9"
 description = "Local-first, verifiable signed receipts for OpenAI-compatible AI calls."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -38,9 +38,10 @@ dontlie = "dontlie.cli:main"
 dontlie-passive = "onboard.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/Matrix-ops77/dont-lie"
+Homepage = "https://matrix-ops77.github.io/dont-lie/"
 Repository = "https://github.com/Matrix-ops77/dont-lie"
 Issues = "https://github.com/Matrix-ops77/dont-lie/issues"
+Documentation = "https://matrix-ops77.github.io/dont-lie/"
 
 [tool.setuptools.packages.find]
 where = ["."]
