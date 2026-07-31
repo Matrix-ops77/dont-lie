@@ -23,6 +23,31 @@ That's it. 30 seconds. No API keys. A signed receipt chain you can tamper with t
 
 ---
 
+## Primary workflow: produce buyer evidence
+
+Turn the current local receipt vault into one portable packet:
+
+```bash
+dontlie prove customer-evidence
+cd customer-evidence
+shasum -a 256 -c SHA256SUMS
+dontlie verify --export receipts.bundle.json --verbose
+```
+
+The command verifies the source chain, exports and re-verifies the portable
+bundle, then atomically publishes `receipts.bundle.json`,
+`receipt-report.html`, `manifest.json`, `SHA256SUMS`, and `VERIFY.txt`. It
+refuses an empty or invalid vault and will not overwrite a nonempty directory.
+
+The packet's claims are deliberately limited:
+
+- Chain integrity is verified.
+- Signer identity requires external key pinning.
+- Provider identity is recorded, not independently attested.
+- Answer truth is not evaluated.
+
+---
+
 ## What it is
 
 A local-first proxy that captures every AI request and response into a **signed, hash-linked receipt chain**. Ed25519 signatures. SHA-256 chain. Offline verification. Portable bundle. No false claims.

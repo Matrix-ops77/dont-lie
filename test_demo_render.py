@@ -61,6 +61,16 @@ class DemoRenderTest(unittest.TestCase):
         self.assertNotIn(" href=", report.lower())
         self.assertIn("&lt;script src=&quot;https://attacker.invalid", report)
 
+    def test_standalone_report_uses_only_available_artifacts(self) -> None:
+        report = render_report.render(SAMPLE_BUNDLE)
+
+        self.assertNotIn("/tmp/dontlie-demo-work", report)
+        self.assertNotIn("SHA256SUMS", report)
+        self.assertIn(
+            "dontlie verify --export receipts.bundle.json --verbose",
+            report,
+        )
+
     def test_main_writes_report_and_returns_success(self) -> None:
         with tempfile.TemporaryDirectory(prefix="dontlie-render-test-") as temp:
             output = Path(temp) / "nested" / "proof.html"

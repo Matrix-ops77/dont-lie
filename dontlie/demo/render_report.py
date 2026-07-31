@@ -41,7 +41,12 @@ def _key_fingerprint(pem: str) -> str:
     return hashlib.sha256(pem.encode("utf-8")).hexdigest()[:16]
 
 
-def render(bundle: Path) -> str:
+def render(
+    bundle: Path,
+    *,
+    title: str = "Don't-Lie receipt report",
+    packet: bool = False,
+) -> str:
     report = storage.verify_export(bundle)
     document = json.loads(bundle.read_text(encoding="utf-8"))
     receipts = document.get("receipts", [])
@@ -96,12 +101,37 @@ def render(bundle: Path) -> str:
         for issue in report.issues
     ) or "<li>none</li>"
 
+    if packet:
+        workflow_html = """
+<section>
+<h2>How to verify and reproduce this report</h2>
+<p>From inside this packet directory:</p>
+<ol>
+  <li>Check artifact hashes: <code>shasum -a 256 -c SHA256SUMS</code></li>
+  <li>Verify the portable bundle: <code>dontlie verify --export receipts.bundle.json --verbose</code></li>
+  <li>Re-render the report: <code>python -m dontlie.demo.render_report receipts.bundle.json receipt-report.reproduced.html</code></li>
+</ol>
+</section>
+"""
+    else:
+        bundle_name = _esc(bundle.name)
+        workflow_html = f"""
+<section>
+<h2>How to verify and reproduce this report</h2>
+<p>From the directory containing this bundle:</p>
+<ol>
+  <li>Verify the portable bundle: <code>dontlie verify --export {bundle_name} --verbose</code></li>
+  <li>Re-render the report: <code>python -m dontlie.demo.render_report {bundle_name} receipt-report.reproduced.html</code></li>
+</ol>
+</section>
+"""
+
     return f"""<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Don't-Lie receipt report</title>
+<title>{_esc(title)}</title>
 <style>
 :root {{ color-scheme: light dark; font-family: ui-sans-serif,system-ui,sans-serif; }}
 body {{ max-width: 1100px; margin: 0 auto; padding: 2rem; line-height: 1.45; }}
@@ -155,7 +185,7 @@ code {{ font-family:ui-monospace,SFMono-Regular,monospace; font-size:.85em; }}
 </style>
 </head>
 <body>
-<h1>Don't-Lie receipt report</h1>
+<h1>{_esc(title)}</h1>
 <p class="subtle">Portable verification artifact · no network required · self-contained HTML</p>
 <p><span class="badge {status_class}">{status}</span></p>
 
@@ -238,15 +268,7 @@ custody, authorization, or truth questions. Here is the honest short list.
 </div>
 </section>
 
-<section>
-<h2>Tamper demo (one screen)</h2>
-<ol>
-  <li>Run <code>dontlie demo</code> to capture 3 receipts.</li>
-  <li>Run <code>python3 -m dontlie.demo.tamper_walkthrough /tmp/dontlie-demo-work</code>.</li>
-  <li>Stage 3 shows the receipt hash no longer matches; Stage 5 restores it
-  from the signed JSONL export. Stage 6 verifies the restored chain again.</li>
-</ol>
-</section>
+{workflow_html}
 
 <section>
 <h2>Verifier findings</h2>
@@ -280,15 +302,6 @@ bundle was authored by a key you trust.</p>
 </table>
 </section>
 
-<section>
-<h2>How to reproduce this report</h2>
-<ol>
-  <li>Run the offline demo: <code>dontlie demo</code></li>
-  <li>Export the bundle: <code>dontlie export /tmp/dontlie-demo-work/receipts.bundle.json --bundle</code></li>
-  <li>Verify the bundle: <code>dontlie verify --export /tmp/dontlie-demo-work/receipts.bundle.json --verbose</code></li>
-  <li>Render this report: <code>python3 -m dontlie.demo.render_report /tmp/dontlie-demo-work/receipts.bundle.json report.html</code></li>
-</ol>
-</section>
 </body>
 </html>
 """

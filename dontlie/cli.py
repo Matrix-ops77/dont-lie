@@ -9,6 +9,7 @@ Commands:
     dontlie search QUERY              full-text search prompt/response/tags
     dontlie export [PATH] [--bundle] write JSONL or a portable verification bundle
     dontlie verify [--export PATH] verify the local chain or an export
+    dontlie prove OUTPUT_DIR         build a portable evidence packet
     dontlie doctor                    run environment diagnostics
     dontlie demo                      run the offline proof experience
 """
@@ -33,7 +34,7 @@ from urllib.parse import urlparse
 
 import httpx
 
-from . import __version__, encryption, protocols, proxy, storage
+from . import __version__, encryption, protocols, prove, proxy, storage
 from . import sign as signing
 
 
@@ -202,6 +203,18 @@ def cmd_verify(args) -> int:
             receipt = issue.receipt_id if issue.receipt_id is not None else "export"
             print(f"  receipt {receipt}: {issue.reason}")
     return 0 if report.valid else 2
+
+
+def cmd_prove(args: argparse.Namespace) -> int:
+    try:
+        result = prove.build_packet(Path(args.output_dir), title=args.title)
+    except (OSError, ValueError, prove.ProveError) as exc:
+        print(f"prove failed: {exc}", file=sys.stderr)
+        return 1
+    print(
+        f"proved {result.receipt_count} receipts -> {result.output_dir}"
+    )
+    return 0
 
 
 def cmd_revoke_key(args) -> int:
@@ -845,6 +858,25 @@ def build_parser() -> argparse.ArgumentParser:
         help="print receipt-level verification issues",
     )
     p_verify.set_defaults(func=cmd_verify)
+
+    p_prove = sub.add_parser(
+        "prove",
+        help="build a portable evidence packet from the local receipt vault",
+        description=(
+            "Build a portable evidence packet from the local receipt vault."
+        ),
+    )
+    p_prove.add_argument(
+        "output_dir",
+        metavar="OUTPUT_DIR",
+        help="new or empty directory for the evidence packet",
+    )
+    p_prove.add_argument(
+        "--title",
+        default="Don't-Lie receipt report",
+        help="title shown in the self-contained HTML report",
+    )
+    p_prove.set_defaults(func=cmd_prove)
 
     p_revoke = sub.add_parser(
         "revoke-key", help="revoke a signing key for future verification"
