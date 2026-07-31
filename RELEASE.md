@@ -59,8 +59,15 @@ Don't-Lie. Not customer-facing.
 
 ## Tag
 
-- [ ] `git tag -s vX.Y.Z -m "Release X.Y.Z"`
+- [ ] Create an annotated tag:
+      `git tag -a vX.Y.Z -m "Release X.Y.Z"`
 - [ ] Push tag: `git push origin vX.Y.Z`
+- [ ] Describe the tag accurately in release notes: annotated tags establish a
+      named release point but are not a cryptographic identity signature.
+      Published asset SHA-256 digests establish the exact downloadable bytes.
+      Do not claim signed tags unless a documented signing-key ownership,
+      rotation, recovery, and verification policy is in place and the tag
+      passes `git verify-tag`.
 - [ ] Set the repository variable `PYPI_PUBLISH_ENABLED=true` only after the
       PyPI Trusted Publisher is configured; otherwise publish GitHub artifacts
       without attempting PyPI
