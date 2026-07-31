@@ -9,6 +9,10 @@ Don't-Lie. Not customer-facing.
       — full suite passes, including the Browser Proof Lab runtime flow
 - [ ] `ruff check dontlie test_*.py` — clean
 - [ ] `mypy --strict dontlie/sign.py dontlie/protocols.py` — clean
+- [ ] `mypy --strict --follow-imports=skip dontlie/prove.py dontlie/demo/render_report.py`
+      — the proof-packet surface is strict-clean; older transitive storage
+      modules remain outside this isolated gate
+- [ ] `mypy --strict tools/reproducible_build.py` — clean
 - [ ] `python tools/public_claims_scan.py` — clean
 - [ ] `python -m compileall -q dontlie` — bytecode builds
 - [ ] `dontlie demo` — exit 0
@@ -19,6 +23,9 @@ Don't-Lie. Not customer-facing.
 - [ ] Build the wheel and run
       `python tools/reproducible_build.py dist`, then run
       `bash tools/reproducibility_check.sh dist/dontlie-*.whl`
+- [ ] Inspect the normalized sdist and confirm regular files are `0644`,
+      executable files/directories are `0755`, and ownership/timestamps are
+      normalized
 - [ ] No `print()` debug remnants in `dontlie/demo/` (lint catches them)
 - [ ] Git status: working tree clean of stray artifacts
 - [ ] Git status: no tracked changes to `dontlie/storage.py`, `sign.py`,

@@ -74,6 +74,12 @@ def _normalize_sdist(path: Path, epoch: int) -> None:
             member.uname = ""
             member.gname = ""
             member.pax_headers = {}
+            if member.isdir():
+                member.mode = 0o755
+            elif member.isfile():
+                member.mode = 0o755 if member.mode & 0o111 else 0o644
+            elif member.issym() or member.islnk():
+                member.mode = 0o777
             target.addfile(
                 member,
                 io.BytesIO(payload) if payload is not None else None,

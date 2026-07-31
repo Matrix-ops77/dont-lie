@@ -53,7 +53,10 @@ jobs:
         run: |
           ruff check dontlie test_*.py tools/reproducible_build.py
           mypy --strict dontlie/sign.py dontlie/protocols.py
+          mypy --strict --follow-imports=skip dontlie/prove.py dontlie/demo/render_report.py
           mypy --strict tools/reproducible_build.py
+      - name: Public-claims scan
+        run: python tools/public_claims_scan.py
       - name: Test
         env:
           DONTLIE_REQUIRE_BROWSER_TEST: "1"

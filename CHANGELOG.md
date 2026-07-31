@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.3.7 — 2026-07-30
+
+- Added `dontlie prove OUTPUT_DIR`, a single command that verifies the local
+  chain and atomically produces a portable evidence packet containing the
+  canonical bundle, self-contained HTML report, manifest, checksums, and
+  offline verification instructions.
+- Made proof reports explicit about their trust boundary: chain integrity is
+  verified, while signer identity requires external key pinning, provider
+  identity is not independently attested, and answer truth is not evaluated.
+- Replaced demo-only report reproduction paths with truthful packet-relative
+  and standalone-bundle instructions.
+- Added focused failure-path coverage for empty or invalid vaults, unsafe
+  output replacement, export verification, artifact hashes, and report
+  instructions.
+- Normalized source-archive file modes in addition to timestamps and ownership,
+  eliminating the macOS/Linux permission-metadata difference while preserving
+  intentional executable bits.
+- Added an isolated strict-type gate for the proof-packet implementation and
+  report renderer, plus regression tests for cross-platform sdist modes.
+
 ## 0.3.6 — 2026-07-30
 
 - Fixed the Browser Proof Lab receipt write path and added a real headless
