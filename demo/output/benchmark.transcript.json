@@ -1,39 +1,39 @@
 {
   "machine": {
-    "python": "3.10.18",
+    "python": "3.10.20",
     "platform": "macOS-27.0-arm64-arm-64bit",
     "machine": "arm64",
     "processor": "arm",
-    "dontlie_pkg": "0.3.4"
+    "dontlie_pkg": "0.3.10"
   },
   "workdir": "/Users/wayne_dellmyer/orca/projects/dontlie-fresh/demo/work/bench",
   "sign": {
     "n": 5000,
-    "elapsed_sec": 13.0879,
-    "throughput_per_sec": 382.03,
-    "latency_ms_p50": 2.137,
-    "latency_ms_p95": 5.122,
-    "latency_ms_p99": 8.519,
-    "latency_ms_max": 24.275
+    "elapsed_sec": 26.1998,
+    "throughput_per_sec": 190.84,
+    "latency_ms_p50": 5.341,
+    "latency_ms_p95": 7.88,
+    "latency_ms_p99": 9.397,
+    "latency_ms_max": 28.685
   },
   "verify": {
-    "receipts": 12003,
-    "elapsed_sec": 3.9864,
-    "verify_per_sec": 3010.97,
-    "ok": 12003,
+    "receipts": 5001,
+    "elapsed_sec": 2.818,
+    "verify_per_sec": 1774.69,
+    "ok": 5001,
     "bad": 0
   },
   "export": {
-    "n": 12003,
-    "elapsed_sec": 0.7951,
-    "export_per_sec": 15096.34,
-    "jsonl_bytes": 10014687
+    "n": 5001,
+    "elapsed_sec": 0.357,
+    "export_per_sec": 14006.78,
+    "jsonl_bytes": 4172376
   },
   "render": {
-    "n": 12003,
-    "elapsed_sec": 0.4148,
-    "render_per_sec": 28939.8,
-    "html_bytes": 2269779
+    "n": 5001,
+    "elapsed_sec": 0.1406,
+    "render_per_sec": 35573.26,
+    "html_bytes": 949117
   },
-  "db_sha256": "7ce59de4b877126045189f7d133e2a07d153b8ba259973ffd68b0cf81a29e0fa"
+  "db_sha256": "14efd3a13e92b2ad345b1a2e373589b151efa22babd468e05c18b6ef777acee0"
 }
