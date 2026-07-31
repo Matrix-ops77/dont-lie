@@ -187,11 +187,14 @@ jobs:
       - name: Stage package distributions
         run: |
           set -euo pipefail
-          mkdir -p /tmp/pypi-dist
-          cp dist/dontlie-*.whl dist/dontlie-*.tar.gz /tmp/pypi-dist/
+          mkdir -p pypi-dist
+          cp dist/dontlie-*.whl dist/dontlie-*.tar.gz pypi-dist/
       - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # release/v1
         with:
-          packages-dir: /tmp/pypi-dist/
+          # Container actions can only see paths mounted from the workspace.
+          # A host-runner path such as /tmp/pypi-dist is invisible inside the
+          # publishing container.
+          packages-dir: pypi-dist/
 
   github-release:
     needs: [test, build, reproducibility, provenance]

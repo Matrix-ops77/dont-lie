@@ -212,7 +212,7 @@ dontlie/
 
 ## Pricing (v0.3.x — local-first only)
 
-There is no hosted service. There are no paid tiers. v0.3.9 is a single MIT-licensed Python package.
+There is no hosted service. There are no paid tiers. v0.3.10 is a single MIT-licensed Python package.
 
 | What you get | Where it lives |
 |---|---|
@@ -277,7 +277,7 @@ Both pages are self-contained: no CDN fetches, no analytics, no
 third-party fonts. See [PLDG.md](PLDG.md) for the no-phone-home
 pledge and the enforcement test that runs in CI.
 
-The Browser Proof Lab and portable evidence packet are the strongest public surfaces for v0.3.9:
+The Browser Proof Lab and portable evidence packet are the strongest public surfaces for v0.3.10:
 Ed25519 signing, IndexedDB vault, and receipt verification all run
 in the browser via WebCrypto. The CSP header refuses every
 non-`self` connection, so opening the file on an air-gapped

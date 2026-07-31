@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.10 — 2026-07-31
+
+- Fixed the PyPI publishing stage to keep distributions inside the GitHub
+  workspace mounted into the publishing container.
+- Added a release-workflow regression test that rejects host-only absolute
+  staging paths.
+
 ## 0.3.9 — 2026-07-31
 
 - Prepared the first PyPI release so a clean install is simply
