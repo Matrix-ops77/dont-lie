@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.9 — 2026-07-31
+
+- Prepared the first PyPI release so a clean install is simply
+  `python -m pip install dontlie`.
+- Added an official GitHub Pages deployment for the project site and offline
+  Browser Proof Lab.
+- Reworked the GitHub first-run path around three commands: install, run the
+  offline tamper demo, and produce a portable evidence packet.
+- Removed unsupported model-count language and stale funding configuration;
+  narrowed compatibility copy to the provider surfaces exercised by the
+  project.
+
 ## 0.3.8 — 2026-07-30
 
 - Added `dontlie compliance hipaa-security|eu-ai-act` with text, gap-only, and

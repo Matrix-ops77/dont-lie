@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="title desc">
+  <title id="title">Don't-Lie — tamper-evident receipts for AI calls</title>
+  <desc id="desc">A dark social preview showing the Don't-Lie capture, sign, and verify workflow.</desc>
+  <rect width="1280" height="640" fill="#09090b"/>
+  <rect x="56" y="48" width="1168" height="544" rx="28" fill="#111114" stroke="#27272a" stroke-width="2"/>
+
+  <text x="104" y="164" fill="#fafafa" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="78" font-weight="750" letter-spacing="-3">Don't-Lie</text>
+  <text x="104" y="220" fill="#a1a1aa" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="29">Tamper-evident receipts for AI calls.</text>
+  <text x="104" y="260" fill="#a1a1aa" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="25">Local-first. Signed. Hash-linked. Offline-verifiable.</text>
+
+  <rect x="104" y="326" width="246" height="92" rx="14" fill="#18181b" stroke="#3f3f46" stroke-width="2"/>
+  <text x="227" y="364" text-anchor="middle" fill="#86efac" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="18" font-weight="700">1  CAPTURE</text>
+  <text x="227" y="395" text-anchor="middle" fill="#d4d4d8" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="19">request + response</text>
+
+  <path d="M366 372h64" stroke="#52525b" stroke-width="4" stroke-linecap="round"/>
+  <path d="m416 359 14 13-14 13" fill="none" stroke="#52525b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <rect x="446" y="326" width="246" height="92" rx="14" fill="#18181b" stroke="#3f3f46" stroke-width="2"/>
+  <text x="569" y="364" text-anchor="middle" fill="#86efac" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="18" font-weight="700">2  SIGN</text>
+  <text x="569" y="395" text-anchor="middle" fill="#d4d4d8" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="19">Ed25519 + SHA-256</text>
+
+  <path d="M708 372h64" stroke="#52525b" stroke-width="4" stroke-linecap="round"/>
+  <path d="m758 359 14 13-14 13" fill="none" stroke="#52525b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <rect x="788" y="326" width="246" height="92" rx="14" fill="#18181b" stroke="#22c55e" stroke-width="2"/>
+  <text x="911" y="364" text-anchor="middle" fill="#86efac" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="18" font-weight="700">3  VERIFY</text>
+  <text x="911" y="395" text-anchor="middle" fill="#d4d4d8" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="19">on a clean machine</text>
+
+  <circle cx="1102" cy="372" r="38" fill="#14532d"/>
+  <path d="m1085 372 12 12 23-27" fill="none" stroke="#bbf7d0" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <rect x="104" y="484" width="548" height="58" rx="10" fill="#0c2416" stroke="#166534"/>
+  <text x="128" y="520" fill="#bbf7d0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="23">pip install dontlie</text>
+  <text x="1176" y="520" text-anchor="end" fill="#71717a" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="20">MIT · Python 3.10+</text>
+</svg>

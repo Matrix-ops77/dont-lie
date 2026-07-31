@@ -6,6 +6,7 @@
 [![MIT](https://img.shields.io/badge/license-MIT-16a34a?style=flat-square)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-16a34a?style=flat-square)](https://www.python.org)
 [![CI](https://github.com/Matrix-ops77/dont-lie/actions/workflows/ci.yml/badge.svg)](https://github.com/Matrix-ops77/dont-lie/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/dontlie?style=flat-square&color=16a34a)](https://pypi.org/project/dontlie/)
 [![OpenAI compatible](https://img.shields.io/badge/OpenAI-compatible-16a34a?style=flat-square)](#how-it-works)
 [![Anthropic compatible](https://img.shields.io/badge/Anthropic-compatible-16a34a?style=flat-square)](#how-it-works)
 [![Local-first](https://img.shields.io/badge/local--first-MIT-16a34a?style=flat-square)](#philosophy)
@@ -15,7 +16,7 @@
 ---
 
 ```bash
-python -m pip install https://github.com/Matrix-ops77/dont-lie/releases/download/v0.3.8/dontlie-0.3.8-py3-none-any.whl
+python -m pip install dontlie
 dontlie demo
 ```
 
@@ -23,7 +24,18 @@ That's it. 30 seconds. No API keys. A signed receipt chain you can tamper with t
 
 ---
 
-## Primary workflow: produce buyer evidence
+## The useful path
+
+| Goal | Command | Result |
+|---|---|---|
+| Prove the verifier works | `dontlie demo` | Three signed receipts, a deliberate tamper failure, then a restored valid chain |
+| Browse receipts locally | `dontlie web` | A local, dependency-free receipt UI |
+| Hand evidence to someone else | `dontlie prove customer-evidence` | A portable bundle, HTML report, manifest, checksums, and verification instructions |
+
+Try the same cryptographic proof without installing anything in the
+[Browser Proof Lab](https://matrix-ops77.github.io/dont-lie/demo.html).
+
+## Produce portable evidence
 
 Turn the current local receipt vault into one portable packet:
 
@@ -85,7 +97,8 @@ The wedge is honesty. We don't claim AI is truthful. We claim the record is tamp
 - **Portable signed bundles** — verify offline on a clean machine
 - **HTML proof report** — self-contained, beautifully formatted
 - **Secret redaction** — API keys, emails, SSNs, credit cards, JWTs
-- **Works with 200+ models** — OpenAI, Anthropic, MiniMax, Gemini, Llama, Mistral, any local
+- **Tested provider surfaces** — OpenAI Chat Completions, Anthropic Messages,
+  and OpenAI-compatible endpoints such as MiniMax
 - **30-second install** — no Docker, no cloud, no accounts
 - **MIT licensed** — the whole thing
 - **Trust score** — 0-100 number from the existing vault state, JSON for CI
@@ -134,7 +147,7 @@ The wedge is honesty. We don't claim AI is truthful. We claim the record is tamp
 ## Install
 
 ```bash
-python -m pip install https://github.com/Matrix-ops77/dont-lie/releases/download/v0.3.8/dontlie-0.3.8-py3-none-any.whl
+python -m pip install dontlie
 ```
 
 Verify the install:
@@ -199,11 +212,11 @@ dontlie/
 
 ## Pricing (v0.3.x — local-first only)
 
-There is no hosted service. There are no paid tiers. v0.3.8 is a single MIT-licensed Python package.
+There is no hosted service. There are no paid tiers. v0.3.9 is a single MIT-licensed Python package.
 
 | What you get | Where it lives |
 |---|---|
-| The local-first product | Install the wheel from [GitHub Releases](https://github.com/Matrix-ops77/dont-lie/releases) |
+| The local-first product | Install from [PyPI](https://pypi.org/project/dontlie/) |
 | The signing key | Your machine, in `~/.config/dontlie/keys/` |
 | The vault | Your machine, in `~/.local/share/dontlie/vault.db` (or `DONTLIE_DB`) |
 | The receipt chain | Local SQLite, hash-linked, Ed25519-signed |
@@ -251,8 +264,9 @@ Full machine-pinned transcript:
 
 ## Run the local site
 
-The `site/` folder is two static HTML files. There is no hosted site today.
-If you want to open them locally:
+The `site/` folder is deployed as a static
+[GitHub Pages site](https://matrix-ops77.github.io/dont-lie/) and can also be
+opened locally:
 
 ```bash
 open site/index.html     # macOS — the single landing page
@@ -263,7 +277,7 @@ Both pages are self-contained: no CDN fetches, no analytics, no
 third-party fonts. See [PLDG.md](PLDG.md) for the no-phone-home
 pledge and the enforcement test that runs in CI.
 
-The Browser Proof Lab and portable evidence packet are the strongest public surfaces for v0.3.8:
+The Browser Proof Lab and portable evidence packet are the strongest public surfaces for v0.3.9:
 Ed25519 signing, IndexedDB vault, and receipt verification all run
 in the browser via WebCrypto. The CSP header refuses every
 non-`self` connection, so opening the file on an air-gapped
