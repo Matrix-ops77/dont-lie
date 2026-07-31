@@ -1,5 +1,22 @@
 # Changelog
 
+## Unreleased
+
+- Added `dontlie compliance hipaa-security|eu-ai-act` with text, gap-only, and
+  deterministic JSON output. The maps separate supported evidence,
+  supporting evidence, operator-required controls, and out-of-scope duties.
+- Rewrote the HIPAA and EU AI Act operator memos against official HHS,
+  EUR-Lex, and European Commission sources. Removed unsupported claims about
+  Article 12 coverage, HIPAA log retention, capture completeness, regulatory
+  deadlines, and universal integration time.
+- Refreshed the competitive scorecard against current primary project
+  documentation and converted competitor strengths into an evidence-driven
+  priority order.
+- Extended the public-claims gate to reject unsupported HIPAA, AI Act, and
+  audit-pass language, and removed blanket compliance-memo exemptions.
+- Pinned the remaining PyPI-publish and GitHub-release Actions to exact commit
+  SHAs.
+
 ## 0.3.7 — 2026-07-30
 
 - Added `dontlie prove OUTPUT_DIR`, a single command that verifies the local

@@ -43,13 +43,16 @@ Please do **not** open a public issue for suspected vulnerabilities.
 - [ ] Rotate signing keys on a schedule (`dontlie revoke-key`).
 - [ ] Pin exported bundles to a trusted key (`--public-key`) for review.
 - [ ] Enable encrypted vault for shared hosts.
-- [ ] Sign external anchors (RFC 3161) for compliance.
+- [ ] Independently verify an external timestamp when timeline evidence is
+      required. The bundled RFC 3161 classes are integration points and offline
+      fixtures, not a production TSA client.
 - [ ] Forward chain-break alerts to Slack/Teams.
 - [ ] Keep host machine patched.
 
 ## Audit posture
 
-- 246 unit tests, 100% of integrity surface.
+- The CI suite exercises Python 3.10–3.12, first-install wheel behavior,
+  browser flows, public claims, and reproducible artifacts on Linux and macOS.
 - Strict mypy on the integrity core.
 - Quarterly third-party penetration test (planned).
 - Annual SOC 2 Type II (planned).

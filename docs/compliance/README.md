@@ -20,10 +20,10 @@ Per-regime guides for the operator of a Don't-Lie vault. Each memo is **operator
 
 | Regime | Memo | One-line answer |
 |---|---|---|
-| Healthcare PHI | [`HIPAA.md`](./HIPAA.md) | The receipt is the audit control (§164.312(b)) and the integrity control (§164.312(c)) for AI calls. Sign a BAA with your AI provider, restrict key access, run the trust score in CI. |
+| Healthcare PHI | [`HIPAA.md`](./HIPAA.md) | Receipts support review of audit controls (§164.312(b)) and detect alteration of recorded evidence for integrity review (§164.312(c)); the operator supplies the rest of the HIPAA program. |
 | BAA template | [`BAA-TEMPLATE.md`](./BAA-TEMPLATE.md) | A short Business Associate Agreement template. The template is short because the local-first product never receives PHI. Counsel adapts and completes. |
 | SaaS audit | [`SOC2.md`](./SOC2.md) | The receipt is monitoring evidence (CC7.2) and vendor-risk evidence (CC9.2). Include the vault in your audit scope, document key rotation, export the bundle for each audit period. |
-| EU AI Act | [`EUAIAct.md`](./EUAIAct.md) | The receipt directly implements Article 12 logging for AI systems. Use it as the data source for your FRIA and post-market monitoring. |
+| EU AI Act | [`EUAIAct.md`](./EUAIAct.md) | Receipts provide supporting runtime evidence for configured model calls; they do not establish Article 12 coverage or conformity. |
 | NY financial | [`NYDFS.md`](./NYDFS.md) | The receipt is the §500.06 audit trail and the §500.14 incident-response evidence. Wire it into your SIEM and use it for the 72-hour reporting rule. |
 | CFPB / ECOA | [`CFPB.md`](./CFPB.md) | For creditors using LLMs to draft adverse-action narratives. The receipt is the byte-exact record behind the disclosure. |
 | Colorado ADMT | [`ColoradoADMT.md`](./ColoradoADMT.md) | For Colorado SB 24-205 / SB 26-189 high-risk AI. The receipt is the deployer's evidence for the 90-day disclosure rule. |
@@ -34,11 +34,29 @@ Per-regime guides for the operator of a Don't-Lie vault. Each memo is **operator
 
 Every memo says the same three things, because every regime needs the same three things from a tool like Don't-Lie:
 
-1. **The tool provides the receipt.** It's a tamper-evident, hash-linked, signed audit trail of every LLM call.
+1. **The tool provides a receipt for calls that cross a configured capture
+   boundary.** It is a signed, hash-linked record. The chain cannot prove that
+   every real-world event passed through the recorder.
 2. **The receipt does not, on its own, prove the harder things** — that the key was held by an authorized person, that the call was authorized, that the response was correct, that the timestamp is anchored. The Reasonable Doubt panel in every bundle is the honest short list.
 3. **The operator layers additional controls** — BAA, key access policy, retention rules, change management, incident response — and documents how those controls close the gaps.
 
-The Don't-Lie part of the program is one to three days of integration work. The rest of the program is the operator's job and is the same work they'd be doing without Don't-Lie. The difference is that with Don't-Lie, that work is grounded in byte-exact, tamper-evident evidence instead of "we trust our logs."
+Integration time depends on the application, capture boundary, privacy
+requirements, and required coverage. Do not quote a universal implementation
+time. The rest of the program remains the operator's responsibility.
+
+## Machine-readable control maps
+
+The maintained HIPAA Security Rule and EU AI Act maps can be reviewed in text
+or deterministic JSON:
+
+```bash
+dontlie compliance hipaa-security --only-gaps
+dontlie compliance eu-ai-act --json
+```
+
+The JSON is suitable for review or import into a GRC workflow. Its statuses are
+limited to `supported`, `supporting_evidence`, `operator_required`, and
+`out_of_scope`; none means compliant.
 
 ## What the memos do not do
 

@@ -10,6 +10,7 @@ Commands:
     dontlie export [PATH] [--bundle] write JSONL or a portable verification bundle
     dontlie verify [--export PATH] verify the local chain or an export
     dontlie prove OUTPUT_DIR         build a portable evidence packet
+    dontlie compliance FRAMEWORK     show what evidence supports a control review
     dontlie doctor                    run environment diagnostics
     dontlie demo                      run the offline proof experience
 """
@@ -214,6 +215,28 @@ def cmd_prove(args: argparse.Namespace) -> int:
     print(
         f"proved {result.receipt_count} receipts -> {result.output_dir}"
     )
+    return 0
+
+
+def cmd_compliance(args: argparse.Namespace) -> int:
+    """Print an honest evidence-support map for a named framework."""
+    from . import compliance
+
+    try:
+        framework = compliance.get_framework(args.framework)
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+    if args.json:
+        print(
+            compliance.render_json(framework, only_gaps=args.only_gaps),
+            end="",
+        )
+    else:
+        print(
+            compliance.render_text(framework, only_gaps=args.only_gaps),
+            end="",
+        )
     return 0
 
 
@@ -877,6 +900,27 @@ def build_parser() -> argparse.ArgumentParser:
         help="title shown in the self-contained HTML report",
     )
     p_prove.set_defaults(func=cmd_prove)
+
+    p_compliance = sub.add_parser(
+        "compliance",
+        help="show an evidence-support map (not a compliance determination)",
+    )
+    p_compliance.add_argument(
+        "framework",
+        choices=["hipaa-security", "eu-ai-act"],
+        help="control family to map",
+    )
+    p_compliance.add_argument(
+        "--json",
+        action="store_true",
+        help="emit deterministic JSON for review or GRC ingestion",
+    )
+    p_compliance.add_argument(
+        "--only-gaps",
+        action="store_true",
+        help="show only operator-required and out-of-scope controls",
+    )
+    p_compliance.set_defaults(func=cmd_compliance)
 
     p_revoke = sub.add_parser(
         "revoke-key", help="revoke a signing key for future verification"

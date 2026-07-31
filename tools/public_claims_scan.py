@@ -61,22 +61,6 @@ FILE_ALLOWLIST: set[str] = {
     # docs/future-work.md is itself the disclaimer about what's not
     # in the product.
     "docs/future-work.md",
-    # docs/compliance/README.md is the index that points to the
-    # operator reference memos and carries the banner.
-    "docs/compliance/README.md",
-    # The compliance memos themselves are operator reference. The
-    # new versions of these files were rewritten to remove tier
-    # names, prices, and "Compliance tier" promises. If a future
-    # commit re-introduces one, the scan will catch it.
-    "docs/compliance/HIPAA.md",
-    "docs/compliance/SOC2.md",
-    "docs/compliance/EUAIAct.md",
-    "docs/compliance/NYDFS.md",
-    "docs/compliance/CFPB.md",
-    "docs/compliance/ColoradoADMT.md",
-    "docs/compliance/FDAPCCP.md",
-    "docs/compliance/FedRAMP.md",
-    "docs/compliance/BAA-TEMPLATE.md",
     # The legal docs are explicitly forward-looking: they describe
     # the v0.3.x state and the "when a hosted service ships"
     # posture. They are the right place to discuss the possibility
@@ -179,15 +163,24 @@ def is_git_checkout_context(text: str, match_start: int) -> bool:
     if line_end == -1:
         line_end = len(text)
     line = text[line_start:line_end].lower()
-    if "fresh checkout" in line or "source checkout" in line or "git checkout" in line:
-        return True
-    return False
+    return (
+        "fresh checkout" in line
+        or "source checkout" in line
+        or "git checkout" in line
+    )
 
 
 # Phrases that should never appear in a public file outside a
 # disclaimer block. Match is case-sensitive. The right-hand side is
 # the human-readable reason the phrase is prohibited.
 PROHIBITED: list[tuple[str, str]] = [
+    # Unsupported legal/compliance conclusions. Operator-reference files can
+    # say these phrases only inside an explicit disclaimer section.
+    (r"\bHIPAA[- ](?:compliant|grade)\b", "unsupported HIPAA conclusion"),
+    (r"\bAI Act[- ](?:compliant|ready)\b", "unsupported AI Act conclusion"),
+    (r"\b(?:directly )?implements Article 12\b", "unsupported Article 12 conclusion"),
+    (r"\bguarantees? compliance\b", "unsupported compliance guarantee"),
+    (r"\bpass(?:es|ing)? (?:a |the )?(?:HIPAA|EU AI Act|AI Act) audit\b", "unsupported audit-pass claim"),
     # Tier names used as product names
     (r"\bSolo tier\b", "paid tier name"),
     (r"\bPro tier\b", "paid tier name"),

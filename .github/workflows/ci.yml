@@ -48,7 +48,7 @@ jobs:
           # Check the proof-packet implementation strictly while treating its
           # older, not-yet-strict-clean storage dependencies as external.
           mypy --strict --follow-imports=skip dontlie/prove.py dontlie/demo/render_report.py
-          mypy --strict tools/reproducible_build.py
+          mypy --strict dontlie/compliance.py tools/reproducible_build.py
       - name: Public-claims scan
         # The v0.3.7 release is a local-first, MIT-licensed Python package.
         # A future contribution that re-introduces hosted-tier, paid, or
@@ -86,6 +86,8 @@ jobs:
           # version banner. `--version` is wired in cli.py:709.
           /tmp/wheel-smoke/bin/dontlie --version
           /tmp/wheel-smoke/bin/dontlie version
+          /tmp/wheel-smoke/bin/dontlie compliance hipaa-security --json
+          /tmp/wheel-smoke/bin/dontlie compliance eu-ai-act --only-gaps
           # The onboard package-data script must be present at its
           # declared location AND on PATH as a console script.
           test -x "$(/tmp/wheel-smoke/bin/python -c 'import onboard, os; print(os.path.join(os.path.dirname(onboard.__file__), "dontlie-passive"))')"

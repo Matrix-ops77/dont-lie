@@ -94,6 +94,9 @@ The wedge is honesty. We don't claim AI is truthful. We claim the record is tamp
 - **TUI explorer** — `dontlie ui` for receipt browsing over SSH
 - **One-line agent SDK** — `import dontlie_agent; dontlie_agent.install()`
 - **Operator reference memos** — informational notes on HIPAA, SOC 2, EU AI Act, NY DFS, CFPB, Colorado ADMT, FDA PCCP, and FedRAMP in `docs/compliance/`. These are operator-facing reference material, **not** vendor certifications and not legal advice.
+- **Machine-readable evidence maps** — `dontlie compliance hipaa-security`
+  and `dontlie compliance eu-ai-act` separate product evidence from
+  operator-owned controls and can emit deterministic JSON for review.
 
 ---
 

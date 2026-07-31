@@ -1,103 +1,125 @@
-# Don't-Lie & HIPAA — operator reference
+# Don't-Lie and HIPAA Security Rule evidence
 
-**Date:** 2026-07-30
-**Audience:** Privacy officer, compliance counsel, BAA reviewer
-**Scope:** How a Don't-Lie receipt vault, run by the operator on their own hardware, supports HIPAA Security Rule requirements for AI systems that process Protected Health Information (PHI).
+**Reviewed:** 2026-07-30
+**Audience:** Security and privacy officers, counsel, auditors, and operators
 
-> This memo is informational and is not legal advice. Confirm any compliance position with counsel. Don't-Lie is a local-first Python package. There is no hosted service, no hosted witness, no hosted vault, and no compliance product behind this memo.
+> This is an evidence-support map, not legal advice or a compliance
+> determination. The current HIPAA Security Rule remains in effect. HHS
+> describes its December 2024 cybersecurity update as a proposed rule, not a
+> final rule.
 
----
+Authoritative sources:
 
-## What HIPAA actually requires (the relevant subset)
+- [HHS Security Rule summary](https://www.hhs.gov/hipaa/for-professionals/security/laws-regulations/)
+- [HHS risk-analysis guidance](https://www.hhs.gov/hipaa/for-professionals/security/guidance/guidance-risk-analysis/)
+- [HHS proposed Security Rule update](https://www.hhs.gov/hipaa/for-professionals/security/hipaa-security-rule-nprm/)
 
-| Citation | Requirement | Applies to a locally-run AI call vault? |
-|---|---|---|
-| 45 CFR §164.312(a)(1) | Access control for ePHI | Yes — vault is operator-local; access via filesystem permissions |
-| 45 CFR §164.312(b) | Audit controls | **Directly** — every LLM call leaves a signed audit record |
-| 45 CFR §164.312(c) | Integrity controls for ePHI | **Directly** — Ed25519 + SHA-256 chain prove no silent rewrite |
-| 45 CFR §164.312(d) | Person or entity authentication | Partial — the receipt captures the key, not the person |
-| 45 CFR §164.316(b) | Retention for 6 years (or longer per state) | The chain supports arbitrary retention. The operator chooses the storage backend and retention policy. |
-| 45 CFR §164.308(a)(1)(ii)(D) | Information system activity review | Yes — `dontlie search` and the local `dontlie web` UI enable review |
-| 45 CFR §164.530(c) | Documentation retention | Yes — the portable bundle + HTML proof report is the documentation |
-| 45 CFR §164.502(a) | Minimum necessary | **Not addressed** — redaction is the operator's job |
+## The accurate product claim
 
-## What a Don't-Lie receipt proves
+Don't-Lie can support two technical-control reviews for AI calls:
 
-- That a specific call to an AI model was made at a specific time
-- That the exact prompt and response bytes were preserved, byte-for-byte
-- That no operator has silently edited the call record afterward
-- That the chain is unbroken back to the first receipt in the vault
-- That the signing key is the one the operator published
+- **Audit controls (§164.312(b)):** it records configured AI calls and supports
+  search, export, and independent verification.
+- **Integrity (§164.312(c)):** Ed25519 signatures and a hash-linked chain detect
+  alteration of recorded receipts.
 
-## What a Don't-Lie receipt does **not** prove
+That is evidence for part of a HIPAA security program. It is not the program.
+A valid chain does not prove that every in-scope event was captured, that the
+signing key belongs to an authorized identity, or that ePHI elsewhere is
+protected.
 
-- That the patient authorized the call (consent is captured separately, e.g., in a consent-management system; tag the consent ID into the receipt's `tags` field)
-- That the model gave a clinically correct answer
-- That the signing key was held by a specific authorized person (see the "Reasonable Doubt" panel in every bundle)
-- That the upstream AI provider did not log the call on its side
+## Control coverage
 
-## What the operator needs to do
+Run the maintained, machine-readable map:
 
-The receipt is the integrity evidence. The remaining controls are the operator's job — and were always going to be, with or without Don't-Lie.
+```bash
+dontlie compliance hipaa-security
+dontlie compliance hipaa-security --only-gaps
+dontlie compliance hipaa-security --json > hipaa-evidence-map.json
+```
 
-1. **Sign a BAA with your AI provider.** Don't-Lie is a local proxy, not a service provider, so no Don't-Lie BAA is needed. Your AI provider (OpenAI, Anthropic, MiniMax, etc.) is the one you sign a BAA with.
-2. **Map receipts to patients.** Add a `patient_id` or `case_id` tag to every receipt before it lands. Pattern:
-   ```python
-   with dontlie_agent.installed() as h:
-       client.chat.completions.create(
-           model="...",
-           messages=[...],
-           extra_tags={"patient_id": "P-12345"},
-       )
-   ```
-3. **Restrict key access.** The signing key at `~/.config/dontlie/keys/dontlie.key` should be readable only by the service account that runs the proxy. Use filesystem permissions (chmod 600) and consider storing it in macOS Keychain, an HSM, or a key-management service you operate.
-4. **Configure your own retention storage.** HIPAA requires 6 years minimum. Don't-Lie does not host the storage; you do. A common pattern is to export the daily bundle and copy it into an S3 bucket you control with Object Lock in COMPLIANCE mode (or equivalent on Azure Blob immutable storage / GCS bucket lock). Example:
+The map covers:
+
+- administrative safeguards, including risk analysis, activity review,
+  workforce controls, incidents, contingency planning, and evaluation;
+- physical safeguards;
+- technical safeguards: access, audit, integrity, authentication, and
+  transmission security;
+- organizational arrangements, policies, and documentation;
+- the Privacy and Breach Notification Rules as explicitly out of scope;
+- the proposed cybersecurity amendments as future-readiness material only.
+
+## Evidence workflow
+
+For an in-scope AI workflow:
+
+1. Configure capture at the actual provider or application boundary.
+2. Confirm capture of successful calls, failures, streams, and retries.
+3. Create the packet:
+
    ```bash
-   python3 -m dontlie export /tmp/daily.bundle.json --bundle
-   aws s3 cp /tmp/daily.bundle.json s3://your-audit-vault/dontlie/$(date +%Y-%m-%d).bundle.json \
-     --object-lock-mode COMPLIANCE \
-     --object-lock-retain-until-date 2033-07-30T00:00:00Z
+   dontlie prove evidence-packet
    ```
-   The retention date, the bucket, the KMS key, and the access policy are all yours. Don't-Lie only signs the bundle; it does not store it.
-5. **Add the vault to your annual risk assessment.** Document the receipt vault in your §164.308(a)(1)(ii)(A) risk analysis. The vault is one of the controls in the "audit controls" section.
-6. **Run `dontlie trust-score` in CI.** The trust score fails the build if a receipt fails verification. Wire it into your pipeline:
+
+4. Give the packet and the trusted public-key pin to an independent reviewer.
+5. Have the reviewer verify:
+
    ```bash
-   dontlie trust-score --json | jq -e '.value >= 80' || (echo "trust-score below threshold"; exit 1)
+   shasum -a 256 -c evidence-packet/SHA256SUMS
+   dontlie verify \
+     --export evidence-packet/receipts.bundle.json \
+     --public-key KEY_ID=/trusted/path/public.pem \
+     --verbose
    ```
-7. **Document the gaps.** The "Reasonable Doubt" panel in every bundle shows the 5 things receipts do not prove on their own. Your compliance team should write a one-page addendum acknowledging those gaps and naming the controls that close them.
 
-## What Don't-Lie does **not** do for HIPAA
+6. Retain the review result inside the operator's documented activity-review
+   and incident-response process.
 
-- It is **not** a BAA-eligible service. It is a local library. The BAA, if any, is between you and your AI provider.
-- It does **not** de-identify PHI before transmission. Use your existing de-identification layer.
-- It does **not** perform access control on the vault. Use filesystem permissions, an HSM, or a key-management service you operate.
-- It does **not** enforce minimum necessary. That is a workflow problem, not a tool problem.
-- It does **not** host a copy of your receipts. The vault lives on your hardware; backups live in storage you control.
-- It does **not** provide designated support staff. The author (Wayne Dellmyer) and the open-source community answer questions in the issue tracker; no SLA, no on-call, no support contract.
+## Controls the operator must still supply
 
-## Recommended controls layered on top
+- Complete risk analysis and risk management.
+- Authoritative identity, access control, workforce lifecycle, and training.
+- Transport security and protection of ePHI outside the vault.
+- Physical safeguards, backup, recovery, availability, and emergency access.
+- Key ownership, custody, rotation, recovery, and revocation procedures.
+- Capture-completeness testing and response to missing receipts.
+- Lawful use, disclosure, minimum-necessary, patient rights, and breach
+  assessment.
+- Applicable business-associate agreements and other contracts.
+- Written policies, review cadence, retention decisions, and proof that those
+  procedures operate.
 
-| Control | Where it lives | What Don't-Lie provides |
-|---|---|---|
-| Encryption at rest | Your machine + your storage backend | TDE-style via age-encrypted vault export (`dontlie encrypt`) and per-receipt key derivation |
-| Access control | Filesystem + your IAM | The receipt chain detects tampering; your filesystem permissions and storage IAM enforce who can read the vault |
-| Tamper evidence | Don't-Lie (local) | Ed25519 + SHA-256 chain; verifiable offline on a clean laptop |
-| Retention | Your storage backend (S3, Azure, GCS, NAS, tape) | Don't-Lie produces a portable bundle; the operator chooses where it lives and for how long |
-| Activity review | Your compliance team + `dontlie search` | Full-text search across all receipts; operator-side automation (Splunk, ELK) covered in `docs/integrations/SIEM.md` |
-| Documentation | Your HTML report | The bundle is the documentation; render with `dontlie render` or `python3 -m dontlie.demo.render_report` |
+The HIPAA documentation-retention rule is not a universal command to retain
+every ePHI log for six years. Counsel should determine which documentation and
+records must be retained, for how long, and whether other federal or state
+rules impose different periods.
 
-## When you would actually need this
+## PHI handling
 
-- A patient files a complaint with HHS OCR about an AI-assisted decision
-- A state medical board audits your use of AI in clinical workflows
-- A plaintiff in a malpractice case subpoenas "the AI's reasoning"
-- An internal QA review needs to verify that the AI did not hallucinate a drug interaction
+Full prompts and responses may contain PHI. The safest default for
+cross-organizational sharing is a fingerprint-only evidence view. Heuristic
+redaction is defense in depth; it is not de-identification and can miss names,
+addresses, free text, and other identifiers.
 
-In each of these, the receipt is the byte-exact record. The verifier (`dontlie verify --export <bundle>`) runs in under a second on a clean laptop, with no Don't-Lie install and no network. The bundle is the response you hand to the auditor.
+Do not place a direct patient identifier in receipt tags merely to simplify
+search. Prefer a pseudonymous case reference whose identifying mapping lives
+in an access-controlled system with its own retention and deletion policy.
 
-## Where to get help
+Encrypting an exported vault does not secure a running plaintext database,
+authorize its users, secure the host, or replace encrypted transport.
 
-- `docs/integrations/SIEM.md` — Splunk / Datadog / ELK shipping (you operate the SIEM)
-- `docs/groundtruth.md` — vendor-independent route attestation (opt-in lane)
-- GitHub Issues: open a question at `github.com/Matrix-ops77/dont-lie/issues`
-- Security issues: see `security.md`
+## What the packet proves
+
+- The included receipts verify against their included keys.
+- The included receipt chain is internally intact.
+- A pinned external public key can establish trust in a signing key.
+- Packet checksums detect changes to the exported files.
+
+## What it does not prove
+
+- Complete capture of every real-world action.
+- The clinical correctness or lawfulness of an AI response.
+- Patient consent or minimum-necessary use.
+- Provider identity from a recorded route string.
+- A trustworthy event time without an independently verified time source.
+- HIPAA compliance by the operator, provider, or any other party.
