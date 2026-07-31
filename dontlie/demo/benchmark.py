@@ -22,21 +22,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 
-# IMPORTANT: set env BEFORE importing dontlie so module-level DB_PATH / KEY_DIR
-# resolve to the isolated workdir.
-_default_work = ROOT / "demo" / "work" / "bench"
-os.environ.setdefault("DONTLIE_KEY_DIR", str(_default_work / "keys"))
-os.environ.setdefault("DONTLIE_DB", str(_default_work / "vault.db"))
-os.environ.setdefault("DONTLIE_NO_WAL", "1")
-
-sys.path.insert(0, str(ROOT))
-
-from dontlie import sign as signing
-from dontlie import storage
-
 
 def _measure_sign(n: int) -> dict:
     """Append `n` receipts and time the appends."""
+    from dontlie import storage
+
     # warm-up
     storage.append("bench-warmup", "warmup", "ok", tags=["benchmark"])
     latencies_ms: list[float] = []
@@ -63,6 +53,8 @@ def _measure_sign(n: int) -> dict:
 
 
 def _measure_verify() -> dict:
+    from dontlie import storage
+
     t0 = time.perf_counter()
     ok, bad = storage.verify_chain()
     elapsed = time.perf_counter() - t0
@@ -76,6 +68,8 @@ def _measure_verify() -> dict:
 
 
 def _measure_export() -> dict:
+    from dontlie import storage
+
     out = Path(os.environ["DONTLIE_DB"]).with_suffix(".bench-export.jsonl")
     t0 = time.perf_counter()
     n = storage.export(out)
@@ -101,6 +95,7 @@ def _measure_render() -> dict:
     # JSONL-shaped bundles too, but the single-object bundle is
     # the canonical form. Build it in-process.
     import json
+
     from dontlie.demo.render_report import render as render_report
 
     jsonl_path = Path(os.environ["DONTLIE_DB"]).with_suffix(".bench-export.jsonl")
@@ -148,6 +143,25 @@ def _sha256_file(path: Path) -> str:
     return h.hexdigest()
 
 
+def _reset_benchmark_state(work: Path) -> None:
+    """Remove every artifact that can affect a benchmark run."""
+    key_dir = work / "keys"
+    if key_dir.exists():
+        shutil.rmtree(key_dir)
+    key_dir.mkdir(parents=True)
+
+    db_path = work / "vault.db"
+    for path in (
+        db_path,
+        Path(f"{db_path}-shm"),
+        Path(f"{db_path}-wal"),
+        db_path.with_suffix(".bench-export.jsonl"),
+        db_path.with_suffix(".bench-export.bench-bundle.json"),
+        db_path.with_suffix(".bench-export.bench-report.html"),
+    ):
+        path.unlink(missing_ok=True)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("n", nargs="?", type=int, default=1000)
@@ -162,10 +176,13 @@ def main() -> int:
     os.environ["DONTLIE_DB"] = str(work / "vault.db")
     os.environ["DONTLIE_NO_WAL"] = "1"
 
-    # fresh keypair + db
-    if (work / "keys").exists():
-        shutil.rmtree(work / "keys")
-    (work / "keys").mkdir(parents=True)
+    # Fresh keypair + database. A benchmark must not inherit rows, WAL state,
+    # or generated exports from an earlier run.
+    _reset_benchmark_state(work)
+    # Import after setting the environment because these modules resolve their
+    # database and key paths at import time.
+    from dontlie import sign as signing
+
     signing.generate()
 
     machine = _machine_info()

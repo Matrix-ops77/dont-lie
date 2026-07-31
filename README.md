@@ -7,9 +7,6 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-16a34a?style=flat-square)](https://www.python.org)
 [![CI](https://github.com/Matrix-ops77/dont-lie/actions/workflows/ci.yml/badge.svg)](https://github.com/Matrix-ops77/dont-lie/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/dontlie?style=flat-square&color=16a34a)](https://pypi.org/project/dontlie/)
-[![OpenAI compatible](https://img.shields.io/badge/OpenAI-compatible-16a34a?style=flat-square)](#how-it-works)
-[![Anthropic compatible](https://img.shields.io/badge/Anthropic-compatible-16a34a?style=flat-square)](#how-it-works)
-[![Local-first](https://img.shields.io/badge/local--first-MIT-16a34a?style=flat-square)](#philosophy)
 
 ![An illustrated signed receipt connected by a hash chain to a local vault](docs/assets/dontlie-receipt-chain-hero.png)
 
@@ -21,6 +18,20 @@ dontlie demo
 ```
 
 That's it. 30 seconds. No API keys. A signed receipt chain you can tamper with to verify it actually catches tampering.
+
+---
+
+## What it proves — and what it doesn't
+
+| Proved | Not proved |
+|---|---|
+| The receipt was signed by the documented key | Whether the model answer is correct |
+| The chain is unbroken from the first receipt | Whether the upstream provider is the one claimed |
+| The bundle matches the receipts you handed over | Which person or organization held the signing key |
+| Each receipt binds the exact bytes you sent and received | Content semantics beyond the bytes |
+
+Don't-Lie is a notary, not a judge. It makes the record tamper-evident; it
+does not claim the answer is true.
 
 ---
 
@@ -62,30 +73,10 @@ The packet's claims are deliberately limited:
 
 ## What it is
 
-A local-first proxy that captures every AI request and response into a **signed, hash-linked receipt chain**. Ed25519 signatures. SHA-256 chain. Offline verification. Portable bundle. No false claims.
-
-```python
-# Before
-openai.api_base = "https://api.openai.com/v1"
-
-# After (one line)
-openai.api_base = "http://localhost:8080/v1"
-```
-
-Your client doesn't change. Your provider doesn't change. Every call now produces a receipt you can hand to an auditor.
-
----
-
-## What it proves — and what it doesn't
-
-| Proved | Not proved |
-|---|---|
-| The receipt was signed by the documented key | Whether the model answer is correct |
-| The chain is unbroken from the first receipt | Whether the upstream provider is the one claimed |
-| The bundle matches the receipts you handed over | Which person or organization held the signing key |
-| Each receipt binds the exact bytes you sent and received | Content semantics beyond the bytes |
-
-The wedge is honesty. We don't claim AI is truthful. We claim the record is tamper-evident.
+A local-first proxy that captures AI requests and responses in an
+**Ed25519-signed, SHA-256-linked receipt chain**. Route a supported client
+through the local proxy, then verify or export the evidence without trusting
+Don't-Lie's website or a cloud account.
 
 ---
 
@@ -93,7 +84,8 @@ The wedge is honesty. We don't claim AI is truthful. We claim the record is tamp
 
 - **Ed25519-signed receipts** — held locally, no phone-home
 - **Hash-linked chain (v2)** — each receipt SHA-256-links to the previous
-- **OpenAI-compatible proxy** — drop-in for OpenAI, Anthropic, MiniMax, LangChain, LlamaIndex
+- **Provider-compatible proxy** — OpenAI Chat Completions, Anthropic Messages,
+  and tested OpenAI-compatible endpoints including MiniMax
 - **Portable signed bundles** — verify offline on a clean machine
 - **HTML proof report** — self-contained, beautifully formatted
 - **Secret redaction** — API keys, emails, SSNs, credit cards, JWTs
@@ -132,45 +124,48 @@ The wedge is honesty. We don't claim AI is truthful. We claim the record is tamp
 
 ## Use cases
 
-**Incident response** — your customer asks "what did the AI actually say?" Produce a one-page proof report in 30 seconds instead of digging through logs.
+**Incident response** — export the captured exchange and its verification
+result instead of reconstructing it from application logs.
 
-**Compliance & audit** — hand auditors a signed chain of evidence that survives any local machine change. The `docs/compliance/` memos explain which regime a receipt helps with and which parts of the regime are still the operator's job. They are not certifications and not legal advice.
+**Compliance review** — map product evidence to selected control requirements
+while keeping operator-owned controls explicit. The reference memos are not
+certifications or legal advice.
 
-**Customer trust** — show your customers exactly what their data became, that you didn't change it, and which provider answered. Independently verifiable.
+**Customer disputes** — hand a third party the captured bytes and a portable
+verification packet. Provider and signer identity still require external
+evidence.
 
-**Provider migration** — switch from OpenAI to Anthropic to local models without losing your audit history.
+**Provider migration** — retain one exportable receipt history while moving
+between supported provider protocols.
 
-**Forensic debugging** — every prompt, every response, every byte, every signature. Tamper one byte and verification fails.
+**Forensic debugging** — compare the exact captured request and response; a
+one-byte alteration makes verification fail.
 
 ---
 
-## Install
+## Connect a real provider (optional)
+
+The offline demo above is the recommended first run. To capture a live
+OpenAI-compatible call, provide a valid upstream endpoint and key.
+
+For OpenAI:
 
 ```bash
-python -m pip install dontlie
+export DONTLIE_UPSTREAM_BASE_URL=https://api.openai.com/v1
+export DONTLIE_UPSTREAM_API_KEY="$OPENAI_API_KEY"
 ```
 
-Verify the install:
-
-```bash
-dontlie --version
-dontlie demo                  # offline proof: 3 signed receipts, tamper + restore
-dontlie demo --port 9879     # same demo on a non-default proxy port
-```
-
-30-second offline demo:
-
-```bash
-dontlie demo
-```
-
-This runs a local mock provider, captures 3 receipts, verifies them, tampers with one, and shows you exactly what fails.
-
-Live demo with MiniMax:
+Or use another tested OpenAI-compatible provider. For example,
+[MiniMax's official API](https://platform.minimax.io/docs/api-reference/text-openai-api):
 
 ```bash
 export DONTLIE_UPSTREAM_BASE_URL=https://api.minimax.io/v1
 export DONTLIE_UPSTREAM_API_KEY="$MINIMAX_API_KEY"
+```
+
+Then start the local proxy:
+
+```bash
 dontlie proxy --port 8080 &
 
 export OPENAI_BASE_URL=http://127.0.0.1:8080/v1
@@ -179,27 +174,15 @@ export OPENAI_API_KEY=dontlie-local
 # Talk to any OpenAI-compatible client. Receipts are written automatically.
 ```
 
+MiniMax is one tested OpenAI-compatible provider, not a required dependency.
+
 ---
 
 ## Architecture
 
-```
-dontlie/
-├── storage.py          # SQLite vault, chain v2, append
-├── sign.py             # Ed25519 signing, key management
-├── proxy.py            # OpenAI- and Anthropic-compatible HTTP proxy
-├── verify.py           # Offline verification, bundle export
-├── render_report.py    # HTML proof report
-├── redaction.py        # Secret detection and redaction
-├── encryption.py       # Encrypted-at-rest vault option
-├── groundtruth/        # Receipt ↔ source bytes reconciliation
-├── anchor/             # External timestamp anchoring
-├── demo/               # Offline + live runbooks
-├── site/
-│   ├── index.html      # Single-page project landing (local-first, MIT)
-│   └── demo.html       # Browser Proof Lab (WebCrypto + IndexedDB, offline)
-└── tests/              # unit, integration, browser, and release checks
-```
+Capture, signing, storage, verification, and export remain local. See
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for component boundaries and the
+source map.
 
 ---
 
@@ -210,7 +193,7 @@ dontlie/
 
 ---
 
-## Pricing (v0.3.x — local-first only)
+## No hosted service, no paid tiers
 
 There is no hosted service. There are no paid tiers. v0.3.10 is a single MIT-licensed Python package.
 
@@ -228,26 +211,20 @@ There is no hosted service. There are no paid tiers. v0.3.10 is a single MIT-lic
 
 ## Benchmarks
 
-Measured via `python3 -m dontlie.demo.benchmark 5000` on Apple M-class
-hardware, Python 3.10, dontlie 0.3.4, single-threaded. Numbers are
-rounded conservatively and re-run by anyone with
-`python3 -m dontlie.demo.benchmark`:
-
-| Operation | Throughput | Notes |
-|---|---|---|
-| Sign + store | ~380 receipts/sec | p50 latency ~2.1 ms, p95 ~5.1 ms |
-| Verify chain | ~3,000 receipts/sec | 12,003 receipts verified in the captured run |
-| Export JSONL | ~15,000 rows/sec | 10 MB written for 12,003 rows (~830 B/receipt) |
-| HTML report render | ~29,000 receipts/sec | 2.3 MB self-contained HTML, no external assets |
-
-Full machine-pinned transcript:
-[demo/output/benchmark.transcript.json](demo/output/benchmark.transcript.json)
+The checked-in v0.3.10 benchmark starts from an empty isolated vault and
+records machine, runtime, latency, throughput, output sizes, and the resulting
+database hash. See [docs/BENCHMARKS.md](docs/BENCHMARKS.md) for the current
+results and reproduction command.
 
 ---
 
 ## Documentation
 
 - [LAUNCH.md](LAUNCH.md) — customer-facing release notes
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — runtime flow, trust boundaries,
+  and source map
+- [docs/BENCHMARKS.md](docs/BENCHMARKS.md) — current measurements and
+  reproduction method
 - [docs/SUPPLY_CHAIN.md](docs/SUPPLY_CHAIN.md) — checksum, SBOM, and SLSA
   provenance verification
 - [competitive.md](competitive.md) — public landscape and positioning
