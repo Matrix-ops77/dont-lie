@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.11 — 2026-07-31
+
+- Reorganized the README around the 30-second proof path and moved the
+  proof-boundary table directly below installation.
+- Added clear OpenAI and MiniMax live-provider paths while keeping the offline
+  demo as the recommended first run.
+- Moved architecture, trust-boundary, and benchmark detail into focused
+  documentation.
+- Fixed the benchmark harness so every run removes its isolated vault, SQLite
+  sidecars, keypair, and generated outputs instead of accumulating old rows.
+- Added regression coverage for benchmark isolation and regenerated the
+  machine-pinned transcript from a clean vault.
+
 ## 0.3.10 — 2026-07-31
 
 - Fixed the PyPI publishing stage to keep distributions inside the GitHub

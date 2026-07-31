@@ -195,7 +195,7 @@ source map.
 
 ## No hosted service, no paid tiers
 
-There is no hosted service. There are no paid tiers. v0.3.10 is a single MIT-licensed Python package.
+There is no hosted service. There are no paid tiers. v0.3.11 is a single MIT-licensed Python package.
 
 | What you get | Where it lives |
 |---|---|
@@ -211,7 +211,7 @@ There is no hosted service. There are no paid tiers. v0.3.10 is a single MIT-lic
 
 ## Benchmarks
 
-The checked-in v0.3.10 benchmark starts from an empty isolated vault and
+The checked-in v0.3.11 benchmark starts from an empty isolated vault and
 records machine, runtime, latency, throughput, output sizes, and the resulting
 database hash. See [docs/BENCHMARKS.md](docs/BENCHMARKS.md) for the current
 results and reproduction command.
@@ -254,7 +254,7 @@ Both pages are self-contained: no CDN fetches, no analytics, no
 third-party fonts. See [PLDG.md](PLDG.md) for the no-phone-home
 pledge and the enforcement test that runs in CI.
 
-The Browser Proof Lab and portable evidence packet are the strongest public surfaces for v0.3.10:
+The Browser Proof Lab and portable evidence packet are the strongest public surfaces for v0.3.11:
 Ed25519 signing, IndexedDB vault, and receipt verification all run
 in the browser via WebCrypto. The CSP header refuses every
 non-`self` connection, so opening the file on an air-gapped
