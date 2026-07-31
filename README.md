@@ -7,9 +7,6 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-16a34a?style=flat-square)](https://www.python.org)
 [![CI](https://github.com/Matrix-ops77/dont-lie/actions/workflows/ci.yml/badge.svg)](https://github.com/Matrix-ops77/dont-lie/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/dontlie?style=flat-square&color=16a34a)](https://pypi.org/project/dontlie/)
-[![OpenAI compatible](https://img.shields.io/badge/OpenAI-compatible-16a34a?style=flat-square)](#how-it-works)
-[![Anthropic compatible](https://img.shields.io/badge/Anthropic-compatible-16a34a?style=flat-square)](#how-it-works)
-[![Local-first](https://img.shields.io/badge/local--first-MIT-16a34a?style=flat-square)](#philosophy)
 
 ![An illustrated signed receipt connected by a hash chain to a local vault](docs/assets/dontlie-receipt-chain-hero.png)
 
@@ -149,13 +146,26 @@ one-byte alteration makes verification fail.
 ## Connect a real provider (optional)
 
 The offline demo above is the recommended first run. To capture a live
-OpenAI-compatible call, provide a valid upstream endpoint and key. For example,
-[MiniMax's official OpenAI-compatible API](https://platform.minimax.io/docs/api-reference/text-openai-api)
-uses:
+OpenAI-compatible call, provide a valid upstream endpoint and key.
+
+For OpenAI:
+
+```bash
+export DONTLIE_UPSTREAM_BASE_URL=https://api.openai.com/v1
+export DONTLIE_UPSTREAM_API_KEY="$OPENAI_API_KEY"
+```
+
+Or use another tested OpenAI-compatible provider. For example,
+[MiniMax's official API](https://platform.minimax.io/docs/api-reference/text-openai-api):
 
 ```bash
 export DONTLIE_UPSTREAM_BASE_URL=https://api.minimax.io/v1
 export DONTLIE_UPSTREAM_API_KEY="$MINIMAX_API_KEY"
+```
+
+Then start the local proxy:
+
+```bash
 dontlie proxy --port 8080 &
 
 export OPENAI_BASE_URL=http://127.0.0.1:8080/v1
