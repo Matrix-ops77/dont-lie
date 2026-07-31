@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Public-claims scan for the Don't-Lie repository.
 
-v0.3.5 is a local-first, MIT-licensed Python package. Every tracked
+v0.3.6 is a local-first, MIT-licensed Python package. Every tracked
 public Markdown and HTML file in this repository must describe that
 product and nothing else. The pattern below is automated into CI so
 a future contribution cannot reintroduce hosted-tier, paid, or

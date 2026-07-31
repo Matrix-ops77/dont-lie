@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dontlie"
-version = "0.3.5"
+version = "0.3.6"
 description = "Local-first, verifiable signed receipts for OpenAI-compatible AI calls."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -29,6 +29,7 @@ test = [
   "cryptography>=42",
   "argon2-cffi>=23",
   "pytest>=8",
+  "selenium>=4.25",
 ]
 
 
@@ -37,7 +38,7 @@ dontlie = "dontlie.cli:main"
 dontlie-passive = "onboard.cli:main"
 
 [project.urls]
-Homepage = "https://dontlie.pages.dev"
+Homepage = "https://github.com/Matrix-ops77/dont-lie"
 Repository = "https://github.com/Matrix-ops77/dont-lie"
 Issues = "https://github.com/Matrix-ops77/dont-lie/issues"
 

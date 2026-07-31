@@ -5,7 +5,7 @@
 
 [![MIT](https://img.shields.io/badge/license-MIT-16a34a?style=flat-square)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-16a34a?style=flat-square)](https://www.python.org)
-[![Tests](https://img.shields.io/badge/tests-412%20passing-16a34a?style=flat-square)](#benchmarks)
+[![CI](https://github.com/Matrix-ops77/dont-lie/actions/workflows/ci.yml/badge.svg)](https://github.com/Matrix-ops77/dont-lie/actions/workflows/ci.yml)
 [![OpenAI compatible](https://img.shields.io/badge/OpenAI-compatible-16a34a?style=flat-square)](#how-it-works)
 [![Anthropic compatible](https://img.shields.io/badge/Anthropic-compatible-16a34a?style=flat-square)](#how-it-works)
 [![Local-first](https://img.shields.io/badge/local--first-MIT-16a34a?style=flat-square)](#philosophy)
@@ -15,7 +15,7 @@
 ---
 
 ```bash
-pip install dontlie
+python -m pip install https://github.com/Matrix-ops77/dont-lie/releases/download/v0.3.6/dontlie-0.3.6-py3-none-any.whl
 dontlie demo
 ```
 
@@ -106,7 +106,7 @@ The wedge is honesty. We don't claim AI is truthful. We claim the record is tamp
 ## Install
 
 ```bash
-pip install dontlie
+python -m pip install https://github.com/Matrix-ops77/dont-lie/releases/download/v0.3.6/dontlie-0.3.6-py3-none-any.whl
 ```
 
 Verify the install:
@@ -157,7 +157,7 @@ dontlie/
 ├── site/
 │   ├── index.html      # Single-page project landing (local-first, MIT)
 │   └── demo.html       # Browser Proof Lab (WebCrypto + IndexedDB, offline)
-└── tests/              # 412 tests, < 60s
+└── tests/              # unit, integration, browser, and release checks
 ```
 
 ---
@@ -171,11 +171,11 @@ dontlie/
 
 ## Pricing (v0.3.x — local-first only)
 
-There is no hosted service. There are no paid tiers. v0.3.5 is a single MIT-licensed Python package.
+There is no hosted service. There are no paid tiers. v0.3.6 is a single MIT-licensed Python package.
 
 | What you get | Where it lives |
 |---|---|
-| The local-first product | `pip install dontlie` |
+| The local-first product | Install the wheel from [GitHub Releases](https://github.com/Matrix-ops77/dont-lie/releases) |
 | The signing key | Your machine, in `~/.config/dontlie/keys/` |
 | The vault | Your machine, in `~/.local/share/dontlie/vault.db` (or `DONTLIE_DB`) |
 | The receipt chain | Local SQLite, hash-linked, Ed25519-signed |
@@ -233,7 +233,7 @@ Both pages are self-contained: no CDN fetches, no analytics, no
 third-party fonts. See [PLDG.md](PLDG.md) for the no-phone-home
 pledge and the enforcement test that runs in CI.
 
-The Browser Proof Lab is the strongest public surface for v0.3.5:
+The Browser Proof Lab is the strongest public surface for v0.3.6:
 Ed25519 signing, IndexedDB vault, and receipt verification all run
 in the browser via WebCrypto. The CSP header refuses every
 non-`self` connection, so opening the file on an air-gapped

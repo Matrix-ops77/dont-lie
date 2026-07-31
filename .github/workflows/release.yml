@@ -48,8 +48,10 @@ jobs:
       - name: Lint
         run: |
           ruff check dontlie test_*.py
-          mypy --strict dontlie/integrity.py || true
+          mypy --strict dontlie/sign.py dontlie/protocols.py
       - name: Test
+        env:
+          DONTLIE_REQUIRE_BROWSER_TEST: "1"
         run: python -m unittest discover -t . -v
 
   build:

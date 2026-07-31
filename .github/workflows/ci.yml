@@ -37,9 +37,12 @@ jobs:
           # Scope lint to the core product. Sub-packages (clients/, demo/)
           # have their own style rules and are not product-blocking.
           ruff check dontlie test_*.py
-          mypy --strict dontlie/integrity.py || true
+          # Keep this gate limited to modules that are actually strict-clean.
+          # Expanding strict coverage is separate work; type failures here
+          # must not be silently ignored.
+          mypy --strict dontlie/sign.py dontlie/protocols.py
       - name: Public-claims scan
-        # The v0.3.5 release is a local-first, MIT-licensed Python package.
+        # The v0.3.6 release is a local-first, MIT-licensed Python package.
         # A future contribution that re-introduces hosted-tier, paid, or
         # hosted-witness language into any tracked public file fails this
         # step before it can land. The scan is defined in
@@ -48,6 +51,8 @@ jobs:
         # file-allowlist only when its entire job is to be the disclaimer.
         run: python tools/public_claims_scan.py
       - name: Test
+        env:
+          DONTLIE_REQUIRE_BROWSER_TEST: "1"
         run: python -m unittest discover -t . -v
       - name: Build
         run: |

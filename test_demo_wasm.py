@@ -48,7 +48,11 @@ class BrowserWasmDemoContractTest(unittest.TestCase):
         self.assertIn('const RECEIPT_STORE = "receipts"', self.source)
         self.assertIn('const META_STORE = "metadata"', self.source)
         self.assertIn("createObjectStore(RECEIPT_STORE", self.source)
-        self.assertIn("transaction.objectStore(RECEIPT_STORE).put(receipt)", self.source)
+        self.assertIn("tx.objectStore(RECEIPT_STORE).put(receipt)", self.source)
+        self.assertNotIn(
+            "transaction.objectStore(RECEIPT_STORE).put(receipt)",
+            self.source,
+        )
 
     def test_mock_provider_and_chain_verification_are_local(self) -> None:
         self.assertIn("async function mockProvider(prompt, model)", self.source)

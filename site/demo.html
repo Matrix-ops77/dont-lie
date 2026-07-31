@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="dark">
+  <link rel="icon" href="data:,">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'none'; img-src 'self' data:; font-src 'none'; frame-src 'none'; worker-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
   <title>Don't-Lie — Browser Proof Lab</title>
   <style>
@@ -93,7 +94,7 @@
     <section class="workspace">
       <div class="panel">
         <h2>Compose</h2>
-        <p class="panel-copy">Capture three AI calls, verify them, tamper with one, restore from a signed export. The whole proof flow in your browser, no API keys.</p>
+        <p class="panel-copy">Capture AI calls, verify them, tamper with one, then clear the local demo. The whole proof flow runs in your browser with no API keys.</p>
         <div class="field">
           <label for="model">Model</label>
           <select id="model">
@@ -233,7 +234,7 @@
         const tx = db.transaction([RECEIPT_STORE], 'readwrite');
         tx.oncomplete = () => resolve();
         tx.onerror = () => reject(tx.error);
-        transaction.objectStore(RECEIPT_STORE).put(receipt);
+        tx.objectStore(RECEIPT_STORE).put(receipt);
       });
     }
 

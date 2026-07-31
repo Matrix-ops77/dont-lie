@@ -5,15 +5,19 @@ Don't-Lie. Not customer-facing.
 
 ## Before tagging
 
-- [ ] `python -m unittest discover` — full suite passes (target: 50/50)
+- [ ] `DONTLIE_REQUIRE_BROWSER_TEST=1 python -m unittest discover -t . -v`
+      — full suite passes, including the Browser Proof Lab runtime flow
 - [ ] `ruff check dontlie test_*.py` — clean
-- [ ] `mypy --strict dontlie/storage.py dontlie/sign.py` — clean
+- [ ] `mypy --strict dontlie/sign.py dontlie/protocols.py` — clean
+- [ ] `python tools/public_claims_scan.py` — clean
 - [ ] `python -m compileall -q dontlie` — bytecode builds
 - [ ] `dontlie demo` — exit 0
 - [ ] `python3 -m dontlie.demo.tamper_walkthrough /tmp/dontlie-demo-work` — exit 0
 - [ ] `python3 -m dontlie.demo.render_report /tmp/dontlie-demo-work/receipts.bundle.json /tmp/r.html` — written
 - [ ] `python3 -m dontlie.demo.benchmark 1000 demo/output/benchmark.transcript.json` — written
 - [ ] `python3 -m dontlie.demo.cleanup` — no orphans on demo ports
+- [ ] Build the wheel and run
+      `bash tools/reproducibility_check.sh dist/dontlie-*.whl`
 - [ ] No `print()` debug remnants in `dontlie/demo/` (lint catches them)
 - [ ] Git status: working tree clean of stray artifacts
 - [ ] Git status: no tracked changes to `dontlie/storage.py`, `sign.py`,
@@ -33,7 +37,7 @@ Don't-Lie. Not customer-facing.
 - [ ] `demo/README.md` quickstart works on a fresh checkout
 - [ ] `demo/runbooks/OFFLINE.md` and `demo/runbooks/MINIMAX_LIVE.md`
       commands actually work as written
-- [ ] `RELEASE.md` (customer-facing) notes match the changelog
+- [ ] GitHub release notes match `CHANGELOG.md`
 - [ ] `LAUNCH.md` (this repo) "What it proves / does not prove" list
       matches the current capability surface
 - [ ] No references to deleted files (e.g. a removed runbook, an old

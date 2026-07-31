@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.3.6 — 2026-07-30
+
+- Fixed the Browser Proof Lab receipt write path and added a real headless
+  browser test for create, verify, tamper detection, and reset.
+- Replaced stale hard-coded test totals with the live CI badge and descriptive
+  test coverage.
+- Pointed package metadata to the GitHub repository until a single official
+  project site is deployed, and documented the working GitHub release-wheel
+  install while PyPI publication remains unavailable.
+- Replaced a nonexistent, silently ignored mypy target with a real strict
+  type-check gate over the signing and protocol modules.
+- Updated the release checklist to require the runtime browser test, public
+  claims scan, honest type-check scope, and built-wheel reproducibility gate.
+- Corrected the Browser Proof Lab copy so it describes the implemented local
+  reset flow instead of claiming an unimplemented browser export restore.
+
 ## 0.3.5 — 2026-07-30
 
 Stress-test hardening for the receipt system before launch.

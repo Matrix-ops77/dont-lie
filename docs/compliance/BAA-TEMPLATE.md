@@ -60,7 +60,7 @@ Capitalized terms have the meaning given in the HIPAA Rules (45 CFR §160.103, �
 - **No telemetry:** the Don't-Lie software does not phone home. The Don't-Lie proxy makes no outbound calls except to the upstream AI provider the Covered Entity has configured.
 - **At-rest encryption (optional):** the Vault may be exported as an age-encrypted bundle for offline storage.
 
-3.2 The Business Associate shall, where applicable and to the extent it holds PHI on its own systems (which in this v0.3.5 local-first configuration it does not), comply with the applicable provisions of the Security Rule with respect to electronic PHI, including §164.308 (administrative safeguards), §164.310 (physical safeguards), §164.312 (technical safeguards), and §164.316 (policies, procedures, and documentation).
+3.2 The Business Associate shall, where applicable and to the extent it holds PHI on its own systems (which in this v0.3.6 local-first configuration it does not), comply with the applicable provisions of the Security Rule with respect to electronic PHI, including §164.308 (administrative safeguards), §164.310 (physical safeguards), §164.312 (technical safeguards), and §164.316 (policies, procedures, and documentation).
 
 3.3 The Business Associate shall report to the Covered Entity any security incident of which it becomes aware affecting the signing keychain, in accordance with §5 below.
 
