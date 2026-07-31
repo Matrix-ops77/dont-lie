@@ -36,26 +36,34 @@ and render a self-contained HTML proof report.
   history. Once a key is revoked (`dontlie revoke-key`), receipts signed
   after revocation fail verification.
 
-## Try it in 10 seconds
+## Try it in 30 seconds
 
 ```sh
-git clone https://github.com/your-org/dontlie.git
-cd dontlie
-python -m pip install -e .
+python -m pip install dontlie
 dontlie demo
-python3 -m dontlie.demo.tamper_walkthrough demo/work
-python3 -m dontlie.demo.render_report demo/work/receipts.bundle.json report.html
-python3 -m dontlie.demo.cleanup
 ```
 
-The offline demo uses a local mock provider. No network, no API keys,
-no secrets. The default mock port is 9876 and the proxy port is 9877.
+The offline demo uses a local mock provider. No provider account or API key is
+required. It creates three signed receipts, detects a deliberate alteration,
+then restores and re-verifies the chain.
 
 ## Use it for real
 
 ```sh
+export DONTLIE_UPSTREAM_BASE_URL=https://api.openai.com/v1
+export DONTLIE_UPSTREAM_API_KEY="$OPENAI_API_KEY"
+```
+
+Or use a tested OpenAI-compatible provider such as MiniMax:
+
+```sh
 export DONTLIE_UPSTREAM_BASE_URL=https://api.minimax.io/v1
 export DONTLIE_UPSTREAM_API_KEY="$MINIMAX_API_KEY"
+```
+
+Then start the local proxy:
+
+```sh
 dontlie proxy --port 8080 &
 
 export OPENAI_BASE_URL=http://127.0.0.1:8080/v1
@@ -64,19 +72,17 @@ export OPENAI_API_KEY=dontlie-local   # placeholder for SDKs that need one
 # Talk to any OpenAI-compatible client. Receipts are written automatically.
 ```
 
-See [`demo/runbooks/MINIMAX_LIVE.md`](demo/runbooks/MINIMAX_LIVE.md) for
-the full walkthrough.
+See [`demo/runbooks/MINIMAX_LIVE.md`](demo/runbooks/MINIMAX_LIVE.md) for the
+tested MiniMax walkthrough.
 
 ## Performance
 
-~300 receipts/sec signing, ~1900 receipts/sec verification on Apple M-class
-hardware. Single-threaded. See
-[`demo/output/BENCHMARK.md`](demo/output/BENCHMARK.md) for the full
-transcript.
+See [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md) for the current machine-pinned
+measurement, limitations, and reproduction command.
 
 ## Pricing
 
-The current v0.3.x release is MIT-licensed and free, forever, for
+The current v0.3.11 release is MIT-licensed and free, forever, for
 local-first use. There is no hosted service today. Encrypted
 cross-device sync and shared namespaces are research items on the
 roadmap but are **not** promised for any specific quarter. When
@@ -86,15 +92,16 @@ not be degraded to push users to the hosted service.
 
 ## Limits (current release)
 
-- **V1 chain only.** Receipts created by v0.1.x are still verifiable; they
-  are upgraded into the v2 chain on append.
-- **Single machine key.** Multi-machine reconciliation requires exporting
-  bundles and pinning keys.
-- **No streaming chunk signing.** Streaming responses are reconstructed
-  from the final chunk; the full raw SSE body is stored alongside (up to
-  16 MiB by default).
-- **No native Anthropic Messages endpoint.** Use an OpenAI-compatible
-  gateway or proxy.
+- **Signer identity is external.** A valid signature proves possession of a
+  key, not which person or organization controlled it. Pin trusted public keys
+  separately.
+- **Provider identity is recorded, not attested.** The proxy records the
+  configured provider and captured exchange; it does not independently prove
+  which upstream service answered.
+- **Streaming is receipted after assembly.** Streaming chunks are forwarded
+  unchanged, then the assembled response and bounded raw body are recorded.
+- **No hosted control plane.** Shared cloud administration, managed retention,
+  billing, and organization-wide policy deployment are not part of v0.3.11.
 
 ## License
 

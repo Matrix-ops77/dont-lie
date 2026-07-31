@@ -12,15 +12,15 @@ Command:
 python3 -m dontlie.demo.benchmark 5000 demo/output/benchmark.transcript.json
 ```
 
-Environment: Apple arm64 hardware, Python 3.10.20, Don't-Lie 0.3.10,
+Environment: Apple arm64 hardware, Python 3.10.20, Don't-Lie 0.3.11,
 single-threaded.
 
 | Operation | Measured throughput | Additional result |
 |---|---:|---|
-| Sign + store | 190.84 receipts/sec | p50 5.341 ms; p95 7.880 ms |
-| Verify chain | 1,774.69 receipts/sec | 5,001 valid; 0 invalid |
-| Export JSONL | 14,006.78 rows/sec | 4,172,376 bytes |
-| Render HTML report | 35,573.26 receipts/sec | 949,117 bytes |
+| Sign + store | 1,075.62 receipts/sec | p50 0.871 ms; p95 1.201 ms |
+| Verify chain | 5,960.42 receipts/sec | 5,001 valid; 0 invalid |
+| Export JSONL | 47,101.06 rows/sec | 4,172,376 bytes |
+| Render HTML report | 96,707.14 receipts/sec | 949,117 bytes |
 
 The extra receipt is the benchmark warm-up record. The complete machine-pinned
 record, including timings and database SHA-256, is
