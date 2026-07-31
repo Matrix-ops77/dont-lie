@@ -17,6 +17,7 @@ Don't-Lie. Not customer-facing.
 - [ ] `python3 -m dontlie.demo.benchmark 1000 demo/output/benchmark.transcript.json` — written
 - [ ] `python3 -m dontlie.demo.cleanup` — no orphans on demo ports
 - [ ] Build the wheel and run
+      `python tools/reproducible_build.py dist`, then run
       `bash tools/reproducibility_check.sh dist/dontlie-*.whl`
 - [ ] No `print()` debug remnants in `dontlie/demo/` (lint catches them)
 - [ ] Git status: working tree clean of stray artifacts
@@ -53,7 +54,9 @@ Don't-Lie. Not customer-facing.
 
 - [ ] `git tag -s vX.Y.Z -m "Release X.Y.Z"`
 - [ ] Push tag: `git push origin vX.Y.Z`
-- [ ] Trigger PyPI publish via GitHub Actions (manual step if not auto)
+- [ ] Set the repository variable `PYPI_PUBLISH_ENABLED=true` only after the
+      PyPI Trusted Publisher is configured; otherwise publish GitHub artifacts
+      without attempting PyPI
 
 ## Post-release
 

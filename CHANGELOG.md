@@ -15,6 +15,12 @@
   claims scan, honest type-check scope, and built-wheel reproducibility gate.
 - Corrected the Browser Proof Lab copy so it describes the implemented local
   reset flow instead of claiming an unimplemented browser export restore.
+- Made wheel and source-archive builds byte-reproducible using a fixed source
+  epoch, pinned build tooling, normalized archive metadata, and two-build hash
+  comparison.
+- Added an explicit Chrome/ChromeDriver inventory check before mandatory
+  browser tests, and gated PyPI publication behind an operator-controlled
+  repository variable until Trusted Publishing is configured.
 
 ## 0.3.5 — 2026-07-30
 

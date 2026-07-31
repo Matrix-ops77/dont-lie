@@ -45,10 +45,15 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[dev,test]"
+      - name: Verify browser runtime
+        run: |
+          google-chrome --version
+          chromedriver --version
       - name: Lint
         run: |
-          ruff check dontlie test_*.py
+          ruff check dontlie test_*.py tools/reproducible_build.py
           mypy --strict dontlie/sign.py dontlie/protocols.py
+          mypy --strict tools/reproducible_build.py
       - name: Test
         env:
           DONTLIE_REQUIRE_BROWSER_TEST: "1"
@@ -64,9 +69,9 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
-      - run: pip install build
+      - run: pip install build==1.5.0
       - name: Build
-        run: python -m build
+        run: python tools/reproducible_build.py dist
       - name: Wheel install smoke test
         # Same safety net as in ci.yml: the artifact users will
         # install must contain the artifact the test suite claims
@@ -117,6 +122,7 @@ jobs:
 
   publish:
     needs: [test, build, reproducibility]
+    if: ${{ vars.PYPI_PUBLISH_ENABLED == 'true' }}
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
